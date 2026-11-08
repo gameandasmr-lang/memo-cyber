@@ -1,6 +1,6 @@
 {
   "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question = un QCM lié à une paire. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id.",
-  "maj": "2026-11-08",
+  "maj": "2026-11-09",
   "paires": [
     {
       "id": "http-html",
@@ -276,6 +276,40 @@
         }
       ],
       "piege": "Même une erreur a souvent un corps : la page « Oups, introuvable » est du HTML envoyé avec un code 404 ou 410."
+    },
+    {
+      "id": "reseau-abonnement",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "Réseau (en informatique)",
+          "phrase": "Un groupe d'adresses IP qui ont la même partie réseau, par exemple tous les 192.168.1.x. Gratuit, on en crée autant qu'on veut.",
+          "image": "Une rue : toutes les maisons portent le même nom de rue."
+        },
+        {
+          "mot": "Abonnement Internet",
+          "phrase": "Le contrat avec un opérateur (Orange, Free…) qui donne l'accès à Internet.",
+          "image": "Le contrat d'eau ou d'électricité de la maison."
+        }
+      ],
+      "piege": "Un réseau n'a pas besoin d'Internet ni d'abonnement : deux PC reliés dans Packet Tracer forment déjà un réseau."
+    },
+    {
+      "id": "switch-routeur",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "Switch",
+          "phrase": "Relie plusieurs appareils DANS le même réseau et transmet chaque message seulement au bon destinataire.",
+          "image": "Le facteur de l'immeuble : il dépose chaque lettre dans la bonne boîte."
+        },
+        {
+          "mot": "Routeur",
+          "phrase": "Relie des réseaux DIFFÉRENTS entre eux. Il a un pied dans chaque réseau.",
+          "image": "Le carrefour entre deux rues."
+        }
+      ],
+      "piege": "La box de la maison contient les deux (plus un modem et le Wi-Fi) : son switch relie tes appareils entre eux, son routeur te relie à Internet."
     }
   ],
   "questions": [
@@ -783,6 +817,66 @@
       ],
       "bonne": 1,
       "pourquoi": "Les deux finissent par utiliser le matériel. La différence est la couche du dessous : rien (ESXi, Proxmox) ou un système hôte (VirtualBox)."
+    },
+    {
+      "id": "q44",
+      "paire": "masque-passerelle",
+      "q": "PC0 (192.168.1.10/24) et PC1 (192.168.2.20/24) sont reliés par un câble. Le ping marche-t-il ?",
+      "choix": [
+        "Oui, ils sont reliés par un câble",
+        "Non : le masque montre qu'ils ne sont pas dans le même réseau, et il n'y a pas de passerelle",
+        "Oui, mais seulement avec un câble croisé"
+      ],
+      "bonne": 1,
+      "pourquoi": "Le câble est obligatoire mais ne suffit pas. PC0 voit avec son masque que 192.168.2 n'est pas sa « rue » : il cherche une passerelle, n'en a pas, et n'envoie rien."
+    },
+    {
+      "id": "q45",
+      "paire": "masque-passerelle",
+      "q": "Avec le masque 255.255.255.0, quelle partie de 192.168.1.10 est le « nom de la rue » (la partie réseau) ?",
+      "choix": [
+        "192",
+        "192.168.1",
+        "192.168.1.10"
+      ],
+      "bonne": 1,
+      "pourquoi": "Les trois « 255 » du masque couvrent les trois premiers nombres : c'est la partie réseau. Le dernier (.10) est le numéro de la maison."
+    },
+    {
+      "id": "q46",
+      "paire": "reseau-abonnement",
+      "q": "Une entreprise a un seul abonnement Internet mais deux réseaux, 192.168.1.x (Compta) et 192.168.2.x (Ateliers). Est-ce possible ?",
+      "choix": [
+        "Non, il faut un abonnement par réseau",
+        "Oui : un routeur relie les deux réseaux, l'abonnement n'a rien à voir",
+        "Oui, mais seulement en Wi-Fi"
+      ],
+      "bonne": 1,
+      "pourquoi": "Un réseau est juste un groupe d'adresses. On découpe souvent en plusieurs réseaux pour la sécurité : un virus à l'atelier n'atteint pas directement la compta."
+    },
+    {
+      "id": "q47",
+      "paire": "switch-routeur",
+      "q": "À la maison, quel appareil de la box permet à ton téléphone et à ton PC de se parler entre eux ?",
+      "choix": [
+        "Le switch (ou la borne Wi-Fi), car ils sont dans le même réseau",
+        "Le routeur",
+        "Le modem"
+      ],
+      "bonne": 0,
+      "pourquoi": "Même réseau = pas besoin de routeur. Le switch (prises) ou la borne Wi-Fi (sans-fil) transmet entre appareils de la même « rue »."
+    },
+    {
+      "id": "q48",
+      "paire": "switch-routeur",
+      "q": "Quel appareil de la box te permet d'aller sur YouTube ?",
+      "choix": [
+        "Le switch",
+        "Le routeur (avec le modem), qui relie ton réseau de la maison à celui de l'opérateur",
+        "La borne Wi-Fi seule"
+      ],
+      "bonne": 1,
+      "pourquoi": "YouTube est dans un autre réseau. Pour sortir de ta « rue », il faut le routeur : c'est ta passerelle."
     }
   ]
 }
