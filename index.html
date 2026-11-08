@@ -111,6 +111,9 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .item .img::before { content: "Image : "; font-weight: 600; color: var(--ink); }
 .piege { background: var(--bad-soft); border-radius: 10px; padding: 10px 12px; font-size: .9rem; }
 .piege b { color: var(--bad); }
+.recherche { width: 100%; font: inherit; font-size: 1rem; padding: 11px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); }
+.recherche:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+#liste-lexique { display: grid; gap: 14px; }
 .filtres { display: flex; gap: 8px; flex-wrap: wrap; }
 .filtres button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; font-size: .85rem; }
 .filtres button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
@@ -142,7 +145,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;",
 const jour = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;   // date locale (pas UTC : une révision à 23 h 30 compte pour le bon jour)
 const plusJours = n => { const d = new Date(); d.setDate(d.getDate() + n); return jour(d); };
 
-let D = null, filtre = "Tous", onglet = "reviser", session = null;
+let D = null, filtre = "Tous", recherche = "", onglet = "reviser", session = null;
 let etat = { cartes: {}, xp: 0, serie: 0, dernierJour: null };
 let stockage = true;
 try { const s = JSON.parse(localStorage.getItem(CLE)); if (s) etat = { ...etat, ...s }; } catch { stockage = false; }
@@ -263,11 +266,24 @@ function vueFin() {
     </section>`;
 }
 
+// Recherche insensible à la casse et aux accents : « regle » trouve « règle ».
+const sansAccents = s => String(s).normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+const textePaire = p => sansAccents([p.theme, p.piege, ...p.items.flatMap(i => [i.mot, i.phrase, i.image])].join(" "));
+
+// Le champ de recherche est rendu une seule fois ; à chaque lettre, seule la liste est remplacée (sinon le champ perdrait le focus et le clavier du téléphone se fermerait).
 function vueLexique() {
   const themes = ["Tous", ...new Set(D.paires.map(p => p.theme))];
-  const liste = D.paires.filter(p => filtre === "Tous" || p.theme === filtre);
   return `
+    <input type="search" id="recherche" class="recherche" placeholder="Chercher un mot (ex. : passerelle)" aria-label="Chercher dans le lexique" autocomplete="off" enterkeyhint="search" value="${esc(recherche)}">
     <div class="filtres">${themes.map(t => `<button data-f="${esc(t)}" aria-pressed="${t === filtre}">${esc(t)}</button>`).join("")}</div>
+    <div id="liste-lexique">${listeLexique()}</div>`;
+}
+
+function listeLexique() {
+  const mots = sansAccents(recherche).split(/\s+/).filter(Boolean);
+  const liste = D.paires.filter(p => (filtre === "Tous" || p.theme === filtre) && mots.every(m => textePaire(p).includes(m)));
+  if (!liste.length) return `<p class="note">Aucune paire ne contient « ${esc(recherche)} »${filtre === "Tous" ? "" : ` dans le thème ${esc(filtre)}`}.</p>`;
+  return `${mots.length ? `<p class="note">${liste.length} paire${liste.length > 1 ? "s" : ""} trouvée${liste.length > 1 ? "s" : ""}</p>` : ""}
     ${liste.map(p => `
       <section class="card paire">
         <span class="label">${esc(p.theme)} · ne pas confondre</span>
@@ -296,6 +312,11 @@ document.getElementById("vue").addEventListener("click", e => {
   else if (b.id === "retour") { session = null; afficher(); }
   else if (b.dataset.i !== undefined && session && session.reponse === null) repondre(+b.dataset.i);
   else if (b.dataset.f) { filtre = b.dataset.f; afficher(); }
+});
+document.getElementById("vue").addEventListener("input", e => {
+  if (e.target.id !== "recherche") return;
+  recherche = e.target.value;
+  document.getElementById("liste-lexique").innerHTML = listeLexique();
 });
 document.getElementById("tab-reviser").addEventListener("click", () => { onglet = "reviser"; afficher(); });
 document.getElementById("tab-lexique").addEventListener("click", () => { onglet = "lexique"; afficher(); });
