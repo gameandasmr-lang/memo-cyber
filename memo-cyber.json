@@ -1,0 +1,150 @@
+{
+  "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question = un QCM lié à une paire. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id.",
+  "maj": "2026-11-08",
+  "paires": [
+    {
+      "id": "http-html", "theme": "Web",
+      "items": [
+        { "mot": "HTTP", "phrase": "Les règles de la conversation entre le navigateur et le serveur : comment on demande, et comment on répond.", "image": "La façon de commander au restaurant : tu demandes un plat, le serveur répond « ça arrive » ou « on n'en a plus »." },
+        { "mot": "HTML", "phrase": "Le document que le serveur renvoie. Il décrit la page : titres, textes, boutons.", "image": "L'assiette qui arrive sur ta table." }
+      ],
+      "piege": "HTTP n'est pas « la requête » : la réponse aussi est du HTTP. Le « 200 OK » en première ligne, c'est du HTTP."
+    },
+    {
+      "id": "html-js", "theme": "Web",
+      "items": [
+        { "mot": "HTML", "phrase": "Décrit ce qu'il y a sur la page. Il ne fait rien tout seul : le navigateur l'affiche.", "image": "Les murs et les meubles d'une maison." },
+        { "mot": "CSS", "phrase": "L'apparence : couleurs, tailles, polices, positions.", "image": "La peinture et la déco." },
+        { "mot": "JavaScript (JS)", "phrase": "Des instructions que le navigateur exécute : ce qui se passe quand on clique.", "image": "L'électricité : tu appuies sur l'interrupteur, la lumière s'allume." }
+      ],
+      "piege": "Le HTML ne s'exécute pas, il décrit. Seul le JS s'exécute. Sans JS, la page s'affiche quand même : seuls les boutons ne réagissent plus."
+    },
+    {
+      "id": "codes", "theme": "Web",
+      "items": [
+        { "mot": "200", "phrase": "Ça a marché, voici ce que tu as demandé. Famille 2xx = succès.", "image": "« Voici votre plat. »" },
+        { "mot": "404", "phrase": "Introuvable. Le serveur a bien répondu : il n'a pas ça. Famille 4xx = erreur du client.", "image": "« Ce plat n'existe pas à la carte. »" },
+        { "mot": "403", "phrase": "Interdit. Ça existe, mais tu n'as pas le droit d'y accéder.", "image": "« Ce salon est privé, vous n'entrez pas. »" },
+        { "mot": "500", "phrase": "Le serveur a planté. Famille 5xx = erreur du serveur.", "image": "« La cuisine a pris feu. »" }
+      ],
+      "piege": "404 ne veut pas dire « pas de réponse » : le serveur a répondu « je n'ai pas ça ». 4 = c'est ta faute, 5 = c'est la sienne."
+    },
+    {
+      "id": "masque-passerelle", "theme": "Réseau",
+      "items": [
+        { "mot": "Masque", "phrase": "La règle qui dit si une adresse est dans mon réseau ou ailleurs.", "image": "Savoir si le destinataire habite dans ton immeuble." },
+        { "mot": "Passerelle", "phrase": "La porte de sortie : tout ce qui n'est pas dans mon réseau lui est envoyé. Chez toi, c'est la box.", "image": "La boîte aux lettres de La Poste, au coin de la rue, pour tout le reste." }
+      ],
+      "piege": "Pour savoir si on passe par la passerelle, on regarde le masque. Avec 255.255.255.0 : mêmes 3 premiers nombres = même réseau, sinon passerelle."
+    },
+    {
+      "id": "ip-privee-publique", "theme": "Réseau",
+      "items": [
+        { "mot": "IP privée", "phrase": "Adresse à l'intérieur de ton réseau (192.168…, 10…, 172.16 à 172.31). Elle ne sort jamais sur Internet.", "image": "Le numéro de poste interne au bureau : « poste 94 »." },
+        { "mot": "IP publique", "phrase": "L'adresse de ta box sur Internet, unique au monde.", "image": "Le numéro du standard de l'entreprise." },
+        { "mot": "NAT", "phrase": "La box remplace l'IP privée par l'IP publique à la sortie, et fait le chemin inverse au retour.", "image": "Le standard qui transfère chaque appel au bon poste." }
+      ],
+      "piege": "Un site ne voit jamais ton IP privée. ifconfig.me te montre l'IP publique de ta box."
+    },
+    {
+      "id": "ports", "theme": "Réseau",
+      "items": [
+        { "mot": "Port serveur", "phrase": "Numéro fixe et connu de tous : 443 = HTTPS, 80 = HTTP, 53 = DNS, 22 = SSH.", "image": "Le guichet n° 4 de la poste : tout le monde sait où aller." },
+        { "mot": "Port client", "phrase": "Numéro tiré au hasard par mon PC, un par connexion, pour que chaque réponse revienne au bon onglet.", "image": "Le ticket de la file d'attente : ton numéro à toi pour être appelé." }
+      ],
+      "piege": "3 onglets vers le même site = 3 ports différents de mon côté, sur la même machine."
+    },
+    {
+      "id": "dns-port", "theme": "Réseau",
+      "items": [
+        { "mot": "DNS", "phrase": "Traduit un nom (picard.fr) en adresse IP. Il ne donne que l'adresse, jamais de port.", "image": "L'annuaire : il te donne l'adresse de l'immeuble." },
+        { "mot": "Le port", "phrase": "Vient du protocole tapé : https:// donne 443, http:// donne 80.", "image": "Le numéro de la porte, que tout le monde connaît déjà." }
+      ],
+      "piege": "Le DNS ne renvoie jamais « IP:443 ». Et il passe toujours avant la requête HTTP : pas de colis sans adresse."
+    },
+    {
+      "id": "resolveur-autorite", "theme": "Réseau",
+      "items": [
+        { "mot": "Résolveur", "phrase": "Celui qui cherche la réponse DNS pour toi et la garde en mémoire. Chez toi, c'est la box.", "image": "Le collègue qui te répète les horaires du magasin." },
+        { "mot": "Serveur qui fait autorité", "phrase": "Le serveur officiel du domaine, qui détient la vraie réponse.", "image": "Le responsable du magasin." }
+      ],
+      "piege": "« Réponse ne faisant pas autorité » = c'est le résolveur qui a répondu, de mémoire. Rien à voir avec privé ou public."
+    },
+    {
+      "id": "tcp-udp", "theme": "Réseau",
+      "items": [
+        { "mot": "TCP", "phrase": "Vérifie que tout arrive, dans l'ordre (poignée de main SYN, SYN-ACK, ACK). Pour les pages web et les fichiers.", "image": "Le colis avec accusé de réception." },
+        { "mot": "UDP", "phrase": "Envoie sans vérifier, donc plus rapide. Pour les jeux en ligne, les appels et le DNS.", "image": "La radio : si tu rates une phrase, l'émission continue." }
+      ],
+      "piege": "Dans un jeu, une position perdue est déjà périmée : la renvoyer ne sert à rien, d'où UDP."
+    },
+    {
+      "id": "fiable-securise", "theme": "Sécurité",
+      "items": [
+        { "mot": "Fiable", "phrase": "Tout arrive, rien ne manque. C'est ce que fait TCP.", "image": "Une carte postale en recommandé : elle arrive à coup sûr, mais le facteur peut la lire." },
+        { "mot": "Sécurisé (chiffré)", "phrase": "Personne ne peut lire en route. C'est TLS, le « S » de HTTPS.", "image": "Une lettre dans une enveloppe scellée." }
+      ],
+      "piege": "TCP est fiable, pas sécurisé. HTTPS protège le trajet, pas la page une fois arrivée : le visiteur peut lire tout le HTML."
+    },
+    {
+      "id": "hyperviseurs", "theme": "Virtualisation",
+      "items": [
+        { "mot": "Hyperviseur type 1", "phrase": "Installé directement sur la machine, sans Windows dessous. Dans les centres de données (ESXi, Proxmox).", "image": "Le propriétaire de l'immeuble, qui loue les appartements." },
+        { "mot": "Hyperviseur type 2", "phrase": "Un logiciel qui tourne sur ton Windows (VirtualBox).", "image": "Le locataire qui sous-loue une chambre de son appartement." }
+      ],
+      "piege": "Centre de données = type 1. Ton PC avec VirtualBox = type 2."
+    },
+    {
+      "id": "vm-conteneur", "theme": "Virtualisation",
+      "items": [
+        { "mot": "Machine virtuelle (VM)", "phrase": "Un ordinateur complet, virtuel, avec son propre système. Isolée : on peut tout casser sans risque, et revenir en arrière avec un instantané.", "image": "Une maison entière, avec ses propres fondations." },
+        { "mot": "Conteneur", "phrase": "Une petite boîte pour une seule appli, qui partage le système de la machine.", "image": "Une chambre en colocation : la cuisine est commune." }
+      ],
+      "piege": "Tester une mise à jour sans risque = une VM (isolée) + un instantané (pour revenir en arrière)."
+    },
+    {
+      "id": "scan", "theme": "Sécurité",
+      "items": [
+        { "mot": "Énumération (scan)", "phrase": "Un robot essaie des dizaines de chemins (/admin, /.env…) pour trouver des pages cachées.", "image": "Quelqu'un qui tourne toutes les poignées de porte d'un couloir." },
+        { "mot": "Fuite d'information", "phrase": "Le serveur révèle trop, par exemple son logiciel et sa version dans l'en-tête Server:.", "image": "Laisser la notice de son coffre-fort scotchée dessus." }
+      ],
+      "piege": "Dans une rafale de 404, la ligne grave est le 200 : la porte trouvée ouverte."
+    }
+  ],
+  "questions": [
+    { "id": "q1", "paire": "http-html", "q": "HTTP, c'est…", "choix": ["La requête envoyée par mon navigateur", "Les règles de la conversation : demande ET réponse", "Le langage de la page web"], "bonne": 1, "pourquoi": "HTTP couvre toute la conversation. La réponse « 200 OK » est aussi du HTTP." },
+    { "id": "q2", "paire": "http-html", "q": "Au restaurant, l'assiette qui arrive sur ta table, c'est…", "choix": ["HTTP", "HTML", "Le DNS"], "bonne": 1, "pourquoi": "L'assiette, c'est le contenu livré : le HTML. La façon de commander et de servir, c'est HTTP." },
+    { "id": "q3", "paire": "http-html", "q": "Dans « HTTP/1.1 200 OK », le mot HTTP apparaît dans…", "choix": ["La demande du navigateur", "La réponse du serveur", "Le code HTML"], "bonne": 1, "pourquoi": "C'est la première ligne de la réponse du serveur. Preuve que HTTP n'est pas que la requête." },
+    { "id": "q4", "paire": "html-js", "q": "Lequel s'exécute ?", "choix": ["Le HTML", "Le CSS", "Le JavaScript"], "bonne": 2, "pourquoi": "Seul le JS s'exécute. Le HTML décrit, le CSS habille." },
+    { "id": "q5", "paire": "html-js", "q": "On bloque script.js sur une page. Que se passe-t-il ?", "choix": ["La page ne s'affiche plus du tout", "La page s'affiche, mais les boutons ne réagissent plus", "La page s'affiche sans couleurs"], "bonne": 1, "pourquoi": "Le HTML suffit pour afficher. Le JS, c'est l'électricité : sans lui, l'interrupteur ne fait plus rien." },
+    { "id": "q6", "paire": "html-js", "q": "Dans une maison : les murs, la déco, l'électricité. Dans le même ordre :", "choix": ["HTML, CSS, JS", "JS, CSS, HTML", "CSS, HTML, JS"], "bonne": 0, "pourquoi": "Murs = HTML (ce qui existe), déco = CSS (l'apparence), électricité = JS (ce qui réagit)." },
+    { "id": "q7", "paire": "codes", "q": "Le serveur répond 404. Ça veut dire…", "choix": ["Il n'a pas répondu", "Il a répondu : « je n'ai pas ça »", "Il a planté"], "bonne": 1, "pourquoi": "404 = introuvable. Le serveur a bien répondu. Planté, c'est 500." },
+    { "id": "q8", "paire": "codes", "q": "« Ce salon est privé, vous n'entrez pas. » C'est quel code ?", "choix": ["404", "403", "500"], "bonne": 1, "pourquoi": "403 = interdit : ça existe, mais tu n'as pas le droit." },
+    { "id": "q9", "paire": "codes", "q": "Un code qui commence par 5, c'est la faute de…", "choix": ["Du client (ton navigateur)", "Du serveur", "Du DNS"], "bonne": 1, "pourquoi": "4xx = c'est ta faute, 5xx = c'est la sienne." },
+    { "id": "q10", "paire": "codes", "q": "Où se trouve le code de statut dans une réponse HTTP ?", "choix": ["Sur la première ligne", "Au milieu des en-têtes, à côté de :443", "À la fin du HTML"], "bonne": 0, "pourquoi": "Toujours en première ligne : « HTTP/1.1 200 OK ». Un :443, c'est un port." },
+    { "id": "q11", "paire": "masque-passerelle", "q": "Mon PC : 192.168.0.12, masque 255.255.255.0. Il veut joindre 51.38.20.7. Il l'envoie…", "choix": ["Directement à 51.38.20.7", "À la passerelle", "Au DNS"], "bonne": 1, "pourquoi": "Le masque compare : 51.38.20 n'est pas 192.168.0, donc c'est un autre réseau, donc la passerelle." },
+    { "id": "q12", "paire": "masque-passerelle", "q": "Qui décide si une adresse est « dans mon réseau » ?", "choix": ["La passerelle", "Le masque", "Le DNS"], "bonne": 1, "pourquoi": "Le masque, c'est la règle « même immeuble ou pas ». La passerelle, c'est la boîte aux lettres pour tout le reste." },
+    { "id": "q13", "paire": "masque-passerelle", "q": "Mon PC : 192.168.1.94, masque 255.255.255.0. Il veut joindre l'imprimante 192.168.1.50. Il l'envoie…", "choix": ["Directement à l'imprimante", "À la passerelle"], "bonne": 0, "pourquoi": "Mêmes trois premiers nombres (192.168.1) = même réseau = envoi direct." },
+    { "id": "q14", "paire": "ip-privee-publique", "q": "192.168.1.94, c'est une IP…", "choix": ["Privée", "Publique"], "bonne": 0, "pourquoi": "192.168.x.x fait partie des plages privées. Elle ne sort jamais sur Internet." },
+    { "id": "q15", "paire": "ip-privee-publique", "q": "Sur son serveur, un site voit arriver ma connexion. Il voit…", "choix": ["L'IP privée de mon PC", "L'IP publique de ma box", "L'IP privée de ma box"], "bonne": 1, "pourquoi": "La box fait du NAT : elle remplace l'IP privée par son IP publique, comme un standard téléphonique." },
+    { "id": "q16", "paire": "ip-privee-publique", "q": "Mon voisin a aussi un PC en 192.168.1.94. Problème ?", "choix": ["Oui, deux machines ont la même adresse", "Non, ce sont des adresses privées, chacun dans sa maison"], "bonne": 1, "pourquoi": "Les IP privées sont réutilisées partout, comme les numéros de poste internes dans chaque entreprise." },
+    { "id": "q17", "paire": "ports", "q": "3 onglets ouverts sur le même site : netstat montre 3 ports différents de mon côté. Pourquoi ?", "choix": ["Les onglets sont sur 3 machines différentes", "Un ticket par connexion, pour remettre chaque réponse au bon onglet", "Le site utilise 3 ports"], "bonne": 1, "pourquoi": "Même machine, mais un ticket (port client) par connexion. Le site, lui, reste sur son guichet 443." },
+    { "id": "q18", "paire": "ports", "q": "Le port 443 dans « 51.91.60.233:443 », c'est…", "choix": ["Le port du serveur (HTTPS)", "Le port de mon PC", "Un code de statut"], "bonne": 0, "pourquoi": "443 = le guichet fixe du serveur pour HTTPS. Mon port à moi est tiré au hasard (ex. 50265)." },
+    { "id": "q19", "paire": "ports", "q": "Port 53, c'est…", "choix": ["HTTP", "DNS", "SSH"], "bonne": 1, "pourquoi": "53 = DNS. 80 = HTTP, 443 = HTTPS, 22 = SSH." },
+    { "id": "q20", "paire": "dns-port", "q": "Je tape https://picard.fr. Le DNS me renvoie…", "choix": ["51.91.60.233:443", "51.91.60.233", "Le HTML de la page"], "bonne": 1, "pourquoi": "Le DNS ne donne que l'adresse. Le 443 vient du https:// que tu as tapé." },
+    { "id": "q21", "paire": "dns-port", "q": "Dans quel ordre ?", "choix": ["GET / puis DNS", "DNS puis GET /", "Les deux en même temps"], "bonne": 1, "pourquoi": "Pas de colis sans adresse : le DNS passe toujours en premier." },
+    { "id": "q22", "paire": "resolveur-autorite", "q": "nslookup affiche « Réponse ne faisant pas autorité ». Ça veut dire…", "choix": ["Le site est privé", "C'est le résolveur (la box) qui a répondu, de mémoire", "La réponse est fausse"], "bonne": 1, "pourquoi": "La box rapporte une réponse qu'elle a gardée en mémoire. Le serveur officiel, lui, fait autorité." },
+    { "id": "q23", "paire": "resolveur-autorite", "q": "Dans nslookup, la ligne « Serveur », c'est…", "choix": ["Mon PC", "Le résolveur qui m'a répondu", "Le serveur du site"], "bonne": 1, "pourquoi": "C'est celui qui a répondu, en général ta box. Ton PC n'apparaît nulle part." },
+    { "id": "q24", "paire": "tcp-udp", "q": "Position des joueurs dans un jeu en ligne : TCP ou UDP ?", "choix": ["TCP", "UDP"], "bonne": 1, "pourquoi": "UDP : une position perdue est déjà périmée, inutile de la renvoyer. TCP ferait ramer le jeu." },
+    { "id": "q25", "paire": "tcp-udp", "q": "Télécharger un fichier : TCP ou UDP ?", "choix": ["TCP", "UDP"], "bonne": 0, "pourquoi": "TCP : il manque un morceau, le fichier est cassé. Il faut tout, dans l'ordre." },
+    { "id": "q26", "paire": "tcp-udp", "q": "La poignée de main de TCP, dans l'ordre :", "choix": ["SYN, SYN-ACK, ACK", "ACK, SYN, SYN-ACK", "SYN, ACK, SYN-ACK"], "bonne": 0, "pourquoi": "« On peut parler ? » (SYN), « Oui, et toi ? » (SYN-ACK), « Oui » (ACK)." },
+    { "id": "q27", "paire": "fiable-securise", "q": "TCP est-il sécurisé ?", "choix": ["Oui, il vérifie tout", "Non, il est fiable mais pas chiffré"], "bonne": 1, "pourquoi": "Carte postale en recommandé : elle arrive, mais tout le monde peut la lire. Le chiffrement, c'est TLS." },
+    { "id": "q28", "paire": "fiable-securise", "q": "Site en HTTPS. Je peux laisser le mot de passe admin en commentaire dans le HTML ?", "choix": ["Oui, HTTPS le cache", "Non, le visiteur peut lire tout le HTML"], "bonne": 1, "pourquoi": "HTTPS protège le trajet. Une fois arrivé, le HTML se lit en entier (clic droit, code source)." },
+    { "id": "q29", "paire": "hyperviseurs", "q": "Dans un centre de données, l'hyperviseur est plutôt…", "choix": ["De type 1", "De type 2"], "bonne": 0, "pourquoi": "Type 1 : directement sur la machine, sans Windows dessous. Le propriétaire de l'immeuble." },
+    { "id": "q30", "paire": "hyperviseurs", "q": "VirtualBox sur ton PC Windows, c'est…", "choix": ["Type 1", "Type 2"], "bonne": 1, "pourquoi": "Type 2 : un logiciel qui tourne sur Windows. Le locataire qui sous-loue une chambre." },
+    { "id": "q31", "paire": "vm-conteneur", "q": "Tester une mise à jour sans risquer le vrai serveur : la meilleure idée ?", "choix": ["La tester directement sur le serveur un dimanche", "Une VM, avec un instantané avant de commencer", "Un conteneur partagé avec le serveur"], "bonne": 1, "pourquoi": "La VM est isolée, et l'instantané permet de revenir en arrière si tout casse." },
+    { "id": "q32", "paire": "vm-conteneur", "q": "Lequel partage le système de la machine ?", "choix": ["La VM", "Le conteneur"], "bonne": 1, "pourquoi": "Le conteneur, c'est la chambre en colocation : la cuisine (le système) est commune." },
+    { "id": "q33", "paire": "scan", "q": "Une même IP : 50 lignes 404 en 30 secondes (/admin, /.env, /backup.zip…). C'est…", "choix": ["Un utilisateur qui se trompe", "Un robot qui scanne (énumération)", "Une panne du serveur"], "bonne": 1, "pourquoi": "Quelqu'un tourne toutes les poignées du couloir. Cherche s'il y a un 200 au milieu." },
+    { "id": "q34", "paire": "scan", "q": "Quel en-tête est le plus dangereux à laisser visible ?", "choix": ["Server: cloudflare", "Server: SimpleHTTP/0.6 Python/3.12.3"], "bonne": 1, "pourquoi": "Logiciel + version exacte = on peut chercher les failles connues de cette version." }
+  ]
+}

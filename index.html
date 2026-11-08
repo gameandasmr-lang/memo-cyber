@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#3446c9">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>Mémo cyber</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Lexend:wght@400;500;600&display=swap">
+<style>
+/* Mise en page : une appli de poche, une seule colonne de 560px max. En haut la série et l'XP, puis la session du jour (QCM un par un, correction immédiate), et un onglet Lexique avec les paires de mots à ne pas confondre. */
+:root {
+  --bg: #f2f4f9;
+  --surface: #ffffff;
+  --ink: #161e33;
+  --muted: #5a6480;
+  --line: #dce1ec;
+  --accent: #3446c9;
+  --accent-soft: #e6e9fb;
+  --good: #1d8457;
+  --good-soft: #e3f4eb;
+  --bad: #c0463a;
+  --bad-soft: #fbe8e5;
+  --flame: #c76a12;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Lexend", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1424; --surface: #181f35; --ink: #e6e9f4; --muted: #9aa3bf; --line: #2a3352;
+    --accent: #8d9cff; --accent-soft: #232c55; --good: #5ccf98; --good-soft: #15302a;
+    --bad: #f08a7c; --bad-soft: #3a1f22; --flame: #f2a24e; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1424; --surface: #181f35; --ink: #e6e9f4; --muted: #9aa3bf; --line: #2a3352;
+  --accent: #8d9cff; --accent-soft: #232c55; --good: #5ccf98; --good-soft: #15302a;
+  --bad: #f08a7c; --bad-soft: #3a1f22; --flame: #f2a24e; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font: 16px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px 40px;
+}
+.app { max-width: 560px; margin: 0 auto; display: grid; gap: 16px; }
+h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.top h1 { font-size: 1.5rem; font-weight: 800; }
+.chips { display: flex; gap: 8px; }
+.chip { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: .85rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.chip.flame b { color: var(--flame); }
+.chip b { font-weight: 600; }
+
+.tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 4px; }
+.tabs button { border: 0; background: none; border-radius: 9px; padding: 9px; font-weight: 500; color: var(--muted); }
+.tabs button[aria-selected="true"] { background: var(--accent); color: var(--surface); }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: grid; gap: 14px; min-width: 0; }
+.hero h2 { font-size: 1.6rem; font-weight: 800; line-height: 1.15; }
+.hero p { margin: 0; color: var(--muted); }
+.big { border: 0; border-radius: 14px; padding: 15px; font-weight: 600; font-size: 1.05rem; background: var(--accent); color: var(--surface); box-shadow: 0 4px 0 color-mix(in srgb, var(--accent) 60%, var(--ink)); }
+.big:active { transform: translateY(2px); box-shadow: 0 2px 0 color-mix(in srgb, var(--accent) 60%, var(--ink)); }
+.big.ghost { background: var(--accent-soft); color: var(--accent); box-shadow: none; }
+.big:disabled { opacity: .45; cursor: default; }
+
+.label { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+.paires { display: grid; gap: 10px; }
+.prow { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 12px; align-items: center; font-size: .92rem; }
+.bar { height: 8px; background: var(--accent-soft); border-radius: 4px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--good); border-radius: 4px; }
+
+/* Session */
+.progress { height: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--good); transition: width .3s ease; }
+.qhead { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.theme { font-size: .8rem; background: var(--accent-soft); color: var(--accent); border-radius: 999px; padding: 3px 10px; font-weight: 500; }
+.retry { font-size: .8rem; color: var(--flame); font-weight: 500; }
+.question { font-family: var(--f-display); font-size: 1.35rem; font-weight: 700; line-height: 1.25; }
+.choix { display: grid; gap: 10px; }
+.choix button { text-align: left; background: var(--surface); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 14px; padding: 13px 16px; }
+.choix button:hover:not(:disabled) { border-color: var(--accent); }
+.choix button.ok { border-color: var(--good); background: var(--good-soft); }
+.choix button.ko { border-color: var(--bad); background: var(--bad-soft); }
+.choix button:disabled { cursor: default; }
+.verdict { border-radius: 14px; padding: 16px; display: grid; gap: 8px; }
+.verdict.ok { background: var(--good-soft); }
+.verdict.ko { background: var(--bad-soft); }
+.verdict h3 { font-size: 1.15rem; }
+.verdict.ok h3 { color: var(--good); }
+.verdict.ko h3 { color: var(--bad); }
+.verdict p { margin: 0; }
+.rappel { font-size: .9rem; color: var(--muted); display: grid; gap: 4px; }
+.rappel b { color: var(--ink); font-weight: 600; }
+
+/* Lexique */
+.paire h3 { font-size: 1.15rem; }
+.items { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.item { border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.item .mot { font-family: var(--f-display); font-weight: 700; font-size: 1.1rem; color: var(--accent); }
+.item p { margin: 0; font-size: .92rem; }
+.item .img { color: var(--muted); font-size: .88rem; }
+.item .img::before { content: "Image : "; font-weight: 600; color: var(--ink); }
+.piege { background: var(--bad-soft); border-radius: 10px; padding: 10px 12px; font-size: .9rem; }
+.piege b { color: var(--bad); }
+.filtres { display: flex; gap: 8px; flex-wrap: wrap; }
+.filtres button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; font-size: .85rem; }
+.filtres button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.note { font-size: .8rem; color: var(--muted); text-align: center; }
+.err { color: var(--bad); }
+@media (prefers-reduced-motion: reduce) { .progress i { transition: none; } .big:active { transform: none; } }
+</style>
+
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1>Mémo cyber</h1>
+    <div class="chips" id="chips"></div>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button id="tab-reviser" role="tab" aria-selected="true">Réviser</button>
+    <button id="tab-lexique" role="tab" aria-selected="false">Lexique</button>
+  </nav>
+  <main id="vue"><section class="card"><p>Chargement des cartes…</p></section></main>
+  <p class="note" id="note"></p>
+</div>
+
+<script>
+const CLE = "memo-cyber-v1";
+const INTERVALLES = [0, 1, 2, 4, 8, 16];   // jours avant de revoir une question, selon sa boîte (0 à 5)
+const TAILLE_SESSION = 10;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const jour = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;   // date locale (pas UTC : une révision à 23 h 30 compte pour le bon jour)
+const plusJours = n => { const d = new Date(); d.setDate(d.getDate() + n); return jour(d); };
+
+let D = null, filtre = "Tous", onglet = "reviser", session = null;
+let etat = { cartes: {}, xp: 0, serie: 0, dernierJour: null };
+let stockage = true;
+try { const s = JSON.parse(localStorage.getItem(CLE)); if (s) etat = { ...etat, ...s }; } catch { stockage = false; }
+const sauver = () => { try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch { stockage = false; } };
+const carte = id => etat.cartes[id] || { boite: 0, due: jour() };
+const paire = id => D.paires.find(p => p.id === id);
+const melanger = t => { for (let i = t.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [t[i], t[j]] = [t[j], t[i]]; } return t; };   // vrai tirage au hasard (Fisher-Yates)
+
+function aRevoir() { return D.questions.filter(q => carte(q.id).due <= jour()); }
+function serieVisible() {
+  if (!etat.dernierJour) return 0;
+  return etat.dernierJour >= plusJours(-1) ? etat.serie : 0;
+}
+
+function chips() {
+  const maitrisees = D.questions.filter(q => carte(q.id).boite >= 4).length;
+  document.getElementById("chips").innerHTML =
+    `<span class="chip flame">Série <b>${serieVisible()} j</b></span>
+     <span class="chip"><b>${etat.xp}</b> XP</span>
+     <span class="chip"><b>${maitrisees}</b>/${D.questions.length} sues</span>`;
+}
+
+function accueil() {
+  const dus = aRevoir().length;
+  const n = Math.min(dus, TAILLE_SESSION);
+  const lignes = D.paires.map(p => {
+    const qs = D.questions.filter(q => q.paire === p.id);
+    const pct = Math.round(100 * qs.reduce((s, q) => s + Math.min(carte(q.id).boite, 4), 0) / (qs.length * 4));
+    return { p, pct };
+  }).sort((a, b) => a.pct - b.pct);
+  return `
+    <section class="card hero">
+      <span class="label">Session du jour</span>
+      <h2>${n ? `${n} question${n > 1 ? "s" : ""} t'attend${n > 1 ? "ent" : ""}` : "Tout est révisé pour aujourd'hui"}</h2>
+      <p>${n ? "Tes points faibles passent en premier. Réponds à voix haute avant de toucher un choix." : "Reviens demain : les questions réapparaissent juste avant que tu les oublies."}</p>
+      <button class="big" id="go" ${n ? "" : "disabled"}>Commencer</button>
+      <button class="big ghost" id="bonus">Test aléatoire (10 questions au hasard)</button>
+    </section>
+    <section class="card">
+      <span class="label">Tes paires, de la plus fragile à la plus solide</span>
+      <div class="paires">${lignes.map(({ p, pct }) =>
+        `<div class="prow"><span>${esc(p.items.map(i => i.mot).join(" / "))}</span><div class="bar" aria-label="${pct} % maîtrisé"><i style="width:${pct}%"></i></div></div>`).join("")}</div>
+    </section>`;
+}
+
+function demarrer(bonus) {
+  let liste = bonus ? melanger([...D.questions])
+    : aRevoir().sort((a, b) => carte(a.id).boite - carte(b.id).boite || Math.random() - .5);
+  session = { file: liste.slice(0, TAILLE_SESSION), total: Math.min(liste.length, TAILLE_SESSION), faites: 0, justes: 0, xp: 0, ratees: new Set(), reponse: null };
+  afficher();
+}
+
+function vueSession() {
+  const q = session.file[0];
+  const p = paire(q.paire);
+  const r = session.reponse;
+  const pct = Math.round(100 * session.faites / (session.total + session.ratees.size));
+  return `
+    <div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+    <section class="card">
+      <div class="qhead"><span class="theme">${esc(p.theme)}</span>${q._retour ? `<span class="retry">Deuxième essai</span>` : ""}</div>
+      <div class="question">${esc(q.q)}</div>
+      <div class="choix">${q.choix.map((c, i) => {
+        const cls = r === null ? "" : i === q.bonne ? "ok" : i === r ? "ko" : "";
+        return `<button data-i="${i}" class="${cls}" ${r !== null ? "disabled" : ""}>${esc(c)}</button>`;
+      }).join("")}</div>
+      ${r === null ? "" : `
+        <div class="verdict ${r === q.bonne ? "ok" : "ko"}" role="status">
+          <h3>${r === q.bonne ? "Bien vu" : "Pas tout à fait"}</h3>
+          <p>${esc(q.pourquoi)}</p>
+          <div class="rappel">${p.items.map(i => `<span><b>${esc(i.mot)}</b> : ${esc(i.image)}</span>`).join("")}</div>
+        </div>
+        <button class="big" id="suite">Continuer</button>`}
+    </section>`;
+}
+
+function repondre(i) {
+  const q = session.file[0];
+  session.reponse = i;
+  const c = carte(q.id);
+  if (i === q.bonne) {
+    if (!q._retour) { session.justes++; c.boite = Math.min(c.boite + 1, 5); session.xp += 10; }
+    else session.xp += 5;
+  } else {
+    c.boite = 0;
+    if (!q._retour) { session.ratees.add(q.id); session.file.push({ ...q, _retour: true }); }
+  }
+  c.due = plusJours(INTERVALLES[c.boite]);
+  etat.cartes[q.id] = c;
+  sauver();
+  afficher();
+  document.getElementById("suite")?.focus();
+}
+
+function suivant() {
+  session.file.shift();
+  session.faites++;
+  session.reponse = null;
+  if (!session.file.length) {
+    etat.xp += session.xp;
+    const auj = jour();
+    if (etat.dernierJour !== auj) { etat.serie = etat.dernierJour === plusJours(-1) ? etat.serie + 1 : 1; etat.dernierJour = auj; }
+    sauver();
+    session.fini = true;
+  }
+  afficher();
+}
+
+function vueFin() {
+  const ratees = [...session.ratees].map(id => D.questions.find(q => q.id === id));
+  return `
+    <section class="card hero">
+      <span class="label">Session terminée</span>
+      <h2>${session.justes} / ${session.total} du premier coup</h2>
+      <p>+${session.xp} XP · série de ${etat.serie} jour${etat.serie > 1 ? "s" : ""}</p>
+      ${ratees.length ? `<div class="piege"><b>À retravailler :</b> ${ratees.map(q => esc(paire(q.paire).items.map(i => i.mot).join(" / "))).filter((v, i, a) => a.indexOf(v) === i).join(" · ")}. Elles reviendront dès demain.</div>` : ""}
+      <button class="big" id="retour">Retour</button>
+    </section>`;
+}
+
+function vueLexique() {
+  const themes = ["Tous", ...new Set(D.paires.map(p => p.theme))];
+  const liste = D.paires.filter(p => filtre === "Tous" || p.theme === filtre);
+  return `
+    <div class="filtres">${themes.map(t => `<button data-f="${esc(t)}" aria-pressed="${t === filtre}">${esc(t)}</button>`).join("")}</div>
+    ${liste.map(p => `
+      <section class="card paire">
+        <span class="label">${esc(p.theme)} · ne pas confondre</span>
+        <h3>${esc(p.items.map(i => i.mot).join(" / "))}</h3>
+        <div class="items">${p.items.map(i => `
+          <div class="item"><span class="mot">${esc(i.mot)}</span><p>${esc(i.phrase)}</p><p class="img">${esc(i.image)}</p></div>`).join("")}</div>
+        <div class="piege"><b>Le piège :</b> ${esc(p.piege)}</div>
+      </section>`).join("")}`;
+}
+
+function afficher() {
+  chips();
+  document.getElementById("tab-reviser").setAttribute("aria-selected", onglet === "reviser");
+  document.getElementById("tab-lexique").setAttribute("aria-selected", onglet === "lexique");
+  const v = document.getElementById("vue");
+  if (onglet === "lexique") { v.innerHTML = vueLexique(); v.style.display = "grid"; v.style.gap = "14px"; return; }
+  v.style.display = "grid"; v.style.gap = "16px";
+  v.innerHTML = session ? (session.fini ? vueFin() : vueSession()) : accueil();
+}
+
+document.getElementById("vue").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.id === "go") demarrer(false);
+  else if (b.id === "bonus") demarrer(true);
+  else if (b.id === "suite") suivant();
+  else if (b.id === "retour") { session = null; afficher(); }
+  else if (b.dataset.i !== undefined && session && session.reponse === null) repondre(+b.dataset.i);
+  else if (b.dataset.f) { filtre = b.dataset.f; afficher(); }
+});
+document.getElementById("tab-reviser").addEventListener("click", () => { onglet = "reviser"; afficher(); });
+document.getElementById("tab-lexique").addEventListener("click", () => { onglet = "lexique"; afficher(); });
+
+fetch("memo-cyber.json", { cache: "no-store" })
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(d => {
+    D = d;
+    document.getElementById("note").textContent = (stockage ? "Ta progression reste enregistrée sur cet appareil." : "Ta progression ne peut pas être enregistrée ici (navigation privée ?).") + ` Cartes mises à jour le ${new Date(d.maj + "T12:00:00").toLocaleDateString("fr-FR")}.`;
+    afficher();
+  })
+  .catch(e => { document.getElementById("vue").innerHTML = `<section class="card"><p class="err">Impossible de charger les cartes (${esc(e.message)}). Il faut republier le mémo avec memo-cyber.json.</p></section>`; });
+</script>
+
+<script>
+// Installation hors ligne ; quand une nouvelle version arrive, la page se recharge une fois d'elle-même.
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  var dejaControlee = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener("controllerchange", function () { if (dejaControlee) location.reload(); });
+  navigator.serviceWorker.register("sw.js").catch(function () {});
+}
+</script>
+</body>
+</html>
