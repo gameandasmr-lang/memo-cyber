@@ -1,5 +1,5 @@
 {
-  "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question = un QCM lié à une paire. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id.",
+  "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question est liée à une paire et a un format (champ type, qcm par défaut) : qcm (choix, bonne), saisie (reponses acceptées), ordre (etapes dans le bon ordre), erreur (texte en morceaux, faux = indice du morceau faux), associer (couples), generateur (gen = nom d’un générateur de l’appli), explique (modele). Champ niveau facultatif : 1 reconnaître, 2 retrouver seul, 3 appliquer. Les choix des QCM sont mélangés par l’appli : l’ordre dans ce fichier n’a pas d’importance. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id.",
   "maj": "2026-11-09",
   "paires": [
     {
@@ -877,6 +877,255 @@
       ],
       "bonne": 1,
       "pourquoi": "YouTube est dans un autre réseau. Pour sortir de ta « rue », il faut le routeur : c'est ta passerelle."
+    },
+    {
+      "id": "q49",
+      "paire": "dns-port",
+      "type": "ordre",
+      "niveau": 2,
+      "q": "Tu tapes https://picard.fr. Remets les étapes dans l’ordre.",
+      "etapes": [
+        "Le DNS donne l’adresse IP de picard.fr",
+        "Ton PC se connecte au port 443 de cette adresse",
+        "Le navigateur envoie GET /",
+        "Le serveur répond « 200 OK » et ses en-têtes",
+        "Le HTML arrive dans le corps de la réponse"
+      ],
+      "pourquoi": "On ne peut pas frapper à une porte sans connaître l’adresse : d’abord le DNS, ensuite la connexion au port, et seulement après la demande GET."
+    },
+    {
+      "id": "q50",
+      "paire": "statut-corps",
+      "type": "ordre",
+      "niveau": 2,
+      "q": "Remets dans l’ordre les morceaux d’une réponse HTTP, de haut en bas.",
+      "etapes": [
+        "La ligne de statut : HTTP/1.1 200 OK",
+        "Les en-têtes (Content-Type…)",
+        "Une ligne vide",
+        "Le corps : le HTML de la page"
+      ],
+      "pourquoi": "Comme une lettre : l’enveloppe et le tampon d’abord (statut, en-têtes), une séparation, puis la lettre elle-même (le corps)."
+    },
+    {
+      "id": "q51",
+      "paire": "ports",
+      "type": "saisie",
+      "niveau": 2,
+      "q": "Port du serveur pour HTTPS ?",
+      "reponses": [
+        "443"
+      ],
+      "pourquoi": "443 = HTTPS, le web chiffré. C’est le port que ton navigateur choisit quand l’adresse commence par https://."
+    },
+    {
+      "id": "q52",
+      "paire": "ports",
+      "type": "saisie",
+      "niveau": 2,
+      "q": "Port du serveur pour HTTP, sans chiffrement ?",
+      "reponses": [
+        "80"
+      ],
+      "pourquoi": "80 = HTTP. Le même service que 443, mais en clair."
+    },
+    {
+      "id": "q53",
+      "paire": "dns-port",
+      "type": "saisie",
+      "niveau": 2,
+      "q": "Le service qui traduit « picard.fr » en adresse IP (le sigle) ?",
+      "reponses": [
+        "DNS"
+      ],
+      "pourquoi": "Le DNS, c’est l’annuaire : un nom en entrée, une adresse en sortie. Jamais de port."
+    },
+    {
+      "id": "q54",
+      "paire": "codes",
+      "type": "saisie",
+      "niveau": 2,
+      "q": "Le code HTTP quand la page demandée n’existe pas ?",
+      "reponses": [
+        "404"
+      ],
+      "pourquoi": "404 = introuvable. Le serveur a bien répondu, il n’a simplement pas ça."
+    },
+    {
+      "id": "q55",
+      "paire": "dns-port",
+      "type": "erreur",
+      "niveau": 2,
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Je tape https://picard.fr.",
+        "Le DNS me renvoie 51.91.60.233:443,",
+        "puis mon navigateur envoie GET /."
+      ],
+      "faux": 1,
+      "pourquoi": "Le DNS renvoie seulement l’adresse (51.91.60.233). Le port 443, c’est ton navigateur qui le choisit, parce que l’adresse commence par https."
+    },
+    {
+      "id": "q56",
+      "paire": "masque-passerelle",
+      "type": "erreur",
+      "niveau": 2,
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "PC1 (192.168.1.10/24) veut joindre 192.168.1.20.",
+        "Comme c’est un autre réseau,",
+        "il envoie le paquet à sa passerelle."
+      ],
+      "faux": 1,
+      "pourquoi": "Avec /24, on compare les 3 premiers nombres : 192.168.1 des deux côtés, donc même réseau. PC1 lui parle directement, sans passerelle."
+    },
+    {
+      "id": "q57",
+      "paire": "http-html",
+      "type": "erreur",
+      "niveau": 2,
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Le serveur renvoie le document de la page,",
+        "écrit en HTTP,",
+        "et le navigateur l’affiche."
+      ],
+      "faux": 1,
+      "pourquoi": "Le document est écrit en HTML (l’assiette). HTTP, ce sont les règles de la conversation qui l’apportent (la façon de commander)."
+    },
+    {
+      "id": "q58",
+      "paire": "ports",
+      "type": "associer",
+      "niveau": 1,
+      "q": "Relie chaque port à son service.",
+      "couples": [
+        [
+          "22",
+          "SSH"
+        ],
+        [
+          "53",
+          "DNS"
+        ],
+        [
+          "80",
+          "HTTP"
+        ],
+        [
+          "443",
+          "HTTPS"
+        ]
+      ],
+      "pourquoi": "Les ports serveur sont fixes et connus de tous. Ceux-là reviennent partout, y compris dans Hacknet."
+    },
+    {
+      "id": "q59",
+      "paire": "switch-routeur",
+      "type": "associer",
+      "niveau": 1,
+      "q": "Relie chaque appareil à son rôle.",
+      "couples": [
+        [
+          "Switch",
+          "Relie les appareils d’un même réseau"
+        ],
+        [
+          "Routeur",
+          "Relie deux réseaux différents"
+        ],
+        [
+          "Passerelle",
+          "La porte de sortie de mon réseau"
+        ]
+      ],
+      "pourquoi": "La passerelle, c’est le routeur vu depuis ton PC : l’adresse à qui il envoie tout ce qui sort de son réseau."
+    },
+    {
+      "id": "q60",
+      "paire": "codes",
+      "type": "associer",
+      "niveau": 1,
+      "q": "Relie chaque code à son sens.",
+      "couples": [
+        [
+          "200",
+          "Tout va bien"
+        ],
+        [
+          "403",
+          "Interdit"
+        ],
+        [
+          "404",
+          "Introuvable"
+        ],
+        [
+          "500",
+          "Le serveur a planté"
+        ]
+      ],
+      "pourquoi": "2xx succès, 4xx faute de la demande, 5xx faute du serveur."
+    },
+    {
+      "id": "q61",
+      "paire": "masque-passerelle",
+      "type": "generateur",
+      "gen": "meme-reseau",
+      "niveau": 3,
+      "q": "Même réseau ?"
+    },
+    {
+      "id": "q62",
+      "paire": "ip-privee-publique",
+      "type": "generateur",
+      "gen": "ip-privee",
+      "niveau": 3,
+      "q": "Privée ou publique ?"
+    },
+    {
+      "id": "q63",
+      "paire": "dns-port",
+      "niveau": 3,
+      "q": "Un collègue : « Le ping vers 8.8.8.8 répond. Mais aucun site ne s’ouvre par son nom, ni picard.fr ni google.fr. » Le coupable le plus probable ?",
+      "choix": [
+        "Le DNS : l’annuaire ne répond plus, donc les noms ne donnent plus d’adresse",
+        "Le câble réseau",
+        "Le serveur de Picard est en panne"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le ping vers une adresse marche : le câble et la sortie vers Internet vont bien. Seuls les noms échouent, et pour tous les sites : c’est la traduction nom → adresse qui casse."
+    },
+    {
+      "id": "q64",
+      "paire": "masque-passerelle",
+      "niveau": 3,
+      "q": "Un PC est réglé en 192.168.1.10/24, sans passerelle. Il imprime sur 192.168.1.50, mais n’atteint pas Internet. Pourquoi ?",
+      "choix": [
+        "Il n’a pas de porte de sortie pour ce qui est hors de son réseau",
+        "Son masque est faux",
+        "L’imprimante bloque Internet"
+      ],
+      "bonne": 0,
+      "pourquoi": "L’imprimante est dans son réseau : il lui parle directement. Internet est ailleurs : il faut la passerelle, et il n’en a pas."
+    },
+    {
+      "id": "q65",
+      "paire": "dns-port",
+      "type": "explique",
+      "niveau": 3,
+      "q": "Explique à un collègue de Picard ce qui se passe entre le moment où tu tapes picard.fr et l’affichage de la page.",
+      "modele": "1) Le PC demande au DNS l’adresse IP de picard.fr. 2) Il se connecte au port 443 de cette adresse (https). 3) Le navigateur envoie la demande HTTP « GET / ». 4) Le serveur répond « 200 OK », avec ses en-têtes. 5) Après une ligne vide arrive le corps : le HTML, que le navigateur affiche.",
+      "pourquoi": "Claude relira ton texte dans le bilan."
+    },
+    {
+      "id": "q66",
+      "paire": "masque-passerelle",
+      "type": "explique",
+      "niveau": 3,
+      "q": "Explique avec tes mots à quoi servent le masque et la passerelle, et comment ils travaillent ensemble.",
+      "modele": "Le masque dit quelle partie de l’adresse est le réseau. Le PC compare la partie réseau de la destination avec la sienne : si c’est pareil, il envoie directement ; sinon, il envoie à la passerelle, la porte de sortie (le routeur, la box), qui transmet vers l’autre réseau.",
+      "pourquoi": "Claude relira ton texte dans le bilan."
     }
   ]
 }

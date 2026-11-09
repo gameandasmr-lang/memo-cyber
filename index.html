@@ -91,6 +91,17 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .choix button.ok { border-color: var(--good); background: var(--good-soft); }
 .choix button.ko { border-color: var(--bad); background: var(--bad-soft); }
 .choix button:disabled { cursor: default; }
+.choix button.sel { border-color: var(--accent); background: var(--accent-soft); }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cols .choix button { padding: 11px 12px; font-size: .92rem; overflow-wrap: anywhere; }
+.etapes { margin: 0; padding-left: 1.4em; display: grid; gap: 6px; }
+.etapes li.ok::marker, .etapes li.ok { color: var(--good); }
+.etapes li.ko::marker, .etapes li.ko { color: var(--bad); }
+.etapes li.vide { list-style: none; margin-left: -1.4em; color: var(--muted); font-size: .9rem; }
+.lien { border: 0; background: none; padding: 0; text-align: left; text-decoration: underline dotted; text-underline-offset: 3px; }
+.nsp { justify-self: center; color: var(--muted); font-size: .92rem; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+textarea.recherche { resize: vertical; line-height: 1.45; }
 .verdict { border-radius: 14px; padding: 16px; display: grid; gap: 8px; }
 .verdict.ok { background: var(--good-soft); }
 .verdict.ko { background: var(--bad-soft); }
@@ -146,7 +157,7 @@ const jour = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).
 const plusJours = n => { const d = new Date(); d.setDate(d.getDate() + n); return jour(d); };
 
 let D = null, filtre = "Tous", recherche = "", onglet = "reviser", session = null;
-// journal : une ligne par réponse (t = date ISO, q = id de la question, r = indice choisi, rep = texte choisi, ok, essai 1 ou 2, mode jour/aleatoire).
+// journal : une ligne par réponse (t = date ISO, q = id de la question, type = format, r = indice du choix dans la carte (pas sa position à l’écran), rep = réponse donnée, ok, essai 1 ou 2, mode jour/aleatoire, conf = sur/hesite, nsp = « je ne sais pas », enonce = question générée, texte = explication écrite).
 // envoye : date ISO du dernier bilan envoyé à Claude (les réponses plus récentes sont « pas encore envoyées »).
 let etat = { cartes: {}, xp: 0, serie: 0, dernierJour: null, journal: [], envoye: null };
 let envoi = null;   // message ou texte de secours affiché sous le bouton d'envoi
@@ -185,7 +196,7 @@ function accueil() {
       <h2>${n ? `${n} question${n > 1 ? "s" : ""} t'attend${n > 1 ? "ent" : ""}` : "Tout est révisé pour aujourd'hui"}</h2>
       <p>${n ? "Tes points faibles passent en premier. Réponds à voix haute avant de toucher un choix." : "Reviens demain : les questions réapparaissent juste avant que tu les oublies."}</p>
       <button class="big" id="go" ${n ? "" : "disabled"}>Commencer</button>
-      <button class="big ghost" id="bonus">Test aléatoire (10 questions au hasard)</button>
+      <button class="big ghost" id="bonus">Test aléatoire (10 questions, les plus fragiles sortent plus souvent)</button>
     </section>
     <section class="card">
       <span class="label">Tes paires, de la plus fragile à la plus solide</span>
@@ -228,61 +239,200 @@ async function envoyer() {
   document.getElementById("bilan-texte")?.select();
 }
 
+// ---- Formats de question ----
+// qcm (défaut) : q, choix, bonne, pourquoi. Les choix sont mélangés à chaque affichage (sinon on apprend la position, pas la réponse).
+// saisie : q, reponses (formes acceptées), pourquoi. Rappel sans aide : on tape la réponse.
+// ordre : q, etapes (dans le bon ordre), pourquoi. On touche les étapes dans l'ordre.
+// erreur : q, texte (morceaux de phrase), faux (indice du morceau faux), pourquoi. On touche le morceau faux.
+// associer : q, couples [[gauche, droite], …], pourquoi. On relie chaque élément à son partenaire.
+// generateur : gen (nom d'un générateur ci-dessous), pourquoi facultatif. Nouveaux chiffres à chaque fois : impossible à apprendre par cœur.
+// explique : q, modele, pourquoi. On écrit son explication, on la compare au modèle et on s'auto-évalue ; Claude relit le texte dans le bilan.
+// Champ commun facultatif : niveau (1 = reconnaître, 2 = retrouver seul, 3 = appliquer ou diagnostiquer).
+const AVEC_CONFIANCE = ["qcm", "saisie", "ordre", "erreur", "generateur"];
+const alea = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const norm = s => sansAccents(s).replace(/[^a-z0-9/]+/g, " ").trim();
+
+const GENERATEURS = {
+  // Deux PC : même réseau ou pas ? On compare la partie réseau donnée par le masque.
+  "meme-reseau"() {
+    const m = Math.random() < .7 ? 24 : 16, n = m / 8;
+    const a = m === 16 ? [10, alea(0, 60), alea(0, 60), alea(2, 250)] : (Math.random() < .5 ? [192, 168, alea(0, 20), alea(2, 250)] : [10, alea(0, 60), alea(0, 60), alea(2, 250)]);
+    const b = [...a]; b[3] = a[3] === 250 ? 249 : a[3] + alea(1, 4);
+    const meme = Math.random() < .5;
+    if (meme && m === 16) b[2] = (a[2] + alea(1, 9)) % 256;            // le piège : le 3e nombre change, mais avec /16 il ne compte pas
+    if (!meme) { const k = n - 1; b[k] = (a[k] + alea(1, 5)) % 256; }
+    const reseau = ip => ip.slice(0, n).join(".");
+    const q = `PC A : ${a.join(".")}/${m}\nPC B : ${b.join(".")}/${m}\nSont-ils dans le même réseau ?`;
+    return { q, enonce: q.replace(/\n/g, " · "), choix: ["Oui : ils se parlent directement", "Non : il faut passer par la passerelle (le routeur)"], bonne: meme ? 0 : 1,
+      pourquoi: `/${m} = on compare les ${n === 3 ? "3" : "2"} premiers nombres. Ici ${reseau(a)} et ${reseau(b)} : ${meme ? "identiques, donc même réseau" : "différents, donc deux réseaux"}.${meme && m === 16 ? " Le 3e nombre change, mais avec /16 il fait partie de l'adresse de la machine, pas du réseau." : ""}` };
+  },
+  // Adresse privée ou publique ? Les trois plages privées : 10…, 172.16 à 172.31, 192.168…
+  "ip-privee"() {
+    const sorte = alea(0, 5);
+    const ip = [[10, alea(0, 255), alea(0, 255), alea(1, 254)], [172, alea(16, 31), alea(0, 255), alea(1, 254)], [192, 168, alea(0, 255), alea(1, 254)],
+      [alea(11, 99), alea(0, 255), alea(0, 255), alea(1, 254)], [172, Math.random() < .5 ? alea(1, 15) : alea(32, 99), alea(0, 255), alea(1, 254)], [192, alea(169, 220), alea(0, 255), alea(1, 254)]][sorte];
+    const privee = sorte < 3;
+    const q = `${ip.join(".")} : adresse privée ou publique ?`;
+    return { q, enonce: q, choix: ["Privée : elle ne sort jamais sur Internet", "Publique : unique au monde, visible sur Internet"], bonne: privee ? 0 : 1,
+      pourquoi: `Les adresses privées commencent par 10, par 172.16 à 172.31, ou par 192.168. ${ip.join(".")} ${privee ? "en fait partie" : "n'en fait pas partie"}.` };
+  }
+};
+
+function preparer(q, retour) {
+  let x = { ...q, type: q.type || "qcm", _src: q, _retour: !!retour };
+  if (x.type === "generateur") x = { ...x, ...GENERATEURS[q.gen]() };
+  if (x.choix) x.ordreChoix = melanger(x.choix.map((_, i) => i));
+  if (x.type === "ordre") { x.melange = melanger(x.etapes.map((_, i) => i)); x.pris = []; }
+  if (x.type === "associer") { x.gauche = melanger(x.couples.map((_, i) => i)); x.droite = melanger(x.couples.map((_, i) => i)); x.trouves = []; x.sel = null; x.fautes = 0; x.flash = null; }
+  return x;
+}
+
+// Test aléatoire pondéré : une question de la boîte 0 a 6 fois plus de chances de sortir qu'une question de la boîte 5 (qui ne disparaît pas pour autant).
+function tirage(n) {
+  const pool = D.questions.map(q => ({ q, w: 6 - carte(q.id).boite }));
+  const out = [];
+  while (out.length < n && pool.length) {
+    let r = Math.random() * pool.reduce((s, p) => s + p.w, 0), k = 0;
+    while ((r -= pool[k].w) > 0) k++;
+    out.push(pool.splice(k, 1)[0].q);
+  }
+  return out;
+}
+
 function demarrer(bonus) {
-  let liste = bonus ? melanger([...D.questions])
-    : aRevoir().sort((a, b) => carte(a.id).boite - carte(b.id).boite || Math.random() - .5);
-  session = { file: liste.slice(0, TAILLE_SESSION), total: Math.min(liste.length, TAILLE_SESSION), faites: 0, justes: 0, xp: 0, ratees: new Set(), reponse: null, mode: bonus ? "aleatoire" : "jour" };
+  const liste = bonus ? tirage(TAILLE_SESSION)
+    : aRevoir().sort((a, b) => carte(a.id).boite - carte(b.id).boite || Math.random() - .5).slice(0, TAILLE_SESSION);
+  session = { file: liste.map(q => preparer(q)), total: liste.length, faites: 0, justes: 0, xp: 0, ratees: new Set(), etape: "repondre", res: null, mode: bonus ? "aleatoire" : "jour" };
   envoi = null;
   afficher();
 }
 
+const NIVEAUX = ["", "Reconnaître", "Retrouver seul", "Appliquer"];
+
+function zoneReponse(x) {
+  const fini = session.etape === "verdict", res = session.res;
+  switch (x.type) {
+    case "saisie":
+      return `<input id="saisie" class="recherche" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" placeholder="Ta réponse" ${res ? `value="${esc(res.rep)}" disabled` : ""}>
+        ${res ? "" : `<button class="big" id="valider">Valider</button>`}`;
+    case "ordre": {
+      if (fini) return `<ol class="etapes">${x.etapes.map((e, i) => `<li class="${x.pris[i] === i ? "ok" : "ko"}">${esc(e)}</li>`).join("")}</ol>
+        ${res.ok ? "" : `<p class="note" style="text-align:left;margin:0">Ton ordre : ${esc(res.rep)}</p>`}`;
+      const reste = x.melange.filter(i => !x.pris.includes(i));
+      return `<span class="label">Ton ordre</span>
+        <ol class="etapes">${x.pris.length ? x.pris.map((i, k) => `<li><button class="lien" data-retire="${k}" ${res ? "disabled" : ""}>${esc(x.etapes[i])}</button></li>`).join("") : `<li class="vide">Touche les étapes ci-dessous, de la première à la dernière.</li>`}</ol>
+        <div class="choix">${reste.map(i => `<button data-pick="${i}">${esc(x.etapes[i])}</button>`).join("")}</div>
+        ${res ? "" : `<button class="big" id="valider" ${reste.length ? "disabled" : ""}>Valider cet ordre</button>`}`;
+    }
+    case "erreur":
+      return `<div class="choix">${x.texte.map((m, i) => {
+        const cls = fini ? (i === x.faux ? "ok" : i === res.r ? "ko" : "") : res && i === res.r ? "sel" : "";
+        return `<button data-i="${i}" class="${cls}" ${res ? "disabled" : ""}>${esc(m)}</button>`; }).join("")}</div>`;
+    case "associer": {
+      const btn = (cote, i, txt) => {
+        const trouve = x.trouves.includes(i);
+        const cls = trouve ? "ok" : cote === "g" && x.sel === i ? "sel" : cote === "d" && x.flash === i ? "ko" : "";
+        return `<button data-${cote}="${i}" class="${cls}" ${trouve || res ? "disabled" : ""}>${esc(txt)}</button>`;
+      };
+      return `<div class="cols"><div class="choix">${x.gauche.map(i => btn("g", i, x.couples[i][0])).join("")}</div>
+        <div class="choix">${x.droite.map(i => btn("d", i, x.couples[i][1])).join("")}</div></div>
+        ${x.fautes ? `<p class="note" style="margin:0">${x.fautes} erreur${x.fautes > 1 ? "s" : ""} pour l'instant</p>` : ""}`;
+    }
+    case "explique":
+      if (session.etape === "repondre") return `<textarea id="explication" class="recherche" rows="6" placeholder="Explique avec tes mots, comme à un collègue.">${esc(session.texte || "")}</textarea>
+        <button class="big" id="voir">Voir la réponse modèle</button>`;
+      return `<div class="item"><span class="label">Ce que tu as écrit</span><p>${esc(session.texte || "(rien)")}</p></div>
+        <div class="item"><span class="label">Réponse modèle</span><p>${esc(x.modele)}</p></div>
+        ${res ? "" : `<p style="margin:0">Honnêtement, ton explication contenait l'essentiel ?</p>
+        <div class="duo"><button class="big ghost" data-auto="0">Il me manquait des choses</button><button class="big" data-auto="1">J'avais l'essentiel</button></div>`}`;
+    default:   // qcm et generateur
+      return `<div class="choix">${x.ordreChoix.map(i => {
+        const cls = fini ? (i === x.bonne ? "ok" : i === res.r ? "ko" : "") : res && i === res.r ? "sel" : "";
+        return `<button data-i="${i}" class="${cls}" ${res ? "disabled" : ""}>${esc(x.choix[i])}</button>`; }).join("")}</div>`;
+  }
+}
+
+function solution(x) {
+  switch (x.type) {
+    case "saisie": return `Réponse attendue : ${x.reponses[0]}`;
+    case "erreur": return `Le morceau faux : « ${x.texte[x.faux]} »`;
+    case "associer": return x.couples.map(c => `${c[0]} → ${c[1]}`).join(" · ");
+    default: return "";
+  }
+}
+
 function vueSession() {
-  const q = session.file[0];
-  const p = paire(q.paire);
-  const r = session.reponse;
+  const x = session.file[0];
+  const p = paire(x.paire);
+  const res = session.res;
   const pct = Math.round(100 * session.faites / (session.total + session.ratees.size));
+  let bas = "";
+  if (session.etape === "repondre") bas = `<button class="lien nsp" id="nsp">Je ne sais pas</button>`;
+  else if (session.etape === "confiance") bas = `<p style="margin:0">Avant la correction : tu étais…</p>
+    <div class="duo"><button class="big ghost" data-conf="hesite">J'hésitais</button><button class="big" data-conf="sur">Sûr de moi</button></div>`;
+  else if (session.etape === "verdict") {
+    const titre = res.nsp ? "Pas grave : voici la réponse" : res.ok ? (res.conf === "hesite" ? "Juste, mais tu hésitais" : "Bien vu")
+      : res.conf === "sur" ? "Erreur sûre : c'est celle-là qu'il faut retenir" : "Pas tout à fait";
+    const sol = res.ok ? "" : solution(x);
+    bas = `<div class="verdict ${res.ok ? "ok" : "ko"}" role="status">
+        <h3>${titre}</h3>
+        ${sol ? `<p><b>${esc(sol)}</b></p>` : ""}
+        ${x.pourquoi ? `<p>${esc(x.pourquoi)}</p>` : ""}
+        ${res.ok && res.conf === "hesite" ? `<p class="note" style="text-align:left;margin:0">Elle revient demain : une réponse devinée ne compte pas comme sue.</p>` : ""}
+        <div class="rappel">${p.items.map(i => `<span><b>${esc(i.mot)}</b> : ${esc(i.image)}</span>`).join("")}</div>
+      </div>
+      <button class="big" id="suite">Continuer</button>`;
+  }
   return `
     <div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
     <section class="card">
-      <div class="qhead"><span class="theme">${esc(p.theme)}</span>${q._retour ? `<span class="retry">Deuxième essai</span>` : ""}</div>
-      <div class="question">${esc(q.q)}</div>
-      <div class="choix">${q.choix.map((c, i) => {
-        const cls = r === null ? "" : i === q.bonne ? "ok" : i === r ? "ko" : "";
-        return `<button data-i="${i}" class="${cls}" ${r !== null ? "disabled" : ""}>${esc(c)}</button>`;
-      }).join("")}</div>
-      ${r === null ? "" : `
-        <div class="verdict ${r === q.bonne ? "ok" : "ko"}" role="status">
-          <h3>${r === q.bonne ? "Bien vu" : "Pas tout à fait"}</h3>
-          <p>${esc(q.pourquoi)}</p>
-          <div class="rappel">${p.items.map(i => `<span><b>${esc(i.mot)}</b> : ${esc(i.image)}</span>`).join("")}</div>
-        </div>
-        <button class="big" id="suite">Continuer</button>`}
+      <div class="qhead"><span class="theme">${esc(p.theme)}${x.niveau ? ` · ${NIVEAUX[x.niveau]}` : ""}</span>${x._retour ? `<span class="retry">Deuxième essai</span>` : ""}</div>
+      <div class="question">${esc(x.q).replace(/\n/g, "<br>")}</div>
+      ${zoneReponse(x)}
+      ${bas}
     </section>`;
 }
 
-function repondre(i) {
-  const q = session.file[0];
-  session.reponse = i;
-  const c = carte(q.id);
-  if (i === q.bonne) {
-    if (!q._retour) { session.justes++; c.boite = Math.min(c.boite + 1, 5); session.xp += 10; }
-    else session.xp += 5;
-  } else {
-    c.boite = 0;
-    if (!q._retour) { session.ratees.add(q.id); session.file.push({ ...q, _retour: true }); }
-  }
-  c.due = plusJours(INTERVALLES[c.boite]);
-  etat.cartes[q.id] = c;
-  etat.journal.push({ t: new Date().toISOString(), q: q.id, r: i, rep: q.choix[i], ok: i === q.bonne, essai: q._retour ? 2 : 1, mode: session.mode });
-  sauver();
+// Une réponse est donnée : on demande la confiance (si le format s'y prête), sinon on corrige tout de suite.
+function proposer(res) {
+  session.res = res;
+  session.etape = !res.nsp && AVEC_CONFIANCE.includes(session.file[0].type) ? "confiance" : "verdict";
+  if (session.etape === "verdict") finaliser();
   afficher();
-  document.getElementById("suite")?.focus();
+  (document.querySelector("[data-conf]") || document.getElementById("suite"))?.focus();
+}
+
+function finaliser() {
+  const x = session.file[0], res = session.res, c = carte(x.id);
+  const due = c.due <= jour(), doute = res.conf === "hesite";
+  session.etape = "verdict";
+  if (res.ok) {
+    if (x._retour) session.xp += 5;
+    else {
+      session.justes++;
+      session.xp += doute ? 5 : 10;
+      if (doute) c.due = plusJours(1);                                                  // devinée : on la revoit demain, sans monter de boîte
+      else if (due) { c.boite = Math.min(c.boite + 1, 5); c.due = plusJours(INTERVALLES[c.boite]); }   // pas encore due (test aléatoire) : ne monte pas
+    }
+  } else {
+    c.boite = 0; c.due = jour();
+    if (!x._retour) { session.ratees.add(x.id); session.file.push(preparer(x._src, true)); }
+  }
+  etat.cartes[x.id] = c;
+  const e = { t: new Date().toISOString(), q: x.id, type: x.type, rep: res.rep, ok: res.ok, essai: x._retour ? 2 : 1, mode: session.mode };
+  if (res.r !== undefined) e.r = res.r;
+  if (res.conf) e.conf = res.conf;
+  if (res.nsp) e.nsp = true;
+  if (x.enonce) e.enonce = x.enonce;
+  if (x.type === "explique") e.texte = session.texte || "";
+  etat.journal.push(e);
+  sauver();
 }
 
 function suivant() {
   session.file.shift();
   session.faites++;
-  session.reponse = null;
+  session.res = null; session.etape = "repondre"; session.texte = "";
   if (!session.file.length) {
     etat.xp += session.xp;
     const auj = jour();
@@ -291,6 +441,49 @@ function suivant() {
     session.fini = true;
   }
   afficher();
+  if (!session.fini) document.querySelector("#saisie, #explication")?.focus();
+}
+
+function valider() {
+  const x = session.file[0];
+  if (x.type === "saisie") {
+    const v = document.getElementById("saisie").value;
+    if (!v.trim()) return;
+    proposer({ ok: x.reponses.some(r => norm(r) === norm(v)), rep: v.trim() });
+  } else if (x.type === "ordre") {
+    proposer({ ok: x.pris.every((v, k) => v === k), rep: x.pris.map(i => x.etapes[i]).join(" → ") });
+  }
+}
+
+// Clics pendant une session (renvoie true si le clic a été traité).
+function clicSession(b) {
+  const x = session.file[0];
+  if (b.id === "suite") return suivant(), true;
+  if (b.dataset.conf) { session.res.conf = b.dataset.conf; finaliser(); afficher(); document.getElementById("suite")?.focus(); return true; }
+  if (session.etape === "repondre") {
+    if (b.id === "nsp") { if (x.type === "explique") session.texte = document.getElementById("explication")?.value || ""; proposer({ ok: false, nsp: true, rep: "(je ne sais pas)" }); return true; }
+    if (b.id === "valider") return valider(), true;
+    if (b.id === "voir") { session.texte = document.getElementById("explication").value; session.etape = "auto"; afficher(); return true; }
+    if (b.dataset.pick !== undefined) { x.pris.push(+b.dataset.pick); afficher(); return true; }
+    if (b.dataset.retire !== undefined) { x.pris.splice(+b.dataset.retire, 1); afficher(); return true; }
+    if (b.dataset.g !== undefined) { x.sel = +b.dataset.g; x.flash = null; afficher(); return true; }
+    if (b.dataset.d !== undefined && x.sel !== null) {
+      const j = +b.dataset.d;
+      if (j === x.sel) { x.trouves.push(j); x.flash = null; } else { x.fautes++; x.flash = j; }
+      x.sel = null;
+      if (x.trouves.length === x.couples.length) proposer({ ok: x.fautes === 0, rep: x.fautes ? `${x.fautes} erreur(s)` : "sans faute" });
+      else afficher();
+      return true;
+    }
+    if (b.dataset.i !== undefined) {
+      const i = +b.dataset.i;
+      if (x.type === "erreur") proposer({ ok: i === x.faux, r: i, rep: x.texte[i] });
+      else proposer({ ok: i === x.bonne, r: i, rep: x.choix[i] });
+      return true;
+    }
+  }
+  if (session.etape === "auto" && b.dataset.auto) { proposer({ ok: b.dataset.auto === "1", rep: b.dataset.auto === "1" ? "auto-évaluation : l'essentiel" : "auto-évaluation : incomplet" }); return true; }
+  return false;
 }
 
 function vueFin() {
@@ -348,11 +541,13 @@ document.getElementById("vue").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   if (b.id === "go") demarrer(false);
   else if (b.id === "bonus") demarrer(true);
-  else if (b.id === "suite") suivant();
+  else if (session && !session.fini && clicSession(b)) return;
   else if (b.id === "retour") { session = null; afficher(); }
   else if (b.id === "envoyer") envoyer();
-  else if (b.dataset.i !== undefined && session && session.reponse === null) repondre(+b.dataset.i);
   else if (b.dataset.f) { filtre = b.dataset.f; afficher(); }
+});
+document.getElementById("vue").addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target.id === "saisie" && session && session.etape === "repondre") { e.preventDefault(); valider(); }
 });
 document.getElementById("vue").addEventListener("input", e => {
   if (e.target.id !== "recherche") return;
