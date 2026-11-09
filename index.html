@@ -146,7 +146,10 @@ const jour = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).
 const plusJours = n => { const d = new Date(); d.setDate(d.getDate() + n); return jour(d); };
 
 let D = null, filtre = "Tous", recherche = "", onglet = "reviser", session = null;
-let etat = { cartes: {}, xp: 0, serie: 0, dernierJour: null };
+// journal : une ligne par réponse (t = date ISO, q = id de la question, r = indice choisi, rep = texte choisi, ok, essai 1 ou 2, mode jour/aleatoire).
+// envoye : date ISO du dernier bilan envoyé à Claude (les réponses plus récentes sont « pas encore envoyées »).
+let etat = { cartes: {}, xp: 0, serie: 0, dernierJour: null, journal: [], envoye: null };
+let envoi = null;   // message ou texte de secours affiché sous le bouton d'envoi
 let stockage = true;
 try { const s = JSON.parse(localStorage.getItem(CLE)); if (s) etat = { ...etat, ...s }; } catch { stockage = false; }
 const sauver = () => { try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch { stockage = false; } };
@@ -188,13 +191,48 @@ function accueil() {
       <span class="label">Tes paires, de la plus fragile à la plus solide</span>
       <div class="paires">${lignes.map(({ p, pct }) =>
         `<div class="prow"><span>${esc(p.items.map(i => i.mot).join(" / "))}</span><div class="bar" aria-label="${pct} % maîtrisé"><i style="width:${pct}%"></i></div></div>`).join("")}</div>
+    </section>
+    ${carteEnvoi()}`;
+}
+
+// ---- Bilan pour Claude : tout le journal + l'état des cartes, dans un fichier texte (JSON) ----
+const nonEnvoyees = () => etat.journal.filter(e => !etat.envoye || e.t > etat.envoye).length;
+
+function carteEnvoi() {
+  const n = nonEnvoyees();
+  const dernier = etat.envoye ? new Date(etat.envoye).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }) : null;
+  return `
+    <section class="card">
+      <span class="label">Envoyer à Claude</span>
+      <p style="margin:0">${n ? `<b>${n}</b> réponse${n > 1 ? "s" : ""} pas encore envoyée${n > 1 ? "s" : ""}.` : "Tout est envoyé."} ${dernier ? `Dernier envoi : ${dernier}.` : "Aucun envoi pour l'instant."}</p>
+      <p class="note" style="text-align:left;margin:0">Partage le fichier vers Google Drive (ou envoie-le-toi par Gmail) : Claude le récupère en début de séance et adapte les révisions à tes erreurs.</p>
+      <button class="big ${n ? "" : "ghost"}" id="envoyer">Envoyer mon bilan</button>
+      ${envoi ? (envoi.texte
+        ? `<p class="note" style="text-align:left;margin:0">Le partage n'a pas marché ici : copie tout ce texte et colle-le à Claude.</p><textarea readonly class="recherche" rows="5" id="bilan-texte">${esc(envoi.texte)}</textarea>`
+        : `<p class="note" role="status" style="margin:0">${esc(envoi.msg)}</p>`) : ""}
     </section>`;
+}
+
+async function envoyer() {
+  const b = { app: "memo-cyber", format: 1, exporte: new Date().toISOString(), cartesMaj: D.maj,
+              xp: etat.xp, serie: serieVisible(), dernierJour: etat.dernierJour, cartes: etat.cartes, journal: etat.journal };
+  const texte = JSON.stringify(b);
+  const nom = `memo-cyber-bilan-${jour()}.txt`;   // .txt : Chrome refuse de partager un .json
+  const fait = msg => { etat.envoye = b.exporte; sauver(); envoi = { msg }; afficher(); };
+  try {
+    const f = new File([texte], nom, { type: "text/plain" });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: nom }); return fait("Bilan partagé. Préviens Claude en début de séance."); }
+  } catch (e) { if (e.name === "AbortError") return; }
+  try { await navigator.clipboard.writeText(texte); return fait("Bilan copié : colle-le à Claude (ou dans un mail à toi-même)."); } catch {}
+  envoi = { texte }; etat.envoye = b.exporte; sauver(); afficher();
+  document.getElementById("bilan-texte")?.select();
 }
 
 function demarrer(bonus) {
   let liste = bonus ? melanger([...D.questions])
     : aRevoir().sort((a, b) => carte(a.id).boite - carte(b.id).boite || Math.random() - .5);
-  session = { file: liste.slice(0, TAILLE_SESSION), total: Math.min(liste.length, TAILLE_SESSION), faites: 0, justes: 0, xp: 0, ratees: new Set(), reponse: null };
+  session = { file: liste.slice(0, TAILLE_SESSION), total: Math.min(liste.length, TAILLE_SESSION), faites: 0, justes: 0, xp: 0, ratees: new Set(), reponse: null, mode: bonus ? "aleatoire" : "jour" };
+  envoi = null;
   afficher();
 }
 
@@ -235,6 +273,7 @@ function repondre(i) {
   }
   c.due = plusJours(INTERVALLES[c.boite]);
   etat.cartes[q.id] = c;
+  etat.journal.push({ t: new Date().toISOString(), q: q.id, r: i, rep: q.choix[i], ok: i === q.bonne, essai: q._retour ? 2 : 1, mode: session.mode });
   sauver();
   afficher();
   document.getElementById("suite")?.focus();
@@ -263,7 +302,8 @@ function vueFin() {
       <p>+${session.xp} XP · série de ${etat.serie} jour${etat.serie > 1 ? "s" : ""}</p>
       ${ratees.length ? `<div class="piege"><b>À retravailler :</b> ${ratees.map(q => esc(paire(q.paire).items.map(i => i.mot).join(" / "))).filter((v, i, a) => a.indexOf(v) === i).join(" · ")}. Elles reviendront dès demain.</div>` : ""}
       <button class="big" id="retour">Retour</button>
-    </section>`;
+    </section>
+    ${carteEnvoi()}`;
 }
 
 // Recherche insensible à la casse et aux accents : « regle » trouve « règle ».
@@ -310,6 +350,7 @@ document.getElementById("vue").addEventListener("click", e => {
   else if (b.id === "bonus") demarrer(true);
   else if (b.id === "suite") suivant();
   else if (b.id === "retour") { session = null; afficher(); }
+  else if (b.id === "envoyer") envoyer();
   else if (b.dataset.i !== undefined && session && session.reponse === null) repondre(+b.dataset.i);
   else if (b.dataset.f) { filtre = b.dataset.f; afficher(); }
 });
