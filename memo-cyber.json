@@ -310,6 +310,40 @@
         }
       ],
       "piege": "La box de la maison contient les deux (plus un modem et le Wi-Fi) : son switch relie tes appareils entre eux, son routeur te relie à Internet."
+    },
+    {
+      "id": "modem-routeur",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "Routeur",
+          "phrase": "Décide où va chaque message : il relie des réseaux différents. Vu depuis ton PC, c’est la passerelle.",
+          "image": "Le bureau de poste au bout de la rue : le seul qui envoie le courrier vers les autres rues."
+        },
+        {
+          "mot": "Modem",
+          "phrase": "Traduit le signal pour la ligne de l’opérateur (fibre, ADSL). Il ne décide rien.",
+          "image": "Le traducteur à la frontière : il fait passer le message dans la langue de la ligne."
+        }
+      ],
+      "piege": "Pour aller sur YouTube, ce n’est pas « le modem » qui compte : le routeur décide que ça sort, le modem traduit. Dans la box, les deux sont réunis."
+    },
+    {
+      "id": "adresse-masque",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "Adresse IP",
+          "phrase": "L’adresse complète d’une machine : la rue (partie réseau) et le numéro (partie machine). Exemple : 192.168.1.20.",
+          "image": "L’adresse écrite sur l’enveloppe."
+        },
+        {
+          "mot": "Masque",
+          "phrase": "La règle qui dit quelle partie de l’adresse est la rue. Exemple : 255.255.255.0 (/24) = les 3 premiers nombres.",
+          "image": "La consigne du postier : « pour savoir la rue, lis les 3 premiers nombres »."
+        }
+      ],
+      "piege": "L’adresse existe sans le masque. On ne compare jamais deux masques : on applique le masque pour comparer les parties réseau des deux adresses."
     }
   ],
   "questions": [
@@ -1126,6 +1160,141 @@
       "q": "Explique avec tes mots à quoi servent le masque et la passerelle, et comment ils travaillent ensemble.",
       "modele": "Le masque dit quelle partie de l’adresse est le réseau. Le PC compare la partie réseau de la destination avec la sienne : si c’est pareil, il envoie directement ; sinon, il envoie à la passerelle, la porte de sortie (le routeur, la box), qui transmet vers l’autre réseau.",
       "pourquoi": "Claude relira ton texte dans le bilan."
+    },
+    {
+      "id": "q67",
+      "paire": "modem-routeur",
+      "niveau": 1,
+      "q": "Ton téléphone ouvre YouTube. Quel appareil de la box décide que le message doit sortir de ton réseau ?",
+      "choix": [
+        "Le routeur",
+        "Le modem",
+        "Le switch"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le routeur décide (c’est la passerelle). Le modem vient après : il traduit pour la ligne."
+    },
+    {
+      "id": "q68",
+      "paire": "modem-routeur",
+      "type": "associer",
+      "niveau": 1,
+      "q": "Relie chaque appareil à ce qu’il fait.",
+      "couples": [
+        [
+          "Switch",
+          "Remet le paquet à la bonne machine du même réseau"
+        ],
+        [
+          "Routeur",
+          "Décide que le message sort vers un autre réseau"
+        ],
+        [
+          "Modem",
+          "Traduit pour la ligne de l’opérateur"
+        ],
+        [
+          "Box",
+          "Les réunit tous dans un seul boîtier"
+        ]
+      ],
+      "pourquoi": "Le facteur de la rue, le bureau de poste, le traducteur, et le boîtier qui les contient."
+    },
+    {
+      "id": "q69",
+      "paire": "modem-routeur",
+      "type": "ordre",
+      "niveau": 2,
+      "q": "Ton téléphone, en Wi-Fi, ouvre YouTube. Remets le trajet dans l’ordre.",
+      "etapes": [
+        "Le téléphone",
+        "La borne Wi-Fi",
+        "Le routeur",
+        "Le modem",
+        "L’opérateur et Internet",
+        "Le serveur de YouTube"
+      ],
+      "pourquoi": "La borne Wi-Fi est le switch sans fil (même rue) ; le routeur décide que ça sort ; le modem traduit pour la ligne."
+    },
+    {
+      "id": "q70",
+      "paire": "adresse-masque",
+      "type": "erreur",
+      "niveau": 2,
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Pour savoir si deux PC sont dans le même réseau,",
+        "on compare leurs deux masques,",
+        "et s’ils sont identiques, ils se parlent directement."
+      ],
+      "faux": 1,
+      "pourquoi": "On applique le masque aux deux adresses, puis on compare leurs parties réseau. Deux PC peuvent avoir le même masque et être dans deux rues différentes (192.168.1 et 192.168.2)."
+    },
+    {
+      "id": "q71",
+      "paire": "adresse-masque",
+      "niveau": 2,
+      "q": "Dans « 192.168.1.20 / 255.255.255.0 », lequel est l’adresse de la machine ?",
+      "choix": [
+        "192.168.1.20",
+        "255.255.255.0",
+        "Les deux ensemble"
+      ],
+      "bonne": 0,
+      "pourquoi": "L’adresse, c’est 192.168.1.20. Le masque n’est que la règle de lecture : il dit que la rue, c’est 192.168.1."
+    },
+    {
+      "id": "q72",
+      "paire": "adresse-masque",
+      "type": "saisie",
+      "niveau": 2,
+      "q": "PC : 192.168.1.20, masque 255.255.255.0. Tape la partie réseau (la rue).",
+      "reponses": [
+        "192.168.1",
+        "192.168.1.0",
+        "192.168.1.x"
+      ],
+      "pourquoi": "255.255.255 = les 3 premiers nombres sont la rue : 192.168.1. Le 20 est le numéro de la machine."
+    },
+    {
+      "id": "q73",
+      "paire": "switch-routeur",
+      "niveau": 3,
+      "q": "Au magasin, la tablette (192.168.10.5/24) et l’imprimante (192.168.11.80/24) sont sur le même switch, mais rien ne s’imprime. Un collègue : « Le switch est mort. » Ton premier réflexe ?",
+      "choix": [
+        "Comparer les deux adresses : elles ne sont pas dans la même rue, l’imprimante a sans doute une faute de frappe",
+        "Changer le switch",
+        "Régler une passerelle sur la tablette"
+      ],
+      "bonne": 0,
+      "pourquoi": "On lit d’abord les faits (les adresses), ensuite on choisit l’outil. 192.168.10 ≠ 192.168.11 : le switch n’y peut rien. On corrige l’adresse de l’imprimante."
+    },
+    {
+      "id": "q74",
+      "paire": "switch-routeur",
+      "type": "erreur",
+      "niveau": 2,
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Le switch",
+        "distribue la connexion Internet",
+        "aux appareils de la maison."
+      ],
+      "faux": 1,
+      "pourquoi": "Phrase de publicité. Le switch distribue les messages (les paquets) : il remet chacun à la bonne machine, dans le même réseau."
+    },
+    {
+      "id": "q75",
+      "paire": "masque-passerelle",
+      "niveau": 3,
+      "q": "Tu ajoutes un routeur entre 192.168.1.0/24 et 192.168.2.0/24. PC0 (192.168.1.10) ne joint toujours pas PC2 (192.168.2.30). Que manque-t-il le plus probablement ?",
+      "choix": [
+        "La passerelle par défaut sur les PC (l’adresse du routeur dans leur réseau)",
+        "Un deuxième switch",
+        "Un abonnement Internet"
+      ],
+      "bonne": 0,
+      "pourquoi": "Sans passerelle, PC0 a un message pour une autre rue et personne à qui le confier. Il faut régler 192.168.1.1 sur PC0, et 192.168.2.1 sur PC2 pour la réponse."
     }
   ]
 }
