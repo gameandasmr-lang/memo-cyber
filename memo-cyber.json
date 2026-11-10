@@ -1,6 +1,6 @@
 {
   "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question est liée à une paire et a un format (champ type, qcm par défaut) : qcm (choix, bonne), saisie (reponses acceptées), ordre (etapes dans le bon ordre), erreur (texte en morceaux, faux = indice du morceau faux), associer (couples), generateur (gen = nom d’un générateur de l’appli), explique (modele). Champ niveau facultatif : 1 reconnaître, 2 retrouver seul, 3 appliquer. Les choix des QCM sont mélangés par l’appli : l’ordre dans ce fichier n’a pas d’importance. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id.",
-  "maj": "2026-11-09",
+  "maj": "2026-11-10",
   "paires": [
     {
       "id": "http-html",
@@ -344,6 +344,74 @@
         }
       ],
       "piege": "L’adresse existe sans le masque. On ne compare jamais deux masques : on applique le masque pour comparer les parties réseau des deux adresses."
+    },
+    {
+      "id": "passerelle-faces",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "Adresse privée du routeur (côté réseau local)",
+          "phrase": "L’adresse du routeur dans MON réseau, par exemple 192.168.1.1. C’est elle qu’on règle comme passerelle sur le PC.",
+          "image": "La porte de la maison, vue de l’intérieur."
+        },
+        {
+          "mot": "Adresse publique du routeur (côté Internet)",
+          "phrase": "L’adresse donnée par l’opérateur, visible depuis Internet. Elle ne se règle jamais sur un PC.",
+          "image": "La même porte, vue depuis la rue."
+        }
+      ],
+      "piege": "Le routeur a les deux adresses en permanence. La passerelle d’un PC est toujours l’adresse privée, avec la même partie réseau que lui."
+    },
+    {
+      "id": "recevoir-repondre",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "Recevoir (sans passerelle)",
+          "phrase": "Un PC sans passerelle reçoit quand même un paquet venu d’un autre réseau : le routeur le lui livre dans son réseau.",
+          "image": "Le facteur dépose la lettre dans ta boîte, même si tu ne connais pas l’adresse de la poste."
+        },
+        {
+          "mot": "Répondre (il faut une passerelle)",
+          "phrase": "Pour ENVOYER hors de son réseau (une réponse, par exemple), le PC doit connaître sa passerelle. Sinon, il abandonne sa réponse.",
+          "image": "Pour répondre à une autre rue, il faut savoir où est le bureau de poste."
+        }
+      ],
+      "piege": "Un ping est un aller ET un retour : il faut une passerelle des deux côtés. Le ping n’est pas un sonar : la cible doit fabriquer et envoyer sa réponse."
+    },
+    {
+      "id": "box-routeur",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "Box (Wireless Router dans Packet Tracer)",
+          "phrase": "Routeur + switch + Wi-Fi dans un seul boîtier. Ses prises sont un switch intégré : tout ce qu’on y branche est dans le même réseau.",
+          "image": "Un appartement avec plusieurs pièces : c’est toujours la même adresse."
+        },
+        {
+          "mot": "Routeur (2911 dans Packet Tracer)",
+          "phrase": "Il a une interface (une adresse) dans chaque réseau qu’il relie. Ses ports sont éteints par défaut.",
+          "image": "Le bureau de poste au carrefour, avec une porte sur chaque rue."
+        }
+      ],
+      "piege": "Brancher deux switchs sur deux prises d’une box ne crée pas deux réseaux. Pour relier deux réseaux, il faut un routeur avec une adresse dans chacun."
+    },
+    {
+      "id": "arp-icmp",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "ARP",
+          "phrase": "La question criée à tout le réseau : « Qui est 192.168.1.1 ? ». Seul le bon répond. Elle sert à trouver l’adresse matérielle (MAC) avant d’envoyer.",
+          "image": "Dans une salle d’attente, on crie un nom : seul le bon lève la main."
+        },
+        {
+          "mot": "ICMP (le ping)",
+          "phrase": "Le message du ping : une demande d’écho (echo request), puis la réponse (echo reply).",
+          "image": "« Tu es là ? » « Oui ! »"
+        }
+      ],
+      "piege": "La première fois, le premier ping est souvent perdu (Request timed out) : c’est le temps de la question ARP, pas une panne. En mode Simulation, une croix rouge sur un ARP qui ne vous concerne pas est normale."
     }
   ],
   "questions": [
@@ -1281,7 +1349,7 @@
         "aux appareils de la maison."
       ],
       "faux": 1,
-      "pourquoi": "Phrase de publicité. Le switch distribue les messages (les paquets) : il remet chacun à la bonne machine, dans le même réseau."
+      "pourquoi": "Phrase de publicité. Le switch transmet les messages (les paquets) : il remet chacun à la bonne machine, dans le même réseau."
     },
     {
       "id": "q75",
@@ -1295,6 +1363,175 @@
       ],
       "bonne": 0,
       "pourquoi": "Sans passerelle, PC0 a un message pour une autre rue et personne à qui le confier. Il faut régler 192.168.1.1 sur PC0, et 192.168.2.1 sur PC2 pour la réponse."
+    },
+    {
+      "id": "q76",
+      "paire": "passerelle-faces",
+      "niveau": 3,
+      "q": "Un collègue règle comme passerelle de son PC l’adresse publique de la box (par exemple 86.245.12.40). Que se passe-t-il ?",
+      "choix": [
+        "Il ne sort plus du réseau : cette adresse n’est pas dans son réseau, il ne peut pas l’atteindre",
+        "Ça marche mieux, car l’adresse publique va directement sur Internet",
+        "Rien ne change : la box a les deux adresses, peu importe laquelle on met"
+      ],
+      "bonne": 0,
+      "pourquoi": "Un PC n’atteint directement que les adresses de son réseau. La passerelle doit être l’adresse privée du routeur, avec la même partie réseau que le PC (ici, sans doute 192.168.1.1)."
+    },
+    {
+      "id": "q77",
+      "paire": "passerelle-faces",
+      "type": "saisie",
+      "niveau": 2,
+      "q": "Routeur : Gi0/0 = 192.168.1.1 et Gi0/1 = 192.168.2.1. PC3 = 192.168.2.20 /24. Tape la passerelle de PC3.",
+      "reponses": [
+        "192.168.2.1"
+      ],
+      "pourquoi": "La passerelle est l’adresse du routeur qui se trouve dans le réseau du PC : 192.168.2.x, donc 192.168.2.1."
+    },
+    {
+      "id": "q78",
+      "paire": "recevoir-repondre",
+      "niveau": 3,
+      "q": "PC0 a sa passerelle, PC2 (dans l’autre réseau) n’en a pas. Ping de PC0 vers PC2 : que se passe-t-il ?",
+      "choix": [
+        "Le ping arrive à PC2, mais sa réponse est abandonnée : Request timed out",
+        "Le ping n’arrive jamais à PC2, le routeur le bloque",
+        "Le ping marche : une seule passerelle suffit"
+      ],
+      "bonne": 0,
+      "pourquoi": "Recevoir ne demande pas de passerelle : le routeur livre PC2. Mais PC2 doit répondre à un autre réseau, et sans passerelle il ne sait pas à qui confier sa réponse."
+    },
+    {
+      "id": "q79",
+      "paire": "recevoir-repondre",
+      "type": "ordre",
+      "niveau": 2,
+      "q": "Ping de PC0 (192.168.1.10) vers PC2 (192.168.2.10), tout est bien réglé. Remets dans l’ordre.",
+      "etapes": [
+        "PC0 compare les parties réseau : ce n’est pas le même réseau",
+        "PC0 confie le paquet à sa passerelle (192.168.1.1)",
+        "Le routeur le fait passer dans le réseau 192.168.2",
+        "PC2 reçoit la demande et fabrique sa réponse",
+        "PC2 confie sa réponse à SA passerelle (192.168.2.1)",
+        "PC0 reçoit la réponse : Reply"
+      ],
+      "pourquoi": "Aller puis retour : chaque côté utilise SA passerelle pour sortir de son réseau."
+    },
+    {
+      "id": "q80",
+      "paire": "recevoir-repondre",
+      "type": "erreur",
+      "niveau": 2,
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Sans passerelle,",
+        "un PC ne peut pas recevoir",
+        "de paquets venant d’un autre réseau."
+      ],
+      "faux": 1,
+      "pourquoi": "Il les reçoit (le routeur les livre dans son réseau). Ce qu’il ne peut pas faire, c’est ENVOYER hors de son réseau, par exemple répondre."
+    },
+    {
+      "id": "q81",
+      "paire": "box-routeur",
+      "niveau": 2,
+      "q": "Pour relier 192.168.1.0/24 et 192.168.2.0/24, quelqu’un branche les deux switchs sur deux prises d’une box. Pourquoi ça ne marche pas ?",
+      "choix": [
+        "Les prises de la box sont un switch intégré : tout reste dans un seul réseau",
+        "Il faut des câbles croisés",
+        "Une box ne sait faire que du Wi-Fi"
+      ],
+      "bonne": 0,
+      "pourquoi": "Une box = routeur + switch + Wi-Fi ; ses prises sont le switch. Pour deux réseaux, il faut un routeur avec une interface (une adresse) dans chacun."
+    },
+    {
+      "id": "q82",
+      "paire": "box-routeur",
+      "type": "saisie",
+      "niveau": 2,
+      "q": "Tu redémarres un routeur que tu viens de régler sans l’avoir enregistré. Que reste-t-il de sa configuration ? (un mot)",
+      "reponses": [
+        "rien",
+        "plus rien",
+        "aucune",
+        "rien du tout"
+      ],
+      "pourquoi": "Sa configuration est en mémoire vive : il faut l’enregistrer (dans Packet Tracer, Config → Settings → NVRAM : Save), sinon elle est perdue."
+    },
+    {
+      "id": "q83",
+      "paire": "switch-routeur",
+      "type": "explique",
+      "niveau": 3,
+      "q": "Explique la différence entre un switch et un routeur, sans utiliser le mot « distribuer ».",
+      "modele": "Le switch transmet les paquets entre les machines d’un même réseau. Le routeur relie des réseaux différents : il a une adresse dans chacun, et fait passer les paquets de l’un à l’autre. Vu depuis un PC, c’est la passerelle.",
+      "pourquoi": "Claude relira ton texte dans le bilan."
+    },
+    {
+      "id": "q84",
+      "paire": "hyperviseurs",
+      "niveau": 2,
+      "q": "Proxmox est installé directement sur un serveur, à la place de Windows. C’est un hyperviseur de…",
+      "choix": [
+        "Type 1",
+        "Type 2",
+        "Ce n’est pas un hyperviseur"
+      ],
+      "bonne": 0,
+      "pourquoi": "Type 1 = installé directement sur le matériel (le propriétaire de l’immeuble). Type 2 = une application dans un système déjà installé (le locataire qui sous-loue)."
+    },
+    {
+      "id": "q85",
+      "paire": "hyperviseurs",
+      "type": "saisie",
+      "niveau": 2,
+      "q": "VirtualBox s’installe comme une application dans ton Windows. Hyperviseur de type… (tape le chiffre)",
+      "reponses": [
+        "2",
+        "type 2",
+        "deux"
+      ],
+      "pourquoi": "Il dépend de Windows, comme un locataire qui sous-loue : type 2. Type 1 = directement sur le matériel (ESXi, Proxmox, Hyper-V)."
+    },
+    {
+      "id": "q86",
+      "paire": "vm-conteneur",
+      "niveau": 2,
+      "q": "Docker est-il un hyperviseur ?",
+      "choix": [
+        "Non : il fait tourner des conteneurs, qui partagent le noyau du système hôte",
+        "Oui, de type 2",
+        "Oui, de type 1"
+      ],
+      "bonne": 0,
+      "pourquoi": "Une VM a son propre système complet (un appartement avec sa cuisine). Un conteneur partage le noyau de l’hôte (une chambre en colocation) : plus léger, moins isolé."
+    },
+    {
+      "id": "q87",
+      "paire": "vm-conteneur",
+      "type": "erreur",
+      "niveau": 2,
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Un conteneur Docker",
+        "embarque son propre système complet,",
+        "comme une machine virtuelle."
+      ],
+      "faux": 1,
+      "pourquoi": "C’est la VM qui embarque un système complet. Le conteneur n’emporte que l’application et ce dont elle a besoin, et partage le noyau de la machine hôte."
+    },
+    {
+      "id": "q88",
+      "paire": "arp-icmp",
+      "niveau": 1,
+      "q": "Premier ping de la journée vers un autre PC : « Request timed out », puis 3 réponses. Pourquoi le premier est-il perdu ?",
+      "choix": [
+        "Le PC posait d’abord la question ARP (« qui est… ? ») pour trouver l’adresse matérielle",
+        "Le câble mettait du temps à chauffer",
+        "Le switch était en panne puis a redémarré"
+      ],
+      "bonne": 0,
+      "pourquoi": "La première fois, il faut trouver l’adresse MAC du destinataire (ou de la passerelle) avec l’ARP. Ensuite, elle est en mémoire : les pings suivants passent directement."
     }
   ]
 }
