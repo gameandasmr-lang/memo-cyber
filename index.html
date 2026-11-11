@@ -275,6 +275,23 @@ const GENERATEURS = {
     const q = `${ip.join(".")} : adresse privée ou publique ?`;
     return { q, enonce: q, choix: ["Privée : elle ne sort jamais sur Internet", "Publique : unique au monde, visible sur Internet"], bonne: privee ? 0 : 1,
       pourquoi: `Les adresses privées commencent par 10, par 172.16 à 172.31, ou par 192.168. ${ip.join(".")} ${privee ? "en fait partie" : "n'en fait pas partie"}.` };
+  },
+  // Suite logique (11/11/2026, entraînement au test de logique des admissions) : trouver le nombre suivant.
+  // Six familles de règles ; les mauvais choix sont les erreurs typiques (la mauvaise règle, une erreur de calcul).
+  "suite-logique"() {
+    const famille = alea(0, 5);
+    let t = [], regle = "", faux = [];
+    if (famille === 0) { const d = alea(2, 9), a = alea(1, 30); for (let i = 0; i < 6; i++) t.push(a + i * d); regle = `on ajoute ${d} à chaque fois`; faux = [t[5] + 1, t[5] - d, t[4] * 2]; }
+    else if (famille === 1) { const k = alea(2, 3), a = alea(1, 5); for (let i = 0; i < 6; i++) t.push(a * k ** i); regle = `on multiplie par ${k} à chaque fois`; faux = [t[4] + (t[4] - t[3]), t[5] + k, t[5] - a]; }
+    else if (famille === 2) { const x = alea(3, 9), y = alea(1, x - 1), a = alea(1, 20); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + (i % 2 ? x : -y)); regle = `on ajoute ${x}, puis on retire ${y}, en alternance`; faux = [t[5] - x - y, t[4] + x, t[5] + y]; }
+    else if (famille === 3) { const a = alea(1, 6); for (let i = 0; i < 6; i++) t.push((a + i) ** 2); regle = `les carrés : ${a}², ${a + 1}², ${a + 2}²…`; faux = [t[5] + (t[4] - t[3]), t[5] + 2 * (a + 4), (a + 5) * (a + 4)]; }
+    else if (famille === 4) { const a = alea(1, 20), d = alea(1, 4); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + d * i); regle = `l'écart grandit : +${d}, +${2 * d}, +${3 * d}…`; faux = [t[4] + 2 * (t[4] - t[3]), t[5] + d * 4, t[5] + d * 6]; }
+    else { const a = alea(1, 4), b = alea(a, 6); t = [a, b]; for (let i = 2; i < 6; i++) t.push(t[i - 1] + t[i - 2]); regle = `chaque nombre est la somme des deux précédents`; faux = [t[4] + t[4] - t[3], t[4] * 2, t[4] + t[2]]; }
+    const bonne = t[5], vus = new Set([bonne]), choix = [bonne];
+    for (const f of [...faux, bonne + 2, bonne - 3, bonne + 7, bonne + 1, bonne + 4, bonne + 10]) if (choix.length < 4 && f > 0 && !vus.has(f)) { vus.add(f); choix.push(f); }
+    const q = `${t.slice(0, 5).join(" · ")} · ?\nQuel nombre vient ensuite ?`;
+    return { q, enonce: q.replace(/\n/g, " "), choix: choix.map(String), bonne: 0,
+      pourquoi: `La règle : ${regle}. Donc ${t.slice(0, 5).join(", ")}, puis ${bonne}. Réflexe du test : regarde d'abord les écarts entre deux nombres, puis les écarts des écarts.` };
   }
 };
 

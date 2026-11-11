@@ -1,6 +1,6 @@
 {
   "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question est liée à une paire et a un format (champ type, qcm par défaut) : qcm (choix, bonne), saisie (reponses acceptées), ordre (etapes dans le bon ordre), erreur (texte en morceaux, faux = indice du morceau faux), associer (couples), generateur (gen = nom d’un générateur de l’appli), explique (modele). Champ niveau facultatif : 1 reconnaître, 2 retrouver seul, 3 appliquer. Les choix des QCM sont mélangés par l’appli : l’ordre dans ce fichier n’a pas d’importance. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id.",
-  "maj": "2026-11-10",
+  "maj": "2026-11-11",
   "paires": [
     {
       "id": "http-html",
@@ -412,6 +412,23 @@
         }
       ],
       "piege": "La première fois, le premier ping est souvent perdu (Request timed out) : c’est le temps de la question ARP, pas une panne. En mode Simulation, une croix rouge sur un ARP qui ne vous concerne pas est normale."
+    },
+    {
+      "id": "suite-logique",
+      "theme": "Logique",
+      "items": [
+        {
+          "mot": "Suite arithmétique",
+          "phrase": "On ajoute toujours le même nombre : 3, 7, 11, 15… (+4). Les écarts sont égaux.",
+          "image": "Monter un escalier : chaque marche a la même hauteur."
+        },
+        {
+          "mot": "Suite géométrique",
+          "phrase": "On multiplie toujours par le même nombre : 3, 6, 12, 24… (×2). Les écarts grandissent de plus en plus vite.",
+          "image": "Une rumeur : chaque personne la répète à deux autres."
+        }
+      ],
+      "piege": "Si les écarts ne sont pas égaux, ce n’est pas forcément une multiplication : regarde les écarts des écarts (+2, +4, +6…), ou une alternance (+5, −2, +5, −2…)."
     }
   ],
   "questions": [
@@ -1532,6 +1549,46 @@
       ],
       "bonne": 0,
       "pourquoi": "La première fois, il faut trouver l’adresse MAC du destinataire (ou de la passerelle) avec l’ARP. Ensuite, elle est en mémoire : les pings suivants passent directement."
+    },
+    {
+      "id": "q89",
+      "paire": "suite-logique",
+      "type": "generateur",
+      "gen": "suite-logique",
+      "niveau": 2,
+      "q": "Quel nombre vient ensuite ?"
+    },
+    {
+      "id": "q90",
+      "paire": "suite-logique",
+      "type": "qcm",
+      "niveau": 1,
+      "q": "Face à une suite de nombres dans un test de logique, quel est le premier réflexe ?",
+      "choix": [
+        "Calculer les écarts entre deux nombres qui se suivent",
+        "Chercher si ce sont des nombres premiers",
+        "Additionner tous les nombres",
+        "Deviner le plus vite possible"
+      ],
+      "bonne": 0,
+      "pourquoi": "On écrit les écarts (+4, +4, +4 : on ajoute ; +2, +4, +8 : ça double). Si les écarts ne sont pas réguliers, on regarde les écarts des écarts, puis une alternance."
+    },
+    {
+      "id": "q91",
+      "paire": "suite-logique",
+      "type": "saisie",
+      "niveau": 2,
+      "q": "2 · 6 · 18 · 54 : quelle est la règle ? (réponds avec « +… » ou « ×… »)",
+      "reponses": [
+        "x3",
+        "×3",
+        "*3",
+        "fois 3",
+        "multiplier par 3",
+        "x 3",
+        "× 3"
+      ],
+      "pourquoi": "6 = 2 × 3, 18 = 6 × 3, 54 = 18 × 3 : c’est une suite géométrique de raison 3. Le suivant est 162."
     }
   ]
 }
