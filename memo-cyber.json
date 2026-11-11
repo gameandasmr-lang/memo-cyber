@@ -1,6 +1,6 @@
 {
   "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question est liée à une paire et a un format (champ type, qcm par défaut) : qcm (choix, bonne), saisie (reponses acceptées), ordre (etapes dans le bon ordre), erreur (texte en morceaux, faux = indice du morceau faux), associer (couples), generateur (gen = nom d’un générateur de l’appli), explique (modele). Champ niveau facultatif : 1 reconnaître, 2 retrouver seul, 3 appliquer. Les choix des QCM sont mélangés par l’appli : l’ordre dans ce fichier n’a pas d’importance. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id.",
-  "maj": "2026-11-11",
+  "maj": "2026-11-12",
   "paires": [
     {
       "id": "http-html",
@@ -429,6 +429,74 @@
         }
       ],
       "piege": "Si les écarts ne sont pas égaux, ce n’est pas forcément une multiplication : regarde les écarts des écarts (+2, +4, +6…), ou une alternance (+5, −2, +5, −2…)."
+    },
+    {
+      "id": "decide-livre",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "Le PC (il décide)",
+          "phrase": "Avant d’envoyer, le PC compare les adresses avec son masque. Même réseau : il envoie directement. Autre réseau : il écrit la MAC de la passerelle sur l’enveloppe. Pas de passerelle : il jette lui-même le paquet.",
+          "image": "L’habitant qui écrit « bureau de poste » sur l’enveloppe."
+        },
+        {
+          "mot": "Le switch (il livre)",
+          "phrase": "Il ne regarde pas les adresses IP. Il lit l’adresse MAC de destination et transmet le paquet à la prise où est branchée cette machine.",
+          "image": "Le gardien de l’immeuble qui porte l’enveloppe à la porte écrite dessus."
+        }
+      ],
+      "piege": "Le switch ne compare jamais les parties réseau et ne « décide » pas d’envoyer au routeur : c’est le PC qui a décidé avant. Dans Packet Tracer, l’enveloppe passe bien par le switch, mais c’est parce que la MAC du routeur est écrite dessus."
+    },
+    {
+      "id": "ip-mac",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "Adresse IP",
+          "phrase": "L’adresse de la machine sur un réseau. Elle peut changer, elle peut être privée ou publique. Le PC s’en sert pour savoir dans quel réseau est la destination.",
+          "image": "L’adresse postale : elle change si tu déménages."
+        },
+        {
+          "mot": "Adresse MAC",
+          "phrase": "L’adresse matérielle d’une carte réseau, fixée par le fabricant (une par carte : Wi-Fi et Ethernet en ont chacune une). Le switch s’en sert pour livrer à la bonne prise. Elle ne sort jamais du réseau local.",
+          "image": "Le numéro de série gravé sur l’appareil."
+        }
+      ],
+      "piege": "Une MAC peut être modifiée par logiciel (usurpée) et circule en clair : un filtrage par MAC n’est jamais une protection à lui seul. Et un serveur sur Internet ne voit jamais ta MAC."
+    },
+    {
+      "id": "internet-web",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "Internet",
+          "phrase": "Des réseaux du monde entier reliés entre eux : le réseau des réseaux. Le Web, le mail, les jeux en ligne passent dessus.",
+          "image": "Le réseau des routes."
+        },
+        {
+          "mot": "Le Web",
+          "phrase": "Un service qui tourne sur Internet : les pages et les sites, demandés en HTTP(S) avec un navigateur.",
+          "image": "Les camions de livraison qui roulent sur les routes : un usage parmi d’autres."
+        }
+      ],
+      "piege": "« Le Web est composé de réseaux » est faux : ça, c’est Internet. Le mail passe par Internet sans être le Web."
+    },
+    {
+      "id": "ping-service",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "Le ping répond",
+          "phrase": "La machine est joignable : elle a reçu la demande d’écho ICMP et a pu répondre. Ça ne dit rien de ses services.",
+          "image": "Tu frappes à la porte du restaurant, quelqu’un répond."
+        },
+        {
+          "mot": "Le service répond",
+          "phrase": "Le logiciel qui écoute sur un port (443 pour un site en HTTPS) marche. C’est un autre test que le ping.",
+          "image": "La cuisine est ouverte : tu peux avoir ton plat."
+        }
+      ],
+      "piege": "Pas de réponse au ping ≠ machine éteinte (pare-feu qui bloque ICMP, passerelle manquante, câble coupé). Ping qui répond ≠ site qui marche. Et un ping n’est pas une « connexion » : c’est un simple message ICMP."
     }
   ],
   "questions": [
@@ -1589,6 +1657,304 @@
         "× 3"
       ],
       "pourquoi": "6 = 2 × 3, 18 = 6 × 3, 54 = 18 × 3 : c’est une suite géométrique de raison 3. Le suivant est 162."
+    },
+    {
+      "id": "q92",
+      "paire": "decide-livre",
+      "niveau": 3,
+      "q": "Deux PC sur le même switch : 192.168.10.5/24 et 192.168.11.5/24, aucune passerelle. Le ping échoue. Qui bloque ?",
+      "choix": [
+        "Le PC qui envoie : son masque dit « autre réseau » et il n’a pas de passerelle, il jette le paquet",
+        "Le switch : il voit que les parties réseau sont différentes",
+        "Le second PC : son adresse est mal configurée",
+        "Le routeur de la box"
+      ],
+      "bonne": 0,
+      "pourquoi": "Packet Tracer le dit : « The default gateway is not set. The device drops the packet. » Le paquet ne quitte même pas le PC. Le switch ne lit pas les adresses IP."
+    },
+    {
+      "id": "q93",
+      "paire": "decide-livre",
+      "type": "erreur",
+      "niveau": 2,
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Le PC compare les adresses avec son masque,",
+        "puis le switch compare les parties réseau",
+        "et transmet le paquet à la bonne prise."
+      ],
+      "faux": 1,
+      "pourquoi": "Le switch ne compare pas les parties réseau : il lit seulement l’adresse MAC de destination. C’est le PC qui compare, avec son masque."
+    },
+    {
+      "id": "q94",
+      "paire": "decide-livre",
+      "niveau": 1,
+      "q": "Quelle adresse le switch lit-il pour livrer un paquet ?",
+      "choix": [
+        "L’adresse MAC de destination",
+        "L’adresse IP de destination",
+        "Le masque",
+        "L’adresse de la passerelle"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le switch livre à la prise qui correspond à l’adresse MAC. Les adresses IP et le masque, c’est le travail du PC (et du routeur)."
+    },
+    {
+      "id": "q95",
+      "paire": "ip-mac",
+      "type": "saisie",
+      "niveau": 2,
+      "q": "Un PC portable a une carte Wi-Fi et une prise Ethernet. Combien a-t-il d’adresses MAC ? (un nombre)",
+      "reponses": [
+        "2",
+        "deux"
+      ],
+      "pourquoi": "Une adresse MAC par carte réseau, pas une par machine."
+    },
+    {
+      "id": "q96",
+      "paire": "ip-mac",
+      "niveau": 2,
+      "q": "Tu ouvres YouTube. Le serveur de YouTube voit-il l’adresse MAC de ton téléphone ?",
+      "choix": [
+        "Non : la MAC ne sort jamais de ton réseau local",
+        "Oui, elle voyage avec l’adresse IP jusqu’au bout",
+        "Seulement en HTTP, pas en HTTPS"
+      ],
+      "bonne": 0,
+      "pourquoi": "La MAC sert à livrer à la bonne prise dans le réseau local. Au-delà du routeur, elle n’existe plus pour la suite du trajet."
+    },
+    {
+      "id": "q97",
+      "paire": "ip-mac",
+      "niveau": 3,
+      "q": "Le Wi-Fi d’un magasin n’accepte que les adresses MAC des tablettes. Pourquoi est-ce une protection faible ?",
+      "choix": [
+        "Les MAC circulent en clair : on peut en écouter une, puis l’usurper sur son téléphone",
+        "Parce qu’une tablette n’a pas d’adresse MAC",
+        "Parce que le switch ne lit pas les MAC",
+        "Ce n’est pas faible : une MAC ne se modifie jamais"
+      ],
+      "bonne": 0,
+      "pourquoi": "Une MAC se change par logiciel (usurpation, MAC spoofing). Le filtrage MAC n’est jamais une protection seule : il faut un vrai mot de passe Wi-Fi."
+    },
+    {
+      "id": "q98",
+      "paire": "internet-web",
+      "niveau": 1,
+      "q": "Tu envoies un mail. Tu utilises…",
+      "choix": [
+        "Internet, mais pas le Web",
+        "Le Web, puisque c’est en ligne",
+        "Ni l’un ni l’autre"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le mail est un autre service qui passe par Internet. Le Web, ce sont les pages et les sites."
+    },
+    {
+      "id": "q99",
+      "paire": "internet-web",
+      "type": "erreur",
+      "niveau": 2,
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Internet, ce sont des réseaux reliés entre eux.",
+        "Le Web, ce sont aussi des réseaux reliés entre eux,",
+        "qu’on consulte avec un navigateur."
+      ],
+      "faux": 1,
+      "pourquoi": "Le Web n’est pas un réseau : c’est un service (les sites, en HTTP) qui tourne sur Internet."
+    },
+    {
+      "id": "q100",
+      "paire": "ping-service",
+      "niveau": 3,
+      "q": "Ton ping vers un serveur répond, mais le site qu’il héberge ne s’affiche pas. C’est possible ?",
+      "choix": [
+        "Oui : la machine est joignable, mais le service du port 443 est arrêté ou bloqué",
+        "Non : si le ping répond, le site marche forcément",
+        "Non : le ping utilise le port 443"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le ping prouve seulement que la machine est joignable. Le site est un service sur le port 443 : il peut être planté ou bloqué par un pare-feu."
+    },
+    {
+      "id": "q101",
+      "paire": "ping-service",
+      "type": "saisie",
+      "niveau": 2,
+      "q": "Quel protocole utilise ping ? (en lettres)",
+      "reponses": [
+        "icmp"
+      ],
+      "pourquoi": "ICMP : une demande d’écho (echo request), puis une réponse (echo reply). Ce n’est pas une connexion à un port."
+    },
+    {
+      "id": "q102",
+      "paire": "ping-service",
+      "niveau": 2,
+      "q": "Aucune réponse au ping. Ton collègue dit : « Le serveur est éteint. » A-t-il forcément raison ?",
+      "choix": [
+        "Non : un pare-feu peut bloquer ICMP, ou la passerelle du serveur peut manquer",
+        "Oui, sinon il répondrait",
+        "Oui, sauf si son adresse MAC est bloquée"
+      ],
+      "bonne": 0,
+      "pourquoi": "Beaucoup de serveurs refusent le ping par prudence. Une passerelle manquante empêche aussi la réponse. La MAC n’y est pour rien : elle ne sort pas de ton réseau."
+    },
+    {
+      "id": "q103",
+      "paire": "ip-privee-publique",
+      "type": "erreur",
+      "niveau": 2,
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "10.4.2.1 est une adresse privée,",
+        "172.40.1.1 est une adresse privée,",
+        "8.8.8.8 est une adresse publique."
+      ],
+      "faux": 1,
+      "pourquoi": "La plage privée en 172 va seulement de 172.16 à 172.31. 172.40.1.1 est publique."
+    },
+    {
+      "id": "q104",
+      "paire": "ip-privee-publique",
+      "type": "saisie",
+      "niveau": 2,
+      "q": "La plage privée en 172 va de 172.16 à 172.… ? (le nombre)",
+      "reponses": [
+        "31",
+        "172.31"
+      ],
+      "pourquoi": "Les trois plages privées : 10.x.x.x, 172.16 à 172.31, 192.168.x.x. Tout le reste est public."
+    },
+    {
+      "id": "q105",
+      "paire": "ip-privee-publique",
+      "niveau": 1,
+      "q": "Une adresse IPv4 est privée quand elle commence par…",
+      "choix": [
+        "10, ou 172.16 à 172.31, ou 192.168",
+        "Un nombre au-dessus de 170",
+        "Un nombre en dessous de 100",
+        "192, quel que soit le deuxième nombre"
+      ],
+      "bonne": 0,
+      "pourquoi": "Il n’y a pas de seuil « au-dessus de 170 » : il y a trois plages exactes à savoir par cœur. 192.212.x.x, par exemple, est publique."
+    },
+    {
+      "id": "q106",
+      "paire": "modem-routeur",
+      "type": "explique",
+      "niveau": 3,
+      "q": "Explique pourquoi, dans la box, le routeur passe avant le modem.",
+      "modele": "D’abord on décide : le routeur (la passerelle) lit les adresses IP et décide que le paquet sort du réseau. Ensuite seulement on traduit pour le câble de la rue : le modem, branché sur la ligne, transforme le paquet en signal pour la fibre ou l’ADSL. C’est la dernière porte de la box.",
+      "pourquoi": "Claude relira ton texte dans le bilan."
+    },
+    {
+      "id": "q107",
+      "paire": "modem-routeur",
+      "type": "ordre",
+      "niveau": 2,
+      "q": "Ton téléphone en Wi-Fi ouvre YouTube. Remets les rôles dans l’ordre.",
+      "etapes": [
+        "La borne Wi-Fi capte l’onde et transmet au routeur",
+        "Le routeur (passerelle) décide : le paquet sort",
+        "Le modem traduit le paquet pour la ligne",
+        "L’opérateur et Internet acheminent jusqu’au serveur",
+        "Le serveur de YouTube répond"
+      ],
+      "pourquoi": "Borne côté maison, modem côté rue. On décide de sortir (routeur) avant de traduire pour le câble (modem)."
+    },
+    {
+      "id": "q108",
+      "paire": "codes",
+      "niveau": 2,
+      "q": "Le « 200 OK » d’un site répond à quoi ?",
+      "choix": [
+        "À la demande GET du navigateur",
+        "À la connexion au port 443",
+        "À la question DNS"
+      ],
+      "bonne": 0,
+      "pourquoi": "On s’assoit (connexion au port 443), on commande (GET /), puis on est servi (200 OK + le HTML). Le 200 ne vient jamais avant le GET."
+    },
+    {
+      "id": "q109",
+      "paire": "ports",
+      "niveau": 2,
+      "q": "À quoi sert SSH (port 22) ?",
+      "choix": [
+        "Se connecter à distance au terminal d’une machine, avec une conversation chiffrée",
+        "Traduire un nom de domaine en adresse IP",
+        "Afficher une page web chiffrée",
+        "Envoyer un mail"
+      ],
+      "bonne": 0,
+      "pourquoi": "SSH = Secure Shell (1995, Tatu Ylönen), qui a remplacé Telnet, où tout passait en clair. Le DNS, c’est le port 53."
+    },
+    {
+      "id": "q110",
+      "paire": "vm-conteneur",
+      "niveau": 3,
+      "q": "Un étudiant veut s’entraîner sur Windows Server alors que son PC est sous Linux. VM ou conteneur ?",
+      "choix": [
+        "Une VM : il faut un autre OS complet",
+        "Un conteneur : c’est plus léger"
+      ],
+      "bonne": 0,
+      "pourquoi": "Un conteneur partage le noyau du système qui l’accueille : il ne peut pas apporter un Windows complet. Il faut une VM."
+    },
+    {
+      "id": "q111",
+      "paire": "vm-conteneur",
+      "niveau": 3,
+      "q": "Les soldes arrivent : il faut lancer 10 copies du site web de l’entreprise en quelques secondes. VM ou conteneur ?",
+      "choix": [
+        "Des conteneurs : une appli emballée, légère, qui démarre en secondes",
+        "Des VM : chacune son OS complet"
+      ],
+      "bonne": 0,
+      "pourquoi": "10 VM = 10 systèmes complets en mémoire. 10 conteneurs partagent le système du serveur."
+    },
+    {
+      "id": "q112",
+      "paire": "vm-conteneur",
+      "niveau": 2,
+      "q": "Pourquoi 50 conteneurs tiennent-ils sur un serveur qui ne supporterait que 5 VM ?",
+      "choix": [
+        "Chaque VM transporte un OS entier ; les conteneurs partagent celui du serveur",
+        "Les conteneurs contiennent des VM plus petites",
+        "Les VM n’utilisent pas l’hyperviseur"
+      ],
+      "bonne": 0,
+      "pourquoi": "C’est l’OS complet de chaque VM qui coûte cher. Et un conteneur ne contient pas de VM : c’est plutôt l’inverse qui arrive."
+    },
+    {
+      "id": "q113",
+      "paire": "hyperviseurs",
+      "niveau": 2,
+      "q": "Hyper-V, l’hyperviseur de Microsoft qu’on active dans Windows, est de…",
+      "choix": [
+        "Type 1 : une fois activé, il prend le matériel et Windows tourne au-dessus de lui",
+        "Type 2 : c’est une application de Windows"
+      ],
+      "bonne": 0,
+      "pourquoi": "C’est le cas particulier : on l’active depuis Windows, mais il se glisse sous Windows."
+    },
+    {
+      "id": "q114",
+      "paire": "hyperviseurs",
+      "niveau": 2,
+      "q": "Proxmox (au programme de l’AIS), c’est…",
+      "choix": [
+        "Un hyperviseur de type 1, basé sur Linux, installé directement sur le serveur",
+        "Un hyperviseur de type 2 qu’on installe dans Windows",
+        "Un conteneur"
+      ],
+      "bonne": 0,
+      "pourquoi": "Proxmox est gratuit et open source, basé sur Debian, très utilisé dans les PME. VirtualBox est de type 2, ESXi (de VMware) de type 1."
     }
   ]
 }
