@@ -1,5 +1,5 @@
 {
-  "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question est liée à une paire et a un format (champ type, qcm par défaut) : qcm (choix, bonne), saisie (reponses acceptées), ordre (etapes dans le bon ordre), erreur (texte en morceaux, faux = indice du morceau faux), associer (couples), generateur (gen = nom d’un générateur de l’appli), explique (modele). Champ niveau facultatif : 1 reconnaître, 2 retrouver seul, 3 appliquer. Les choix des QCM sont mélangés par l’appli : l’ordre dans ce fichier n’a pas d’importance. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id.",
+  "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question est liée à une paire et a un format (champ type, qcm par défaut) : qcm (choix, bonne), saisie (reponses acceptées), ordre (etapes dans le bon ordre), erreur (texte en morceaux, faux = indice du morceau faux), associer (couples), generateur (gen = nom d’un générateur de l’appli ; pour suite-logique et suite-lettres, le niveau donne la difficulté de 1 à 3), explique (modele). Champ niveau facultatif : 1 reconnaître, 2 retrouver seul, 3 appliquer. Les choix des QCM sont mélangés par l’appli : l’ordre dans ce fichier n’a pas d’importance. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id.",
   "maj": "2026-11-12",
   "paires": [
     {
@@ -1955,6 +1955,60 @@
       ],
       "bonne": 0,
       "pourquoi": "Proxmox est gratuit et open source, basé sur Debian, très utilisé dans les PME. VirtualBox est de type 2, ESXi (de VMware) de type 1."
+    },
+    {
+      "id": "q115",
+      "paire": "suite-logique",
+      "type": "generateur",
+      "gen": "suite-logique",
+      "niveau": 1,
+      "q": "Quel nombre vient ensuite ?"
+    },
+    {
+      "id": "q116",
+      "paire": "suite-logique",
+      "type": "generateur",
+      "gen": "suite-logique",
+      "niveau": 3,
+      "q": "Quel nombre vient ensuite ?"
+    },
+    {
+      "id": "q117",
+      "paire": "suite-logique",
+      "type": "generateur",
+      "gen": "suite-lettres",
+      "niveau": 1,
+      "q": "Quelle lettre vient ensuite ?"
+    },
+    {
+      "id": "q118",
+      "paire": "suite-logique",
+      "type": "generateur",
+      "gen": "suite-lettres",
+      "niveau": 2,
+      "q": "Quelle lettre vient ensuite ?"
+    },
+    {
+      "id": "q119",
+      "paire": "suite-logique",
+      "type": "generateur",
+      "gen": "suite-lettres",
+      "niveau": 3,
+      "q": "Quelle lettre vient ensuite ?"
+    },
+    {
+      "id": "q120",
+      "paire": "suite-logique",
+      "type": "ordre",
+      "niveau": 2,
+      "q": "Une suite te résiste au test de logique. Remets la méthode dans l’ordre.",
+      "etapes": [
+        "Calculer les écarts entre deux nombres qui se suivent",
+        "Si les écarts changent, calculer les écarts des écarts",
+        "Sinon, chercher une multiplication (diviser un nombre par le précédent)",
+        "Sinon, regarder une case sur deux (deux suites entrelacées)"
+      ],
+      "pourquoi": "On va du plus fréquent au plus rare : addition, puis écarts qui changent, puis multiplication, puis alternance. Pour les lettres, on les numérote d’abord (A = 1, B = 2…) et on applique la même méthode."
     }
   ]
 }

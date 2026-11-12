@@ -152,6 +152,8 @@ textarea.recherche { resize: vertical; line-height: 1.45; }
 const CLE = "memo-cyber-v1";
 const INTERVALLES = [0, 1, 2, 4, 8, 16];   // jours avant de revoir une question, selon sa boîte (0 à 5)
 const TAILLE_SESSION = 10;
+const RAPPELS_MIN = 2;      // places gardées dans chaque session du jour pour des questions déjà sues (rappels, comme Duolingo)
+const CAP_GENERATEUR = 2;   // un générateur (logique, calcul) donne de nouveaux chiffres à chaque fois : c'est un entraînement, il revient au plus tous les 2 jours
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const jour = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;   // date locale (pas UTC : une révision à 23 h 30 compte pour le bon jour)
 const plusJours = n => { const d = new Date(); d.setDate(d.getDate() + n); return jour(d); };
@@ -169,6 +171,28 @@ const paire = id => D.paires.find(p => p.id === id);
 const melanger = t => { for (let i = t.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [t[i], t[j]] = [t[j], t[i]]; } return t; };   // vrai tirage au hasard (Fisher-Yates)
 
 function aRevoir() { return D.questions.filter(q => carte(q.id).due <= jour()); }
+
+// Tirage pondéré sans remise : pool = [{ q, w }], plus w est grand, plus la question a de chances de sortir.
+function tirerPondere(pool, n) {
+  pool = pool.filter(p => p.w > 0);
+  const out = [];
+  while (out.length < n && pool.length) {
+    let r = Math.random() * pool.reduce((s, p) => s + p.w, 0), k = 0;
+    while ((r -= pool[k].w) > 0 && k < pool.length - 1) k++;
+    out.push(pool.splice(k, 1)[0].q);
+  }
+  return out;
+}
+
+// Rappels : des questions pas encore dues (souvent déjà sues), pour vérifier qu'elles ne s'effacent pas.
+// Plus la dernière fois qu'on l'a vue est ancienne, plus elle a de chances de revenir (jusqu'à 30 jours).
+function rappels(n, exclus) {
+  const vue = {};
+  for (const e of etat.journal) if (!e.passe) vue[e.q] = e.t;
+  const auj = Date.now();
+  return tirerPondere(D.questions.filter(q => !exclus.has(q.id) && carte(q.id).due > jour())
+    .map(q => ({ q, w: 1 + Math.min(30, vue[q.id] ? (auj - Date.parse(vue[q.id])) / 864e5 : 30) })), n);
+}
 function serieVisible() {
   if (!etat.dernierJour) return 0;
   return etat.dernierJour >= plusJours(-1) ? etat.serie : 0;
@@ -183,8 +207,10 @@ function chips() {
 }
 
 function accueil() {
-  const dus = aRevoir().length;
-  const n = Math.min(dus, TAILLE_SESSION);
+  // Même calcul que demarrer() : combien de questions dues, combien de rappels.
+  const dus = aRevoir().length, nonDus = D.questions.length - dus;
+  const nbDus = Math.min(dus, TAILLE_SESSION - Math.min(RAPPELS_MIN, nonDus));
+  const r = Math.min(TAILLE_SESSION - nbDus, nonDus), n = nbDus + r;
   const lignes = D.paires.map(p => {
     const qs = D.questions.filter(q => q.paire === p.id);
     const pct = Math.round(100 * qs.reduce((s, q) => s + Math.min(carte(q.id).boite, 4), 0) / (qs.length * 4));
@@ -193,8 +219,8 @@ function accueil() {
   return `
     <section class="card hero">
       <span class="label">Session du jour</span>
-      <h2>${n ? `${n} question${n > 1 ? "s" : ""} t'attend${n > 1 ? "ent" : ""}` : "Tout est révisé pour aujourd'hui"}</h2>
-      <p>${n ? "Tes points faibles passent en premier. Réponds à voix haute avant de toucher un choix." : "Reviens demain : les questions réapparaissent juste avant que tu les oublies."}</p>
+      <h2>${n - r ? `${n - r} à revoir + ${r} rappel${r > 1 ? "s" : ""}` : `Tout est à jour : ${r} rappels`}</h2>
+      <p>${n - r ? "Les questions à revoir, plus quelques questions déjà sues pour vérifier qu'elles ne s'effacent pas." : "Rien n'est dû aujourd'hui : une session de rappels sur ce que tu sais déjà."} Réponds à voix haute avant de toucher un choix. Pas le temps pour une question ? « Passer » la remplace par une autre.</p>
       <button class="big" id="go" ${n ? "" : "disabled"}>Commencer</button>
       <button class="big ghost" id="bonus">Test aléatoire (10 questions, les plus fragiles sortent plus souvent)</button>
     </section>
@@ -277,12 +303,21 @@ const GENERATEURS = {
       pourquoi: `Les adresses privées commencent par 10, par 172.16 à 172.31, ou par 192.168. ${ip.join(".")} ${privee ? "en fait partie" : "n'en fait pas partie"}.` };
   },
   // Suite logique (11/11/2026, entraînement au test de logique des admissions) : trouver le nombre suivant.
-  // Six familles de règles ; les mauvais choix sont les erreurs typiques (la mauvaise règle, une erreur de calcul).
-  "suite-logique"() {
-    const famille = alea(0, 5);
+  // Le niveau de la carte choisit la difficulté (12/11/2026) : 1 = une seule opération régulière ; 2 = alternance, carrés, écarts qui grandissent ;
+  // 3 = deux règles mêlées (somme des deux précédents, ×2 puis +c, deux suites entrelacées, écarts qui doublent). Sans niveau : toutes les familles.
+  // Les mauvais choix sont les erreurs typiques (la mauvaise règle, une erreur de calcul).
+  "suite-logique"(niveau) {
+    const familles = { 1: [0, 1, 6], 2: [2, 3, 4], 3: [5, 7, 8, 9] }[niveau] || [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    const famille = familles[alea(0, familles.length - 1)];
     let t = [], regle = "", faux = [];
     if (famille === 0) { const d = alea(2, 9), a = alea(1, 30); for (let i = 0; i < 6; i++) t.push(a + i * d); regle = `on ajoute ${d} à chaque fois`; faux = [t[5] + 1, t[5] - d, t[4] * 2]; }
     else if (famille === 1) { const k = alea(2, 3), a = alea(1, 5); for (let i = 0; i < 6; i++) t.push(a * k ** i); regle = `on multiplie par ${k} à chaque fois`; faux = [t[4] + (t[4] - t[3]), t[5] + k, t[5] - a]; }
+    else if (famille === 6) { const d = alea(3, 9), a = alea(50, 99); for (let i = 0; i < 6; i++) t.push(a - i * d); regle = `on retire ${d} à chaque fois`; faux = [t[5] - 1, t[5] + d, t[5] - d]; }
+    else if (famille === 7) { const c = [1, 2, 3, -1][alea(0, 3)], a = alea(2, 5); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] * 2 + c); regle = `on multiplie par 2, puis on ${c > 0 ? `ajoute ${c}` : `retire ${-c}`}`; faux = [t[4] * 2, t[5] + 2 * c, t[4] + (t[4] - t[3])]; }
+    else if (famille === 8) { const a = alea(1, 20), b = alea(1, 20), d1 = alea(2, 6), d2 = d1 + alea(1, 4);   // deux pas différents, sinon ce serait une seule suite
+      for (let i = 0; i < 6; i++) t.push(i % 2 ? b + 30 + ((i - 1) / 2) * d2 : a + (i / 2) * d1);
+      regle = `deux suites entrelacées, une case sur deux : ${t[0]}, ${t[2]}, ${t[4]} (+${d1}) et ${t[1]}, ${t[3]}, ${t[5]} (+${d2})`; faux = [t[4] + d1, t[3] + d1, t[5] + d1]; }
+    else if (famille === 9) { const g = alea(1, 3), a = alea(1, 20); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + g * 2 ** (i - 1)); regle = `les écarts doublent : +${g}, +${2 * g}, +${4 * g}, +${8 * g}…`; faux = [t[4] + 2 * (t[4] - t[3]) + g, t[4] + (t[4] - t[3]), t[4] + (t[4] - t[3]) + g]; }
     else if (famille === 2) { const x = alea(3, 9), y = alea(1, x - 1), a = alea(1, 20); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + (i % 2 ? x : -y)); regle = `on ajoute ${x}, puis on retire ${y}, en alternance`; faux = [t[5] - x - y, t[4] + x, t[5] + y]; }
     else if (famille === 3) { const a = alea(1, 6); for (let i = 0; i < 6; i++) t.push((a + i) ** 2); regle = `les carrés : ${a}², ${a + 1}², ${a + 2}²…`; faux = [t[5] + (t[4] - t[3]), t[5] + 2 * (a + 4), (a + 5) * (a + 4)]; }
     else if (famille === 4) { const a = alea(1, 20), d = alea(1, 4); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + d * i); regle = `l'écart grandit : +${d}, +${2 * d}, +${3 * d}…`; faux = [t[4] + 2 * (t[4] - t[3]), t[5] + d * 4, t[5] + d * 6]; }
@@ -292,12 +327,28 @@ const GENERATEURS = {
     const q = `${t.slice(0, 5).join(" · ")} · ?\nQuel nombre vient ensuite ?`;
     return { q, enonce: q.replace(/\n/g, " "), choix: choix.map(String), bonne: 0,
       pourquoi: `La règle : ${regle}. Donc ${t.slice(0, 5).join(", ")}, puis ${bonne}. Réflexe du test : regarde d'abord les écarts entre deux nombres, puis les écarts des écarts.` };
+  },
+  // Suite de lettres (12/11/2026) : même logique que les nombres, une fois les lettres numérotées (A = 1, B = 2…).
+  // Niveau 1 : on avance d'un pas fixe ; 2 : on recule, ou on alterne deux pas ; 3 : le pas grandit.
+  "suite-lettres"(niveau) {
+    const L = "ABCDEFGHIJKLMNOPQRSTUVWXYZ", n = niveau || alea(1, 3);
+    let t = [], regle = "";
+    if (n === 1) { const s = alea(1, 4), a = alea(0, 25 - 5 * s); for (let i = 0; i < 6; i++) t.push(a + i * s); regle = `on avance de ${s} lettre${s > 1 ? "s" : ""} à chaque fois`; }
+    else if (n === 2 && Math.random() < .5) { const s = alea(2, 4), a = alea(5 * s, 25); for (let i = 0; i < 6; i++) t.push(a - i * s); regle = `on recule de ${s} lettres à chaque fois`; }
+    else if (n === 2) { const x = alea(2, 4), y = alea(1, x - 1), a = alea(0, 25 - 3 * x); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + (i % 2 ? x : -y)); regle = `on avance de ${x}, puis on recule de ${y}, en alternance`; }
+    else { const a = alea(0, 10); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + i); regle = "le pas grandit : +1, +2, +3, +4, +5"; }
+    const bonne = t[5], choix = [bonne];
+    for (const d of [1, -1, 2, -2, 3, -3]) if (choix.length < 4 && bonne + d >= 0 && bonne + d <= 25) choix.push(bonne + d);
+    const lettres = t.map(i => L[i]);
+    const q = `${lettres.slice(0, 5).join(" · ")} · ?\nQuelle lettre vient ensuite ?`;
+    return { q, enonce: q.replace(/\n/g, " "), choix: choix.map(i => L[i]), bonne: 0,
+      pourquoi: `Numérote les lettres (A = 1, B = 2…) : ${t.slice(0, 5).map(i => i + 1).join(", ")}. La règle : ${regle}, donc ${lettres[5]} (${bonne + 1}). Astuce : E = 5, J = 10, O = 15, T = 20 servent de repères.` };
   }
 };
 
 function preparer(q, retour) {
   let x = { ...q, type: q.type || "qcm", _src: q, _retour: !!retour };
-  if (x.type === "generateur") x = { ...x, ...GENERATEURS[q.gen]() };
+  if (x.type === "generateur") x = { ...x, ...GENERATEURS[q.gen](q.niveau) };
   if (x.choix) x.ordreChoix = melanger(x.choix.map((_, i) => i));
   if (x.type === "ordre") { x.melange = melanger(x.etapes.map((_, i) => i)); x.pris = []; }
   if (x.type === "associer") { x.gauche = melanger(x.couples.map((_, i) => i)); x.droite = melanger(x.couples.map((_, i) => i)); x.trouves = []; x.sel = null; x.fautes = 0; x.flash = null; }
@@ -305,23 +356,54 @@ function preparer(q, retour) {
 }
 
 // Test aléatoire pondéré : une question de la boîte 0 a 6 fois plus de chances de sortir qu'une question de la boîte 5 (qui ne disparaît pas pour autant).
-function tirage(n) {
-  const pool = D.questions.map(q => ({ q, w: 6 - carte(q.id).boite }));
-  const out = [];
-  while (out.length < n && pool.length) {
-    let r = Math.random() * pool.reduce((s, p) => s + p.w, 0), k = 0;
-    while ((r -= pool[k].w) > 0) k++;
-    out.push(pool.splice(k, 1)[0].q);
-  }
-  return out;
+function tirage(n, exclus = new Set()) {
+  return tirerPondere(D.questions.filter(q => !exclus.has(q.id)).map(q => ({ q, w: 6 - carte(q.id).boite })), n);
 }
 
+const fragiles = exclus => aRevoir().filter(q => !exclus.has(q.id)).sort((a, b) => carte(a.id).boite - carte(b.id).boite || Math.random() - .5);
+
+// Session du jour : les questions dues (les plus fragiles d'abord), avec au moins RAPPELS_MIN rappels ; s'il manque des dues, les rappels complètent jusqu'à 10.
 function demarrer(bonus) {
-  const liste = bonus ? tirage(TAILLE_SESSION)
-    : aRevoir().sort((a, b) => carte(a.id).boite - carte(b.id).boite || Math.random() - .5).slice(0, TAILLE_SESSION);
-  session = { file: liste.map(q => preparer(q)), total: liste.length, faites: 0, justes: 0, xp: 0, ratees: new Set(), etape: "repondre", res: null, mode: bonus ? "aleatoire" : "jour" };
+  let liste, nbRappels = 0;
+  if (bonus) liste = tirage(TAILLE_SESSION);
+  else {
+    const dus = fragiles(new Set()), nonDus = D.questions.length - dus.length;
+    const nbDus = Math.min(dus.length, TAILLE_SESSION - Math.min(RAPPELS_MIN, nonDus));
+    liste = dus.slice(0, nbDus);
+    const r = rappels(TAILLE_SESSION - liste.length, new Set(liste.map(q => q.id)));
+    nbRappels = r.length;
+    liste = melanger([...liste.map(q => preparer(q)), ...r.map(q => ({ ...preparer(q), _rappel: true }))]);
+  }
+  const file = bonus ? liste.map(q => preparer(q)) : liste;
+  session = { file, total: file.length, faites: 0, justes: 0, xp: 0, ratees: new Set(), retoursPasses: 0, passees: 0,
+              ids: new Set(file.map(x => x.id)), etape: "repondre", res: null, mode: bonus ? "aleatoire" : "jour" };
   envoi = null;
   afficher();
+}
+
+// « Passer » : la question n'est ni ratée ni réussie (sa carte ne bouge pas, elle reviendra) ; une autre prend sa place, de préférence rapide (jamais une explication écrite).
+function remplacant() {
+  const rapide = q => (q.type || "qcm") !== "explique";
+  const exclus = new Set([...session.ids, ...D.questions.filter(q => !rapide(q)).map(q => q.id)]);
+  if (session.mode === "aleatoire") return tirage(1, exclus)[0];
+  return fragiles(exclus)[0] || rappels(1, exclus)[0];
+}
+
+function passer() {
+  const x = session.file.shift();
+  etat.journal.push({ t: new Date().toISOString(), q: x.id, type: x.type, passe: true, essai: 0, mode: session.mode });
+  sauver();
+  session.passees++;
+  if (x._retour) session.retoursPasses++;
+  else {
+    const q = remplacant();
+    if (q) { session.ids.add(q.id); session.file.push({ ...preparer(q), _rappel: carte(q.id).due > jour() && session.mode === "jour" }); }
+    else session.total--;
+  }
+  session.res = null; session.etape = "repondre"; session.texte = "";
+  terminerSiVide();
+  afficher();
+  if (!session.fini) document.querySelector("#saisie, #explication")?.focus();
 }
 
 const NIVEAUX = ["", "Reconnaître", "Retrouver seul", "Appliquer"];
@@ -382,9 +464,9 @@ function vueSession() {
   const x = session.file[0];
   const p = paire(x.paire);
   const res = session.res;
-  const pct = Math.round(100 * session.faites / (session.total + session.ratees.size));
+  const pct = Math.round(100 * session.faites / (session.total + session.ratees.size - session.retoursPasses));
   let bas = "";
-  if (session.etape === "repondre") bas = `<button class="lien nsp" id="nsp">Je ne sais pas</button>`;
+  if (session.etape === "repondre") bas = `<div class="duo"><button class="lien nsp" id="nsp">Je ne sais pas</button><button class="lien nsp" id="passer">Passer (pas le temps)</button></div>`;
   else if (session.etape === "confiance") bas = `<p style="margin:0">Avant la correction : tu étais…</p>
     <div class="duo"><button class="big ghost" data-conf="hesite">J'hésitais</button><button class="big" data-conf="sur">Sûr de moi</button></div>`;
   else if (session.etape === "verdict") {
@@ -403,7 +485,7 @@ function vueSession() {
   return `
     <div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
     <section class="card">
-      <div class="qhead"><span class="theme">${esc(p.theme)}${x.niveau ? ` · ${NIVEAUX[x.niveau]}` : ""}</span>${x._retour ? `<span class="retry">Deuxième essai</span>` : ""}</div>
+      <div class="qhead"><span class="theme">${esc(p.theme)}${x.niveau ? ` · ${String(x.gen || "").startsWith("suite") ? `Difficulté ${x.niveau}/3` : NIVEAUX[x.niveau]}` : ""}</span>${x._retour ? `<span class="retry">Deuxième essai</span>` : x._rappel ? `<span class="retry">Rappel</span>` : ""}</div>
       <div class="question">${esc(x.q).replace(/\n/g, "<br>")}</div>
       ${zoneReponse(x)}
       ${bas}
@@ -429,7 +511,7 @@ function finaliser() {
       session.justes++;
       session.xp += doute ? 5 : 10;
       if (doute) c.due = plusJours(1);                                                  // devinée : on la revoit demain, sans monter de boîte
-      else if (due) { c.boite = Math.min(c.boite + 1, 5); c.due = plusJours(INTERVALLES[c.boite]); }   // pas encore due (test aléatoire) : ne monte pas
+      else if (due) { c.boite = Math.min(c.boite + 1, 5); c.due = plusJours(x.type === "generateur" ? Math.min(INTERVALLES[c.boite], CAP_GENERATEUR) : INTERVALLES[c.boite]); }   // pas encore due (rappel, test aléatoire) : ne monte pas
     }
   } else {
     c.boite = 0; c.due = jour();
@@ -450,15 +532,18 @@ function suivant() {
   session.file.shift();
   session.faites++;
   session.res = null; session.etape = "repondre"; session.texte = "";
-  if (!session.file.length) {
-    etat.xp += session.xp;
-    const auj = jour();
-    if (etat.dernierJour !== auj) { etat.serie = etat.dernierJour === plusJours(-1) ? etat.serie + 1 : 1; etat.dernierJour = auj; }
-    sauver();
-    session.fini = true;
-  }
+  terminerSiVide();
   afficher();
   if (!session.fini) document.querySelector("#saisie, #explication")?.focus();
+}
+
+function terminerSiVide() {
+  if (session.file.length) return;
+  etat.xp += session.xp;
+  const auj = jour();
+  if (session.faites && etat.dernierJour !== auj) { etat.serie = etat.dernierJour === plusJours(-1) ? etat.serie + 1 : 1; etat.dernierJour = auj; }
+  sauver();
+  session.fini = true;
 }
 
 function valider() {
@@ -479,6 +564,7 @@ function clicSession(b) {
   if (b.dataset.conf) { session.res.conf = b.dataset.conf; finaliser(); afficher(); document.getElementById("suite")?.focus(); return true; }
   if (session.etape === "repondre") {
     if (b.id === "nsp") { if (x.type === "explique") session.texte = document.getElementById("explication")?.value || ""; proposer({ ok: false, nsp: true, rep: "(je ne sais pas)" }); return true; }
+    if (b.id === "passer") return passer(), true;
     if (b.id === "valider") return valider(), true;
     if (b.id === "voir") { session.texte = document.getElementById("explication").value; session.etape = "auto"; afficher(); return true; }
     if (b.dataset.pick !== undefined) { x.pris.push(+b.dataset.pick); afficher(); return true; }
