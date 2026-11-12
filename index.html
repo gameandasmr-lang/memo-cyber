@@ -188,6 +188,13 @@ textarea.recherche { resize: vertical; line-height: 1.45; }
 .calc .touches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .calc .touches button { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 8px 0; font-variant-numeric: tabular-nums; }
 .calc .touches .large { grid-column: span 2; }
+/* Alphabet repère (13/11/2026) : les lettres et leur position, à afficher ou cacher */
+.alpha-bouton { justify-self: start; }
+.alphabet { display: grid; grid-template-columns: repeat(13, 1fr); gap: 3px; border: 1px dashed var(--line); border-radius: 12px; padding: 8px; }
+.alphabet[hidden] { display: none; }
+.alphabet span { display: grid; text-align: center; font: 600 .95rem ui-monospace, Consolas, monospace; line-height: 1.15; padding: 3px 0; border-radius: 6px; background: var(--bg); }
+.alphabet span small { font-weight: 400; font-size: .68rem; color: var(--muted, inherit); opacity: .8; }
+.alphabet span.repere { outline: 1px solid var(--line); }
 /* Courbe de progression et historique des simulations */
 .courbe svg { width: 100%; height: auto; display: block; overflow: visible; }
 .courbe .grille { stroke: var(--line); stroke-width: 1; }
@@ -245,7 +252,7 @@ let D = null, filtre = "Tous", recherche = "", onglet = "reviser", session = nul
 // logique : niveau et statistiques par famille d'exercices ; taille, tailleLogique : 10, 15 ou 20 questions ; concours : chrono limité ; famLogique : famille choisie ou "toutes".
 // simulations : historique des simulations de test (score, durée, par famille) ; simuDuree : 30 ou 45 min ; calc : mini-calculatrice autorisée ; oral : suivi des questions d'entretien.
 let etat = { cartes: {}, xp: 0, serie: 0, dernierJour: null, journal: [], envoye: null, logique: {}, taille: 10, tailleLogique: 10, concours: false, famLogique: "toutes",
-             simulations: [], simuDuree: 30, calc: false, oral: {} };
+             simulations: [], simuDuree: 30, calc: false, alpha: false, oral: {} };
 let envoi = null;   // message ou texte de secours affiché sous le bouton d'envoi
 let stockage = true;
 try { const s = JSON.parse(localStorage.getItem(CLE)); if (s) etat = { ...etat, ...s }; } catch { stockage = false; }
@@ -821,8 +828,26 @@ function exerciceLogique(f, niveau = statLogique(f).niveau) {
   return x;
 }
 
-// ---- Mini-calculatrice (12/11/2026) : seulement si l'option est cochée (beaucoup de tests l'interdisent), et seulement pour le calcul ----
-const calculatriceVisible = x => etat.calc && x.fam === "calcul" && session.etape === "repondre";
+// ---- Mini-calculatrice (12/11/2026, élargie le 13/11) : seulement si l'option est cochée (= mode entraînement, beaucoup de tests l'interdisent),
+// dans tous les exercices où il y a des nombres à manipuler (calcul, suites, dominos, matrices, intrus et analogies à chiffres), simulation comprise.
+const FAM_CHIFFRES = ["calcul", "suites", "dominos", "matrices"];
+const aDesChiffres = x => FAM_CHIFFRES.includes(x.fam) || (["intrus", "analogies"].includes(x.fam) && /\d/.test(x.q + " " + (x.texte || x.choix || []).join(" ")));
+const calculatriceVisible = x => etat.calc && x.type === "logique" && aDesChiffres(x) && session.etape === "repondre";
+// ---- Alphabet repère (13/11/2026, demande d'Arnaud) : bouton afficher / cacher sur les exercices à lettres ; l'état ouvert ou fermé est gardé ----
+const aDesLettres = x => x.type === "logique" && (x.fam === "lettres" || /(^|[^A-Za-zÀ-ÿ])[A-Z]([^A-Za-zÀ-ÿ]|$)/.test(x.q + " " + (x.texte || x.choix || []).join(" ")));
+function alphabet(x) {
+  if (!aDesLettres(x) || session.etape !== "repondre") return "";
+  const L = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  return `<button class="lien alpha-bouton" id="alpha" aria-expanded="${!!etat.alpha}">${etat.alpha ? "🔤 Cacher l'alphabet" : "🔤 Afficher l'alphabet"}</button>
+    <div class="alphabet" id="alphabet" ${etat.alpha ? "" : "hidden"} aria-label="Alphabet avec la position de chaque lettre">${[...L].map((l, i) =>
+      `<span${(i + 1) % 5 ? "" : ' class="repere"'}>${l}<small>${i + 1}</small></span>`).join("")}</div>`;
+}
+function basculerAlphabet() {
+  etat.alpha = !etat.alpha; sauver();
+  const a = document.getElementById("alphabet"), b = document.getElementById("alpha");
+  if (a) a.hidden = !etat.alpha;
+  if (b) { b.textContent = etat.alpha ? "🔤 Cacher l'alphabet" : "🔤 Afficher l'alphabet"; b.setAttribute("aria-expanded", etat.alpha); }
+}
 const TOUCHES = ["7", "8", "9", "÷", "4", "5", "6", "×", "1", "2", "3", "−", "0", ",", "=", "+"];
 function calculatrice(x) {
   if (!calculatriceVisible(x)) return "";
@@ -906,7 +931,7 @@ function vueLogique() {
       <div class="filtres">${[["toutes", "Tout mélanger"], ...fams.map(([f, F]) => [f, F.nom])].map(([f, nom]) =>
         `<button data-fam="${f}" aria-pressed="${(FAMILLES[etat.famLogique] ? etat.famLogique : "toutes") === f}">${esc(nom)}</button>`).join("")}</div>
       <button class="lien bascule" id="concours" aria-pressed="${!!etat.concours}">${etat.concours ? "☑" : "☐"} Mode concours : temps limité par question (au-delà, c'est compté faux)</button>
-      <button class="lien bascule" id="calc-option" aria-pressed="${!!etat.calc}">${etat.calc ? "☑" : "☐"} Calculatrice en calcul mental (désactivée par défaut : beaucoup de tests l'interdisent)</button>
+      <button class="lien bascule" id="calc-option" aria-pressed="${!!etat.calc}">${etat.calc ? "☑" : "☐"} Calculatrice en mode entraînement : dans tous les exercices à chiffres (décoche-la pour t'entraîner au calcul de tête, beaucoup de tests l'interdisent)</button>
       <button class="big" id="go-logique">Commencer (${taille("tailleLogique")} exercices)</button>
     </section>
     ${carteSimulation()}
@@ -977,6 +1002,7 @@ function vueSimulation() {
       <div class="question">${esc(x.q).replace(/\n/g, "<br>")}</div>
       ${x.figure || ""}
       ${zoneReponse(x)}
+      ${alphabet(x)}
       ${calculatrice(x)}
       <div class="duo"><button class="lien nsp" id="passer">Passer (j'y reviendrai)</button><button class="lien nsp" id="rendre">${session.confirmer ? "Sûr ? Touche encore pour rendre" : "Rendre ma copie"}</button></div>
     </section>`;
@@ -985,6 +1011,7 @@ function vueSimulation() {
 function clicSimulation(b) {
   const x = session.file[0];
   if (b.dataset.calc) return toucheCalc(b.dataset.calc), true;
+  if (b.id === "alpha") return basculerAlphabet(), true;
   if (b.id === "rendre") { if (session.confirmer) { finirSimulation(); afficher(); } else { session.confirmer = true; b.textContent = "Sûr ? Touche encore pour rendre"; } return true; }
   if (b.id === "passer") {
     x.ms0 = (x.ms0 || 0) + Date.now() - x.debut; x.debut = null; x.passee = true;   // le temps déjà passé dessus est gardé
@@ -1212,6 +1239,7 @@ function vueSession() {
       <div class="question"${x.lang === "en" ? ' lang="en"' : ""}>${esc(x.q).replace(/\n/g, "<br>")}</div>
       ${x.figure || ""}
       ${zoneReponse(x)}
+      ${alphabet(x)}
       ${calculatrice(x)}
       ${bas}
     </section>`;
@@ -1294,6 +1322,7 @@ function clicSession(b) {
   if (session.mode === "simulation") return clicSimulation(b);
   const x = session.file[0];
   if (b.dataset.calc) return toucheCalc(b.dataset.calc), true;
+  if (b.id === "alpha") return basculerAlphabet(), true;
   if (b.id === "suite") return suivant(), true;
   if (session.etape === "auto" && b.id === "valider-oral") {
     const pts = [...document.querySelectorAll("[data-pt]:checked")].map(c => +c.dataset.pt);
