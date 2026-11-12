@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Lexend:wght@400;500;600&display=swap">
 <style>
-/* Mise en page : une appli de poche, une seule colonne de 560px max. En haut la série et l'XP, puis la session du jour (QCM un par un, correction immédiate), et un onglet Lexique avec les paires de mots à ne pas confondre. */
+/* Mise en page : une appli de poche, une seule colonne de 560px max. En haut la série et l'XP, puis la session du jour (QCM un par un, correction immédiate), un onglet Logique (exercices générés des tests d'admission, avec chrono et niveaux) et un onglet Lexique avec les paires de mots à ne pas confondre. */
 :root {
   --bg: #f2f4f9;
   --surface: #ffffff;
@@ -60,7 +60,7 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .chip.flame b { color: var(--flame); }
 .chip b { font-weight: 600; }
 
-.tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 4px; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 4px; }
 .tabs button { border: 0; background: none; border-radius: 9px; padding: 9px; font-weight: 500; color: var(--muted); }
 .tabs button[aria-selected="true"] { background: var(--accent); color: var(--surface); }
 
@@ -129,6 +129,35 @@ textarea.recherche { resize: vertical; line-height: 1.45; }
 .filtres button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; font-size: .85rem; }
 .filtres button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
 .note { font-size: .8rem; color: var(--muted); text-align: center; }
+
+/* Taille de session et onglet Logique */
+.segment { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
+.segment button { border: 0; background: none; border-radius: 9px; padding: 7px 4px; font-size: .88rem; color: var(--muted); }
+.segment button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px color-mix(in srgb, var(--ink) 15%, transparent); }
+.bascule { justify-self: start; color: var(--muted); font-size: .9rem; text-decoration: none; }
+.bascule[aria-pressed="true"] { color: var(--flame); }
+.chrono { font-size: .85rem; font-weight: 600; color: var(--flame); font-variant-numeric: tabular-nums; }
+.stats { display: grid; gap: 12px; }
+.srow { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: .92rem; }
+.srow small { color: var(--muted); }
+.niv { color: var(--accent); letter-spacing: 2px; white-space: nowrap; }
+.rang { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.matrice { display: grid; grid-template-columns: repeat(3, 76px); gap: 6px; justify-content: center; }
+.case { width: 76px; height: 76px; display: block; }
+.choix.visuel { grid-template-columns: repeat(4, 1fr); }
+.choix.visuel button { display: grid; place-items: center; padding: 8px 4px; text-align: center; }
+.choix.visuel .case { width: 100%; max-width: 64px; height: auto; }
+.choix.visuel button { min-width: 0; }
+.solution { display: inline-flex; align-items: center; gap: 8px; }
+.solution svg { vertical-align: middle; }
+.d-fond, .m-fond { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+.d-vide, .m-vide { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; stroke-dasharray: 5 4; }
+.d-trait { stroke: var(--ink); stroke-width: 2; }
+.d-point { fill: var(--ink); }
+.d-q { fill: var(--accent); font: 700 22px var(--f-display); }
+.m-plein { fill: var(--ink); }
+.m-creux { fill: none; stroke: var(--ink); stroke-width: 2.4; }
+.m-gris { fill: color-mix(in srgb, var(--ink) 35%, transparent); stroke: var(--ink); stroke-width: 1.2; }
 .err { color: var(--bad); }
 @media (prefers-reduced-motion: reduce) { .progress i { transition: none; } .big:active { transform: none; } }
 </style>
@@ -142,6 +171,7 @@ textarea.recherche { resize: vertical; line-height: 1.45; }
   </header>
   <nav class="tabs" role="tablist">
     <button id="tab-reviser" role="tab" aria-selected="true">Réviser</button>
+    <button id="tab-logique" role="tab" aria-selected="false">Logique</button>
     <button id="tab-lexique" role="tab" aria-selected="false">Lexique</button>
   </nav>
   <main id="vue"><section class="card"><p>Chargement des cartes…</p></section></main>
@@ -151,8 +181,9 @@ textarea.recherche { resize: vertical; line-height: 1.45; }
 <script>
 const CLE = "memo-cyber-v1";
 const INTERVALLES = [0, 1, 2, 4, 8, 16];   // jours avant de revoir une question, selon sa boîte (0 à 5)
-const TAILLE_SESSION = 10;
-const RAPPELS_MIN = 2;      // places gardées dans chaque session du jour pour des questions déjà sues (rappels, comme Duolingo)
+const TAILLES = [10, 15, 20];   // taille d'une session au choix (10 pour une pause, 20 à la maison) ; le choix est retenu
+const taille = (cle = "taille") => TAILLES.includes(etat[cle]) ? etat[cle] : 10;
+const RAPPELS_MIN = () => Math.round(taille() * .2);   // places gardées pour des questions déjà sues (rappels, comme Duolingo) : 2 sur 10, 3 sur 15, 4 sur 20
 const CAP_GENERATEUR = 2;   // un générateur (logique, calcul) donne de nouveaux chiffres à chaque fois : c'est un entraînement, il revient au plus tous les 2 jours
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const jour = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;   // date locale (pas UTC : une révision à 23 h 30 compte pour le bon jour)
@@ -161,7 +192,8 @@ const plusJours = n => { const d = new Date(); d.setDate(d.getDate() + n); retur
 let D = null, filtre = "Tous", recherche = "", onglet = "reviser", session = null;
 // journal : une ligne par réponse (t = date ISO, q = id de la question, type = format, r = indice du choix dans la carte (pas sa position à l’écran), rep = réponse donnée, ok, essai 1 ou 2, mode jour/aleatoire, conf = sur/hesite, nsp = « je ne sais pas », enonce = question générée, texte = explication écrite).
 // envoye : date ISO du dernier bilan envoyé à Claude (les réponses plus récentes sont « pas encore envoyées »).
-let etat = { cartes: {}, xp: 0, serie: 0, dernierJour: null, journal: [], envoye: null };
+// logique : niveau et statistiques par famille d'exercices ; taille, tailleLogique : 10, 15 ou 20 questions ; concours : chrono limité ; famLogique : famille choisie ou "toutes".
+let etat = { cartes: {}, xp: 0, serie: 0, dernierJour: null, journal: [], envoye: null, logique: {}, taille: 10, tailleLogique: 10, concours: false, famLogique: "toutes" };
 let envoi = null;   // message ou texte de secours affiché sous le bouton d'envoi
 let stockage = true;
 try { const s = JSON.parse(localStorage.getItem(CLE)); if (s) etat = { ...etat, ...s }; } catch { stockage = false; }
@@ -206,12 +238,16 @@ function chips() {
      <span class="chip"><b>${maitrisees}</b>/${D.questions.length} sues</span>`;
 }
 
+// Sélecteur 10 / 15 / 20 questions (cle = "taille" pour Réviser, "tailleLogique" pour la Logique).
+const choixTaille = cle => `<div class="segment" role="group" aria-label="Nombre de questions">${TAILLES.map(n =>
+  `<button data-taille="${n}" data-cle="${cle}" aria-pressed="${taille(cle) === n}">${n} questions</button>`).join("")}</div>`;
+
 function accueil() {
   // Même calcul que demarrer() : combien de questions dues, combien de rappels.
   const dus = aRevoir().length, nonDus = D.questions.length - dus;
-  const nbDus = Math.min(dus, TAILLE_SESSION - Math.min(RAPPELS_MIN, nonDus));
-  const r = Math.min(TAILLE_SESSION - nbDus, nonDus), n = nbDus + r;
-  const lignes = D.paires.map(p => {
+  const nbDus = Math.min(dus, taille() - Math.min(RAPPELS_MIN(), nonDus));
+  const r = Math.min(taille() - nbDus, nonDus), n = nbDus + r;
+  const lignes = D.paires.filter(p => D.questions.some(q => q.paire === p.id)).map(p => {   // la logique a son propre onglet
     const qs = D.questions.filter(q => q.paire === p.id);
     const pct = Math.round(100 * qs.reduce((s, q) => s + Math.min(carte(q.id).boite, 4), 0) / (qs.length * 4));
     return { p, pct };
@@ -219,10 +255,11 @@ function accueil() {
   return `
     <section class="card hero">
       <span class="label">Session du jour</span>
+      ${choixTaille("taille")}
       <h2>${n - r ? `${n - r} à revoir + ${r} rappel${r > 1 ? "s" : ""}` : `Tout est à jour : ${r} rappels`}</h2>
       <p>${n - r ? "Les questions à revoir, plus quelques questions déjà sues pour vérifier qu'elles ne s'effacent pas." : "Rien n'est dû aujourd'hui : une session de rappels sur ce que tu sais déjà."} Réponds à voix haute avant de toucher un choix. Pas le temps pour une question ? « Passer » la remplace par une autre.</p>
       <button class="big" id="go" ${n ? "" : "disabled"}>Commencer</button>
-      <button class="big ghost" id="bonus">Test aléatoire (10 questions, les plus fragiles sortent plus souvent)</button>
+      <button class="big ghost" id="bonus">Test aléatoire (${taille()} questions, les plus fragiles sortent plus souvent)</button>
     </section>
     <section class="card">
       <span class="label">Tes paires, de la plus fragile à la plus solide</span>
@@ -252,7 +289,7 @@ function carteEnvoi() {
 
 async function envoyer() {
   const b = { app: "memo-cyber", format: 1, exporte: new Date().toISOString(), cartesMaj: D.maj,
-              xp: etat.xp, serie: serieVisible(), dernierJour: etat.dernierJour, cartes: etat.cartes, journal: etat.journal };
+              xp: etat.xp, serie: serieVisible(), dernierJour: etat.dernierJour, cartes: etat.cartes, logique: etat.logique, journal: etat.journal };
   const texte = JSON.stringify(b);
   const nom = `memo-cyber-bilan-${jour()}.txt`;   // .txt : Chrome refuse de partager un .json
   const fait = msg => { etat.envoye = b.exporte; sauver(); envoi = { msg }; afficher(); };
@@ -343,8 +380,97 @@ const GENERATEURS = {
     const q = `${lettres.slice(0, 5).join(" · ")} · ?\nQuelle lettre vient ensuite ?`;
     return { q, enonce: q.replace(/\n/g, " "), choix: choix.map(i => L[i]), bonne: 0,
       pourquoi: `Numérote les lettres (A = 1, B = 2…) : ${t.slice(0, 5).map(i => i + 1).join(", ")}. La règle : ${regle}, donc ${lettres[5]} (${bonne + 1}). Astuce : E = 5, J = 10, O = 15, T = 20 servent de repères.` };
+  },
+
+  // ---- Onglet Logique (12/11/2026) : les familles des tests psychotechniques d'admission ----
+  // Dominos (type D-48 / D-70) : chaque moitié va de 0 à 6 et on tourne en rond (après 6 vient 0, avant 0 vient 6).
+  // Niveau 1 : les deux moitiés bougent pareil ; 2 : le haut et le bas ont chacun leur pas ; 3 : chaîne (le haut reprend le bas du précédent) ou alternance.
+  "dominos"(niveau) {
+    const m = v => ((v % 7) + 7) % 7, t = [];
+    let a = alea(0, 6), b = alea(0, 6), regle;
+    if (niveau === 1) { const d = [1, 2, -1][alea(0, 2)]; for (let i = 0; i < 5; i++) t.push([m(a + i * d), m(b + i * d)]); regle = `les deux moitiés ${d > 0 ? "avancent" : "reculent"} de ${Math.abs(d)} à chaque domino`; }
+    else if (niveau === 2) { const d1 = alea(1, 3), d2 = alea(1, 2); for (let i = 0; i < 5; i++) t.push([m(a + i * d1), m(b - i * d2)]); regle = `le haut avance de ${d1}, le bas recule de ${d2}`; }
+    else if (Math.random() < .5) { const d = alea(1, 3); t.push([a, b]); for (let i = 1; i < 5; i++) t.push([t[i - 1][1], m(t[i - 1][1] + d)]); regle = `le haut reprend le bas du domino précédent, et le bas avance de ${d}`; }
+    else { const d1 = alea(2, 3), d2 = alea(1, 2); for (let i = 0; i < 5; i++) t.push([m(a + (i % 2 ? d1 : 0)), m(b + i * d2)]); regle = `le haut alterne entre ${a} et ${m(a + d1)}, le bas avance de ${d2}`; }
+    const [h, bas] = t[4], vus = new Set([h + "-" + bas]), choix = [[h, bas]];
+    for (const c of [[bas, h], [m(h + 1), bas], [h, m(bas + 1)], [m(h - 1), bas], [h, m(bas - 1)], [m(h + 1), m(bas + 1)]]) {
+      const k = c[0] + "-" + c[1]; if (choix.length < 4 && !vus.has(k)) { vus.add(k); choix.push(c); } }
+    return { q: "Quel domino complète la série ?", figure: `<div class="rang">${t.slice(0, 4).map(svgDomino).join("")}${svgDomino(null)}</div>`,
+      enonce: t.slice(0, 4).map(d => d.join("|")).join(" ") + " ?", choix: choix.map(svgDomino), texte: choix.map(d => d.join("|")), html: true, bonne: 0,
+      pourquoi: `Regarde le haut d'un côté, le bas de l'autre : ${regle}. Après 6, on revient à 0. Ici : ${h} en haut, ${bas} en bas.` };
+  },
+  // Matrices (type Raven) : une grille de 3 × 3 cases ; chaque case a une forme, un nombre de formes et un remplissage.
+  // Chaque caractéristique suit sa propre règle : elle change d'une ligne à l'autre, d'une colonne à l'autre, ou une fois par ligne et par colonne (comme un sudoku).
+  "matrices"(niveau) {
+    const regles = { 1: [[1, 0], [0, 1], [0, 0]], 2: [[1, 0], [0, 1], [1, 1]], 3: [[1, 1], [1, 2], [2, 1]] }[niveau] || [[1, 0], [0, 1], [1, 1]];
+    const perm = regles.map(() => melanger([0, 1, 2]));
+    if (niveau === 3) melanger(regles);   // au niveau 3, n'importe quelle caractéristique peut suivre n'importe quelle règle
+    const cel = (i, j) => regles.map(([a, b], k) => perm[k][(a * i + b * j) % 3]);
+    const rep = cel(2, 2), vus = new Set([rep.join()]), choix = [rep];
+    for (let k = 0; choix.length < 4 && k < 30; k++) { const c = [...rep], at = k % 3; c[at] = (c[at] + 1 + (k > 2 ? 1 : 0)) % 3; if (k > 5) c[(at + 1) % 3] = (c[(at + 1) % 3] + 1) % 3; if (!vus.has(c.join())) { vus.add(c.join()); choix.push(c); } }
+    const nomsAttr = ["la forme", "le nombre de formes", "le remplissage"];
+    const dit = ([a, b], k) => a && b ? `${nomsAttr[k]} change à chaque case : chaque ligne et chaque colonne la contiennent une fois (comme un sudoku)` : a ? `${nomsAttr[k]} change d'une ligne à l'autre` : b ? `${nomsAttr[k]} change d'une colonne à l'autre` : `${nomsAttr[k]} ne change jamais`;
+    const grille = [0, 1, 2].flatMap(i => [0, 1, 2].map(j => i === 2 && j === 2 ? svgCase(null) : svgCase(cel(i, j))));
+    return { q: "Quelle case complète la grille ?", figure: `<div class="matrice">${grille.join("")}</div>`, enonce: `matrice niveau ${niveau}`,
+      choix: choix.map(svgCase), texte: choix.map(c => c.join(",")), html: true, bonne: 0,
+      pourquoi: `Règles : ${regles.map(dit).join(" ; ")}. Méthode : lis une caractéristique à la fois, d'abord sur les lignes, puis sur les colonnes.` };
+  },
+  // Calcul mental : 1 = opérations ; 2 = pourcentages simples et règle de trois ; 3 = hausse ou baisse en %, vitesse, proportion inverse.
+  "calcul"(niveau) {
+    let q, bonne, faux, pourquoi, u = "";
+    const k = alea(0, 1);
+    if (niveau === 1 && k) { const a = alea(6, 12), b = alea(3, 9); q = `${a} × ${b} = ?`; bonne = a * b; faux = [a * b + a, a * b - b, a * b + 10]; pourquoi = `${a} × ${b} = ${a * b}. Astuce : ${a} × ${b} = ${a} × ${b - 1} + ${a}.`; }
+    else if (niveau === 1) { const a = alea(25, 89), b = alea(12, 48), c = alea(5, 19); q = `${a} + ${b} − ${c} = ?`; bonne = a + b - c; faux = [bonne + 10, bonne - 10, a + b + c]; pourquoi = `${a} + ${b} = ${a + b}, puis − ${c} = ${bonne}.`; }
+    else if (niveau === 2 && k) { const p = [10, 20, 25, 50, 75][alea(0, 4)], x = 20 * alea(2, 20); q = `Combien font ${p} % de ${x} ?`; bonne = x * p / 100; faux = [bonne + x / 10, bonne * 2, x - bonne]; pourquoi = `${p} % = ${p}/100. ${p === 25 ? "25 % = un quart" : p === 50 ? "50 % = la moitié" : p === 75 ? "75 % = trois quarts" : `10 % = diviser par 10 (${x / 10})`}, donc ${bonne}.`; }
+    else if (niveau === 2) { const n1 = alea(2, 5), pu = alea(2, 9), n2 = n1 + alea(1, 5); q = `${n1} cahiers coûtent ${n1 * pu} €. Combien coûtent ${n2} cahiers ?`; bonne = n2 * pu; faux = [n1 * pu + (n2 - n1), bonne + pu, bonne - pu]; u = " €"; pourquoi = `Règle de trois : un cahier coûte ${n1 * pu} ÷ ${n1} = ${pu} €, donc ${n2} cahiers coûtent ${n2} × ${pu} = ${bonne} €.`; }
+    else { const s = alea(0, 2);
+      if (s === 0) { const P = 20 * alea(2, 10), p = [5, 15, 20, 30][alea(0, 3)], baisse = Math.random() < .5, d = P * p / 100; q = `Un prix de ${P} € ${baisse ? "baisse" : "augmente"} de ${p} %. Nouveau prix ?`; bonne = baisse ? P - d : P + d; faux = [d, baisse ? P - p : P + p, baisse ? P + d : P - d]; u = " €"; pourquoi = `${p} % de ${P} = ${d} €. ${P} ${baisse ? "−" : "+"} ${d} = ${bonne} €. Piège : enlever ${p} €, ce n'est pas enlever ${p} %.`; }
+      else if (s === 1) { const v = [60, 90, 120][alea(0, 2)], t = 10 * alea(1, 5); q = `À ${v} km/h, quelle distance en ${t} minutes ?`; bonne = v * t / 60; faux = [v * t / 100, bonne + 10, v - t]; u = " km"; pourquoi = `${v} km/h = ${String(v / 60).replace(".", ",")} km par minute. ${t} min × ${v / 60} = ${bonne} km.`; }
+      else { let n1, j1, n2; do { n1 = alea(2, 8); j1 = alea(2, 12); n2 = alea(2, 8); } while (n1 === n2 || (n1 * j1) % n2); q = `${n1} ouvriers font un travail en ${j1} jours. Combien de jours pour ${n2} ouvriers ?`; bonne = n1 * j1 / n2; faux = [j1 + (n1 - n2), Math.round(j1 * n2 / n1), j1 - (n1 - n2)]; u = " jours"; pourquoi = `Plus il y a d'ouvriers, moins il faut de jours (proportion inverse). Le travail fait ${n1} × ${j1} = ${n1 * j1} journées, donc ${n1 * j1} ÷ ${n2} = ${bonne} jours.`; }
+    }
+    const vus = new Set([bonne]), choix = [bonne];
+    for (const f of [...faux, bonne + 1, bonne - 2, bonne + 5]) if (choix.length < 4 && f > 0 && Number.isInteger(f) && !vus.has(f)) { vus.add(f); choix.push(f); }
+    return { q, enonce: q, choix: choix.map(c => c + u), bonne: 0, pourquoi };
+  },
+  // Déduction (syllogismes) : avec des mots inventés, pour raisonner sur la forme et non sur ce qu'on sait du monde.
+  // Réponse : vrai à coup sûr, faux à coup sûr, ou on ne peut pas savoir. Niveau 1 : chaînes simples ; 2 : pièges classiques ; 3 : « aucun » et « certains ».
+  "deduction"(niveau) {
+    const noms = melanger(["zorb", "plink", "taru", "mépo", "vurn", "glim", "brak"]), [A, B, C] = noms, Z = ["Zak", "Lino", "Tess"][alea(0, 2)];
+    const tous = (x, y) => `Tous les ${x}s sont des ${y}s.`, aucun = (x, y) => `Aucun ${x} n'est un ${y}.`, cert = (x, y) => `Certains ${x}s sont des ${y}s.`;
+    const modeles = {
+      1: [[[tous(A, B), tous(B, C)], tous(A, C), 0, `Les ${A}s sont dans les ${B}s, qui sont dans les ${C}s : les ${A}s sont donc dans les ${C}s.`],
+          [[tous(A, B), tous(B, C)], tous(C, A), 2, `Les ${A}s sont une partie des ${C}s, mais rien ne dit que tous les ${C}s sont des ${A}s.`],
+          [[tous(A, B), `${Z} est un ${A}.`], `${Z} est un ${B}.`, 0, `${Z} est dans le groupe des ${A}s, qui est entièrement dans celui des ${B}s.`],
+          [[aucun(A, B), `${Z} est un ${A}.`], `${Z} est un ${B}.`, 1, `Aucun ${A} n'est un ${B} : ${Z}, qui est un ${A}, ne peut pas en être un.`]],
+      2: [[[tous(A, B), `${Z} est un ${B}.`], `${Z} est un ${A}.`, 2, `Le piège le plus courant : tous les ${A}s sont des ${B}s, mais il peut exister des ${B}s qui ne sont pas des ${A}s. ${Z} en est peut-être un.`],
+          [[tous(A, B), `${Z} n'est pas un ${B}.`], `${Z} est un ${A}.`, 1, `Si ${Z} était un ${A}, il serait forcément un ${B}. Or il n'en est pas un : il n'est donc pas un ${A}.`],
+          [[tous(A, B), cert(C, A)], cert(C, B), 0, `Ces ${C}s qui sont des ${A}s sont forcément aussi des ${B}s.`],
+          [[tous(A, B), cert(B, C)], cert(A, C), 2, `Les ${B}s qui sont des ${C}s ne sont pas forcément des ${A}s.`]],
+      3: [[[aucun(A, B), tous(C, A)], cert(C, B), 1, `Tous les ${C}s sont des ${A}s, et aucun ${A} n'est un ${B} : aucun ${C} n'est donc un ${B}.`],
+          [[aucun(A, B), cert(C, B)], `Certains ${C}s ne sont pas des ${A}s.`, 0, `Les ${C}s qui sont des ${B}s ne peuvent pas être des ${A}s.`],
+          [[tous(A, B), aucun(C, B)], cert(C, A), 1, `Un ${C} n'est jamais un ${B} ; or tout ${A} est un ${B} : aucun ${C} ne peut être un ${A}.`],
+          [[cert(A, B), cert(B, C)], cert(A, C), 2, `Les ${A}s et les ${C}s qui sont des ${B}s peuvent être deux groupes différents.`],
+          [[tous(A, B), aucun(B, C)], aucun(A, C), 0, `Les ${A}s sont dans les ${B}s, qui ne touchent jamais les ${C}s.`]] }[niveau] || [];
+    const [prem, concl, bonne, explication] = modeles[alea(0, modeles.length - 1)];
+    const q = `${prem.join("\n")}\n\nConclusion : « ${concl} »`;
+    return { q, enonce: q.replace(/\n+/g, " "), choix: ["Vrai, à coup sûr", "Faux, à coup sûr", "On ne peut pas savoir"], bonne, pourquoi: `${explication} Méthode : dessine deux ronds (des groupes) et vérifie s'il existe un dessin où la conclusion est fausse.` };
   }
 };
+
+// Dessins de la logique (SVG produits par l'appli). Un domino : haut et bas, de 0 à 6 points ; null = la case « ? ».
+const PIPS = [[], [4], [0, 8], [0, 4, 8], [0, 2, 6, 8], [0, 2, 4, 6, 8], [0, 2, 3, 5, 6, 8]];
+function svgDomino(d) {
+  if (!d) return `<svg class="domino" viewBox="0 0 40 78" width="40" height="78" aria-label="domino à trouver"><rect x="1" y="1" width="38" height="76" rx="6" class="d-vide"/><text x="20" y="46" text-anchor="middle" class="d-q">?</text></svg>`;
+  return `<svg class="domino" viewBox="0 0 40 78" width="40" height="78" role="img" aria-label="domino ${d[0]} et ${d[1]}"><rect x="1" y="1" width="38" height="76" rx="6" class="d-fond"/><line x1="6" y1="39" x2="34" y2="39" class="d-trait"/>${d.map((v, k) => PIPS[v].map(p => `<circle cx="${9 + (p % 3) * 11}" cy="${k * 38 + 9 + Math.floor(p / 3) * 11}" r="3.6" class="d-point"/>`).join("")).join("")}</svg>`;
+}
+// Une case de matrice : [forme 0 rond / 1 carré / 2 triangle, nombre 0-2 (= 1 à 3 formes), remplissage 0 plein / 1 vide / 2 gris].
+const POSITIONS = [[[35, 35]], [[21, 35], [49, 35]], [[20, 47], [50, 47], [35, 21]]];
+function svgCase(c) {
+  if (!c) return `<svg class="case" viewBox="0 0 70 70" aria-label="case à trouver"><rect x="1" y="1" width="68" height="68" rx="8" class="m-vide"/><text x="35" y="44" text-anchor="middle" class="d-q">?</text></svg>`;
+  const [f, n, r] = c, cls = ["m-plein", "m-creux", "m-gris"][r];
+  const forme = ([x, y]) => f === 0 ? `<circle cx="${x}" cy="${y}" r="9" class="${cls}"/>` : f === 1 ? `<rect x="${x - 8}" y="${y - 8}" width="16" height="16" class="${cls}"/>` : `<path d="M${x} ${y - 10}L${x + 10} ${y + 8}H${x - 10}Z" class="${cls}"/>`;
+  return `<svg class="case" viewBox="0 0 70 70" role="img" aria-label="${n + 1} ${["rond", "carré", "triangle"][f]}${n ? "s" : ""} ${["plein", "vide", "gris"][r]}${n ? "s" : ""}"><rect x="1" y="1" width="68" height="68" rx="8" class="m-fond"/>${POSITIONS[n].map(forme).join("")}</svg>`;
+}
 
 function preparer(q, retour) {
   let x = { ...q, type: q.type || "qcm", _src: q, _retour: !!retour };
@@ -362,15 +488,15 @@ function tirage(n, exclus = new Set()) {
 
 const fragiles = exclus => aRevoir().filter(q => !exclus.has(q.id)).sort((a, b) => carte(a.id).boite - carte(b.id).boite || Math.random() - .5);
 
-// Session du jour : les questions dues (les plus fragiles d'abord), avec au moins RAPPELS_MIN rappels ; s'il manque des dues, les rappels complètent jusqu'à 10.
+// Session du jour : les questions dues (les plus fragiles d'abord), avec au moins RAPPELS_MIN() rappels ; s'il manque des dues, les rappels complètent la session.
 function demarrer(bonus) {
   let liste, nbRappels = 0;
-  if (bonus) liste = tirage(TAILLE_SESSION);
+  if (bonus) liste = tirage(taille());
   else {
     const dus = fragiles(new Set()), nonDus = D.questions.length - dus.length;
-    const nbDus = Math.min(dus.length, TAILLE_SESSION - Math.min(RAPPELS_MIN, nonDus));
+    const nbDus = Math.min(dus.length, taille() - Math.min(RAPPELS_MIN(), nonDus));
     liste = dus.slice(0, nbDus);
-    const r = rappels(TAILLE_SESSION - liste.length, new Set(liste.map(q => q.id)));
+    const r = rappels(taille() - liste.length, new Set(liste.map(q => q.id)));
     nbRappels = r.length;
     liste = melanger([...liste.map(q => preparer(q)), ...r.map(q => ({ ...preparer(q), _rappel: true }))]);
   }
@@ -391,10 +517,11 @@ function remplacant() {
 
 function passer() {
   const x = session.file.shift();
-  etat.journal.push({ t: new Date().toISOString(), q: x.id, type: x.type, passe: true, essai: 0, mode: session.mode });
+  etat.journal.push({ t: new Date().toISOString(), q: x.id, type: x.type, passe: true, essai: 0, mode: session.mode, ...(x.fam ? { fam: x.fam, niveau: x.niveau } : {}) });
   sauver();
   session.passees++;
-  if (x._retour) session.retoursPasses++;
+  if (session.mode === "logique") session.file.push(exerciceLogique(choisirFamille(x.fam)));   // un autre exercice, d'une autre famille si possible
+  else if (x._retour) session.retoursPasses++;
   else {
     const q = remplacant();
     if (q) { session.ids.add(q.id); session.file.push({ ...preparer(q), _rappel: carte(q.id).due > jour() && session.mode === "jour" }); }
@@ -407,6 +534,107 @@ function passer() {
 }
 
 const NIVEAUX = ["", "Reconnaître", "Retrouver seul", "Appliquer"];
+
+// ---- Onglet Logique : entraînement aux tests d'admission (suites, dominos, matrices, calcul, déduction) ----
+// Pas de boîtes de révision : chaque exercice est neuf. Le niveau s'adapte par famille : 3 réussites d'affilée = niveau au-dessus, 2 erreurs d'affilée = niveau en dessous.
+// limite : temps visé par question, en secondes (en mode concours, au-delà, c'est compté faux).
+const FAMILLES = {
+  suites:    { nom: "Suites de nombres", gen: "suite-logique", limite: 45 },
+  lettres:   { nom: "Suites de lettres", gen: "suite-lettres", limite: 45 },
+  dominos:   { nom: "Dominos",           gen: "dominos",       limite: 45 },
+  matrices:  { nom: "Matrices",          gen: "matrices",      limite: 60 },
+  calcul:    { nom: "Calcul mental",     gen: "calcul",        limite: 45 },
+  deduction: { nom: "Déduction",         gen: "deduction",     limite: 60 }
+};
+const statLogique = f => (etat.logique[f] ||= { niveau: 1, serie: 0, ko: 0, n: 0, ok: 0, ms: 0 });
+const chronoTexte = x => { const s = Math.floor((Date.now() - (x.debut || Date.now())) / 1000), lim = FAMILLES[x.fam].limite; return etat.concours ? `⏱ ${Math.max(0, lim - s)} s` : `⏱ ${s} s`; };
+
+function exerciceLogique(f) {
+  const s = statLogique(f);
+  const x = { id: "L-" + f, fam: f, niveau: s.niveau, type: "logique", paire: null, ...GENERATEURS[FAMILLES[f].gen](s.niveau) };
+  x.ordreChoix = melanger(x.choix.map((_, i) => i));
+  return x;
+}
+
+// Famille suivante : les plus ratées et les moins pratiquées sortent plus souvent ; jamais deux fois de suite la même (sauf si une seule est choisie).
+function choisirFamille(precedente) {
+  const fams = FAMILLES[etat.famLogique] ? [etat.famLogique] : Object.keys(FAMILLES);
+  const pool = fams.filter(f => f !== precedente || fams.length === 1).map(f => { const s = statLogique(f); return { q: f, w: 1 + 2 * (s.n ? 1 - s.ok / s.n : 1) + (s.n < 10 ? 1 : 0) }; });
+  return tirerPondere(pool, 1)[0];
+}
+
+function demarrerLogique() {
+  const f = choisirFamille(null);
+  session = { file: [exerciceLogique(f)], total: taille("tailleLogique"), faites: 0, justes: 0, xp: 0, ratees: new Set(), retoursPasses: 0, passees: 0,
+              ids: new Set(), etape: "repondre", res: null, mode: "logique", derniere: f, ms: 0, changements: [] };
+  envoi = null;
+  afficher();
+}
+
+function finaliserLogique() {
+  const x = session.file[0], res = session.res, s = statLogique(x.fam);
+  session.etape = "verdict"; session.derniere = x.fam; session.niveauMsg = "";
+  res.ms = Math.min(Date.now() - (x.debut || Date.now()), 10 * 60 * 1000);
+  s.n++; s.ms += res.ms; session.ms += res.ms;
+  if (res.ok) {
+    s.ok++; s.ko = 0; session.justes++; session.xp += 10;
+    if (++s.serie >= 3 && s.niveau < 3) { s.niveau++; s.serie = 0; session.niveauMsg = `Niveau ${s.niveau}/3 débloqué en ${FAMILLES[x.fam].nom.toLowerCase()} !`; session.changements.push(`${FAMILLES[x.fam].nom} : niveau ${s.niveau} ↑`); }
+  } else {
+    s.serie = 0; session.ratees.add(x.fam);
+    if (++s.ko >= 2 && s.niveau > 1) { s.niveau--; s.ko = 0; session.niveauMsg = `On redescend au niveau ${s.niveau}/3 pour consolider.`; session.changements.push(`${FAMILLES[x.fam].nom} : niveau ${s.niveau} ↓`); }
+  }
+  const e = { t: new Date().toISOString(), q: x.id, type: "logique", fam: x.fam, niveau: x.niveau, rep: x.texte ? (res.r !== undefined ? x.texte[res.r] : res.rep) : res.rep, ok: res.ok, essai: 1, mode: "logique", ms: res.ms, enonce: x.enonce };
+  if (res.nsp) e.nsp = true;
+  if (res.temps) e.temps = true;
+  etat.journal.push(e);
+  sauver();
+}
+
+function vueLogique() {
+  const fams = Object.entries(FAMILLES);
+  return `
+    <section class="card hero">
+      <span class="label">Entraînement logique</span>
+      <h2>Les tests d'admission, exercice par exercice</h2>
+      <p>Suites, dominos, matrices, calcul mental et déduction : les familles qu'on retrouve le plus souvent dans les tests psychotechniques. Le niveau monte quand tu réussis 3 fois d'affilée.</p>
+      ${choixTaille("tailleLogique")}
+      <div class="filtres">${[["toutes", "Tout mélanger"], ...fams.map(([f, F]) => [f, F.nom])].map(([f, nom]) =>
+        `<button data-fam="${f}" aria-pressed="${(FAMILLES[etat.famLogique] ? etat.famLogique : "toutes") === f}">${esc(nom)}</button>`).join("")}</div>
+      <button class="lien bascule" id="concours" aria-pressed="${!!etat.concours}">${etat.concours ? "☑" : "☐"} Mode concours : temps limité par question (au-delà, c'est compté faux)</button>
+      <button class="big" id="go-logique">Commencer (${taille("tailleLogique")} exercices)</button>
+    </section>
+    <section class="card">
+      <span class="label">Tes familles</span>
+      <div class="stats">${fams.map(([f, F]) => { const s = statLogique(f);
+        return `<div class="srow"><span><b>${esc(F.nom)}</b><br><small>${s.n ? `${Math.round(100 * s.ok / s.n)} % justes · ${Math.round(s.ms / s.n / 1000)} s en moyenne (objectif ${F.limite} s) · ${s.n} faits` : "pas encore essayé"}</small></span>
+          <span class="niv" aria-label="niveau ${s.niveau} sur 3">${"●".repeat(s.niveau)}${"○".repeat(3 - s.niveau)}</span></div>`; }).join("")}</div>
+    </section>
+    <section class="card">
+      <span class="label">La méthode, avant de deviner</span>
+      <div class="rappel">
+        <span><b>Suites</b> : écris les écarts, puis les écarts des écarts ; sinon une multiplication ; sinon une case sur deux. Lettres : A = 1, E = 5, J = 10, O = 15, T = 20.</span>
+        <span><b>Dominos</b> : le haut d'un côté, le bas de l'autre. Après 6 vient 0.</span>
+        <span><b>Matrices</b> : une caractéristique à la fois (forme, nombre, remplissage), sur les lignes puis sur les colonnes.</span>
+        <span><b>Déduction</b> : dessine des ronds. « Tous les A sont des B » ne veut pas dire « tous les B sont des A ».</span>
+        <span><b>Le jour du test</b> : une question bloque ? Passe et reviens-y : elles valent toutes autant de points.</span>
+      </div>
+    </section>
+    ${carteEnvoi()}`;
+}
+
+function vueFinLogique() {
+  const moy = session.faites ? Math.round(session.ms / session.faites / 1000) : 0;
+  return `
+    <section class="card hero">
+      <span class="label">Entraînement terminé</span>
+      <h2>${session.justes} / ${session.total} justes</h2>
+      <p>${moy} s par exercice en moyenne · +${session.xp} XP · série de ${etat.serie} jour${etat.serie > 1 ? "s" : ""}</p>
+      ${session.changements.length ? `<div class="rappel">${session.changements.map(c => `<span>${esc(c)}</span>`).join("")}</div>` : ""}
+      ${session.ratees.size ? `<div class="piege"><b>À retravailler :</b> ${[...session.ratees].map(f => esc(FAMILLES[f].nom)).join(" · ")}. Relis « La méthode » sur l'accueil de la logique.</div>` : ""}
+      <button class="big" id="retour">Retour</button>
+    </section>
+    ${carteEnvoi()}`;
+}
 
 function zoneReponse(x) {
   const fini = session.etape === "verdict", res = session.res;
@@ -444,10 +672,10 @@ function zoneReponse(x) {
         <div class="item"><span class="label">Réponse modèle</span><p>${esc(x.modele)}</p></div>
         ${res ? "" : `<p style="margin:0">Honnêtement, ton explication contenait l'essentiel ?</p>
         <div class="duo"><button class="big ghost" data-auto="0">Il me manquait des choses</button><button class="big" data-auto="1">J'avais l'essentiel</button></div>`}`;
-    default:   // qcm et generateur
-      return `<div class="choix">${x.ordreChoix.map(i => {
+    default:   // qcm, generateur et logique (x.html : les choix sont des dessins SVG produits par l'appli, pas du texte)
+      return `<div class="choix${x.html ? " visuel" : ""}">${x.ordreChoix.map(i => {
         const cls = fini ? (i === x.bonne ? "ok" : i === res.r ? "ko" : "") : res && i === res.r ? "sel" : "";
-        return `<button data-i="${i}" class="${cls}" ${res ? "disabled" : ""}>${esc(x.choix[i])}</button>`; }).join("")}</div>`;
+        return `<button data-i="${i}" class="${cls}" ${res ? "disabled" : ""} ${x.html ? `aria-label="Choix ${i + 1}"` : ""}>${x.html ? x.choix[i] : esc(x.choix[i])}</button>`; }).join("")}</div>`;
   }
 }
 
@@ -456,37 +684,42 @@ function solution(x) {
     case "saisie": return `Réponse attendue : ${x.reponses[0]}`;
     case "erreur": return `Le morceau faux : « ${x.texte[x.faux]} »`;
     case "associer": return x.couples.map(c => `${c[0]} → ${c[1]}`).join(" · ");
+    case "logique": return x.html ? `<span class="solution">La bonne réponse : ${x.choix[x.bonne]}</span>` : `La bonne réponse : ${x.choix[x.bonne]}`;
     default: return "";
   }
 }
 
 function vueSession() {
   const x = session.file[0];
-  const p = paire(x.paire);
+  const p = x.paire ? paire(x.paire) : null, logique = session.mode === "logique";
   const res = session.res;
-  const pct = Math.round(100 * session.faites / (session.total + session.ratees.size - session.retoursPasses));
+  const pct = Math.round(100 * session.faites / (logique ? session.total : session.total + session.ratees.size - session.retoursPasses));
+  if (logique && session.etape === "repondre" && !x.debut) x.debut = Date.now();   // le chrono part quand la question s'affiche
   let bas = "";
   if (session.etape === "repondre") bas = `<div class="duo"><button class="lien nsp" id="nsp">Je ne sais pas</button><button class="lien nsp" id="passer">Passer (pas le temps)</button></div>`;
   else if (session.etape === "confiance") bas = `<p style="margin:0">Avant la correction : tu étais…</p>
     <div class="duo"><button class="big ghost" data-conf="hesite">J'hésitais</button><button class="big" data-conf="sur">Sûr de moi</button></div>`;
   else if (session.etape === "verdict") {
-    const titre = res.nsp ? "Pas grave : voici la réponse" : res.ok ? (res.conf === "hesite" ? "Juste, mais tu hésitais" : "Bien vu")
+    const titre = res.temps ? "Temps écoulé" : res.nsp ? "Pas grave : voici la réponse" : res.ok ? (res.conf === "hesite" ? "Juste, mais tu hésitais" : "Bien vu")
       : res.conf === "sur" ? "Erreur sûre : c'est celle-là qu'il faut retenir" : "Pas tout à fait";
     const sol = res.ok ? "" : solution(x);
+    const lim = logique ? FAMILLES[x.fam].limite : 0;
     bas = `<div class="verdict ${res.ok ? "ok" : "ko"}" role="status">
         <h3>${titre}</h3>
-        ${sol ? `<p><b>${esc(sol)}</b></p>` : ""}
+        ${sol ? `<p><b>${x.html ? sol : esc(sol)}</b></p>` : ""}
         ${x.pourquoi ? `<p>${esc(x.pourquoi)}</p>` : ""}
+        ${logique ? `<p class="note" style="text-align:left;margin:0">Réponse en ${Math.round(res.ms / 1000)} s (objectif du test : moins de ${lim} s).${session.niveauMsg ? ` <b>${esc(session.niveauMsg)}</b>` : ""}</p>` : ""}
         ${res.ok && res.conf === "hesite" ? `<p class="note" style="text-align:left;margin:0">Elle revient demain : une réponse devinée ne compte pas comme sue.</p>` : ""}
-        <div class="rappel">${p.items.map(i => `<span><b>${esc(i.mot)}</b> : ${esc(i.image)}</span>`).join("")}</div>
+        ${p ? `<div class="rappel">${p.items.map(i => `<span><b>${esc(i.mot)}</b> : ${esc(i.image)}</span>`).join("")}</div>` : ""}
       </div>
       <button class="big" id="suite">Continuer</button>`;
   }
   return `
     <div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
     <section class="card">
-      <div class="qhead"><span class="theme">${esc(p.theme)}${x.niveau ? ` · ${String(x.gen || "").startsWith("suite") ? `Difficulté ${x.niveau}/3` : NIVEAUX[x.niveau]}` : ""}</span>${x._retour ? `<span class="retry">Deuxième essai</span>` : x._rappel ? `<span class="retry">Rappel</span>` : ""}</div>
+      <div class="qhead"><span class="theme">${logique ? `${esc(FAMILLES[x.fam].nom)} · Difficulté ${x.niveau}/3` : `${esc(p.theme)}${x.niveau ? ` · ${NIVEAUX[x.niveau]}` : ""}`}</span>${logique ? (session.etape === "repondre" ? `<span class="chrono" id="chrono">${chronoTexte(x)}</span>` : "") : x._retour ? `<span class="retry">Deuxième essai</span>` : x._rappel ? `<span class="retry">Rappel</span>` : ""}</div>
       <div class="question">${esc(x.q).replace(/\n/g, "<br>")}</div>
+      ${x.figure || ""}
       ${zoneReponse(x)}
       ${bas}
     </section>`;
@@ -502,6 +735,7 @@ function proposer(res) {
 }
 
 function finaliser() {
+  if (session.mode === "logique") return finaliserLogique();
   const x = session.file[0], res = session.res, c = carte(x.id);
   const due = c.due <= jour(), doute = res.conf === "hesite";
   session.etape = "verdict";
@@ -531,7 +765,8 @@ function finaliser() {
 function suivant() {
   session.file.shift();
   session.faites++;
-  session.res = null; session.etape = "repondre"; session.texte = "";
+  session.res = null; session.etape = "repondre"; session.texte = ""; session.niveauMsg = "";
+  if (session.mode === "logique" && session.faites < session.total) session.file.push(exerciceLogique(choisirFamille(session.derniere)));   // généré au dernier moment : le niveau a pu changer
   terminerSiVide();
   afficher();
   if (!session.fini) document.querySelector("#saisie, #explication")?.focus();
@@ -590,6 +825,7 @@ function clicSession(b) {
 }
 
 function vueFin() {
+  if (session.mode === "logique") return vueFinLogique();
   const ratees = [...session.ratees].map(id => D.questions.find(q => q.id === id));
   return `
     <section class="card hero">
@@ -634,16 +870,23 @@ function afficher() {
   chips();
   document.getElementById("tab-reviser").setAttribute("aria-selected", onglet === "reviser");
   document.getElementById("tab-lexique").setAttribute("aria-selected", onglet === "lexique");
+  document.getElementById("tab-logique").setAttribute("aria-selected", onglet === "logique");
   const v = document.getElementById("vue");
   if (onglet === "lexique") { v.innerHTML = vueLexique(); v.style.display = "grid"; v.style.gap = "14px"; return; }
   v.style.display = "grid"; v.style.gap = "16px";
-  v.innerHTML = session ? (session.fini ? vueFin() : vueSession()) : accueil();
+  // Une session n'est affichée que dans son propre onglet (Réviser ou Logique).
+  const s = session && (onglet === "logique") === (session.mode === "logique") ? session : null;
+  v.innerHTML = s ? (s.fini ? vueFin() : vueSession()) : onglet === "logique" ? vueLogique() : accueil();
 }
 
 document.getElementById("vue").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   if (b.id === "go") demarrer(false);
   else if (b.id === "bonus") demarrer(true);
+  else if (b.id === "go-logique") demarrerLogique();
+  else if (b.dataset.taille) { etat[b.dataset.cle] = +b.dataset.taille; sauver(); afficher(); }
+  else if (b.dataset.fam) { etat.famLogique = b.dataset.fam; sauver(); afficher(); }
+  else if (b.id === "concours") { etat.concours = !etat.concours; sauver(); afficher(); }
   else if (session && !session.fini && clicSession(b)) return;
   else if (b.id === "retour") { session = null; afficher(); }
   else if (b.id === "envoyer") envoyer();
@@ -659,11 +902,22 @@ document.getElementById("vue").addEventListener("input", e => {
 });
 document.getElementById("tab-reviser").addEventListener("click", () => { onglet = "reviser"; afficher(); });
 document.getElementById("tab-lexique").addEventListener("click", () => { onglet = "lexique"; afficher(); });
+document.getElementById("tab-logique").addEventListener("click", () => { onglet = "logique"; afficher(); });
+
+// Chrono de la logique : seul le compteur est mis à jour chaque seconde ; en mode concours, le temps écoulé compte comme une erreur.
+setInterval(() => {
+  if (!session || session.mode !== "logique" || session.fini || session.etape !== "repondre" || onglet !== "logique") return;
+  const x = session.file[0]; if (!x || !x.debut) return;
+  if (etat.concours && Date.now() - x.debut >= FAMILLES[x.fam].limite * 1000) return proposer({ ok: false, temps: true, rep: "(temps écoulé)" });
+  const c = document.getElementById("chrono"); if (c) c.textContent = chronoTexte(x);
+}, 1000);
 
 fetch("memo-cyber.json", { cache: "no-store" })
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then(d => {
     D = d;
+    // La logique a son propre onglet (exercices générés, avec chrono) : ses cartes sortent des révisions.
+    D.questions = D.questions.filter(q => paire(q.paire)?.theme !== "Logique");
     document.getElementById("note").textContent = (stockage ? "Ta progression reste enregistrée sur cet appareil." : "Ta progression ne peut pas être enregistrée ici (navigation privée ?).") + ` Cartes mises à jour le ${new Date(d.maj + "T12:00:00").toLocaleDateString("fr-FR")}.`;
     afficher();
   })
