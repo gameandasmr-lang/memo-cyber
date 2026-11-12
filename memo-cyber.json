@@ -632,6 +632,44 @@
         }
       ],
       "piege": "ls montre les NOMS des fichiers, cat montre ce qu'il y a DANS un fichier. cd ne montre rien : il déplace. Sous Linux, les majuscules comptent : Documents ≠ documents."
+    },
+    {
+      "id": "switch-couches",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "Switch couche 2",
+          "en": "layer 2 switch",
+          "phrase": "Se repère avec les adresses MAC et livre chaque paquet à la bonne prise, dans le même réseau.",
+          "image": "Le gardien de l'immeuble : il met chaque lettre dans la bonne boîte."
+        },
+        {
+          "mot": "Switch couche 3",
+          "en": "layer 3 switch",
+          "phrase": "Fait la même chose ET route entre des réseaux différents, grâce aux adresses IP. Il sert à l'intérieur de l'entreprise.",
+          "image": "Un gardien qui sait aussi faire suivre une lettre vers un autre immeuble."
+        }
+      ],
+      "piege": "Le switch ne se sert jamais du masque : le masque, c'est le PC (il décide). Et un switch couche 3 n'est pas un routeur : le routeur est à la sortie, vers Internet (NAT, opérateur)."
+    },
+    {
+      "id": "syn-ack",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "SYN",
+          "en": "synchronize",
+          "phrase": "Une question : « tu m'entends ? ». Le PC l'envoie en premier, vers le port du serveur.",
+          "image": "Au téléphone : « Allô, tu m'entends ? »"
+        },
+        {
+          "mot": "ACK",
+          "en": "acknowledgement",
+          "phrase": "Un « oui, bien reçu ». Le serveur le met dans son SYN-ACK, le PC l'envoie en dernier.",
+          "image": "Au téléphone : « Oui, je t'entends. »"
+        }
+      ],
+      "piege": "SYN = une question, ACK = un oui. Ordre : SYN (PC) → SYN-ACK (serveur : oui + question) → ACK (PC : oui). Le GET part APRÈS, tout seul : il n'est pas dans la poignée de main."
     }
   ],
   "questions": [
@@ -2594,6 +2632,203 @@
       ],
       "bonne": 0,
       "pourquoi": "Ici, c'est le routeur (192.168.1.1) qui répond : « je ne sais pas joindre cette machine ». Ce n'est pas un silence (timed out) : quelqu'un répond, mais pour dire que le chemin n'existe pas."
+    },
+    {
+      "id": "q133",
+      "paire": "switch-couches",
+      "q": "Un switch de couche 2 se repère avec…",
+      "choix": [
+        "Les adresses MAC des machines branchées dessus",
+        "Le masque de sous-réseau",
+        "Les adresses IP",
+        "La passerelle par défaut"
+      ],
+      "bonne": 0,
+      "pourquoi": "Couche 2 = MAC. Le masque, c'est le PC qui s'en sert pour décider ; le switch, lui, livre à la bonne prise."
+    },
+    {
+      "id": "q134",
+      "paire": "switch-couches",
+      "q": "La compta est en 192.168.1.0/24, l'entrepôt en 192.168.2.0/24. Le patron veut les brancher tous sur un switch classique (couche 2). Ça suffit ?",
+      "choix": [
+        "Non : il faut un appareil qui route (switch couche 3 ou routeur)",
+        "Oui : un switch relie tous les appareils",
+        "Oui, si on change le masque du switch",
+        "Non : il faut un modem"
+      ],
+      "bonne": 0,
+      "pourquoi": "Deux réseaux différents = il faut router. Le switch couche 3 (ou le routeur) a une adresse dans chaque réseau : c'est lui, la passerelle de chaque PC."
+    },
+    {
+      "id": "q135",
+      "paire": "switch-couches",
+      "type": "erreur",
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Pour joindre 192.168.2.20,",
+        "le switch compare les adresses avec le masque",
+        "et envoie le paquet à la passerelle."
+      ],
+      "faux": 1,
+      "pourquoi": "C'est le PC qui compare les parties réseau grâce au masque, et qui envoie à sa passerelle. Le PC décide, le switch livre."
+    },
+    {
+      "id": "q136",
+      "paire": "switch-couches",
+      "q": "Dans une entreprise, quel appareil met-on à la SORTIE, entre l'entreprise et Internet ?",
+      "choix": [
+        "Le routeur (NAT, liaison avec l'opérateur)",
+        "Le switch couche 3",
+        "Le switch couche 2",
+        "La borne Wi-Fi"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le switch couche 3 relie les services à l'intérieur (beaucoup de prises, très rapide). Le routeur est à la sortie : NAT, opérateur, souvent pare-feu et VPN."
+    },
+    {
+      "id": "q137",
+      "paire": "syn-ack",
+      "type": "ordre",
+      "q": "Tu ouvres une page web. Remets les messages dans l'ordre.",
+      "etapes": [
+        "SYN (le PC)",
+        "SYN-ACK (le serveur)",
+        "ACK (le PC)",
+        "GET / (le PC)",
+        "200 OK et le HTML (le serveur)"
+      ],
+      "pourquoi": "Question → oui + question → oui : la ligne est ouverte. Ensuite seulement, la vraie demande (GET) et la réponse."
+    },
+    {
+      "id": "q138",
+      "paire": "syn-ack",
+      "q": "Le 3ᵉ message de la poignée de main, le PC envoie…",
+      "choix": [
+        "ACK : « oui, je t'entends »",
+        "SYN : « tu m'entends ? »",
+        "SYN-ACK",
+        "Le GET"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le PC n'a plus rien à demander : il répond oui. Le GET part après, à part."
+    },
+    {
+      "id": "q139",
+      "paire": "syn-ack",
+      "type": "erreur",
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Le PC envoie SYN,",
+        "le serveur répond SYN-ACK,",
+        "puis le PC envoie ACK avec le GET dedans."
+      ],
+      "faux": 2,
+      "pourquoi": "Le ACK dit seulement « oui, la ligne est ouverte ». Le GET est un message à part, envoyé juste après."
+    },
+    {
+      "id": "q140",
+      "paire": "syn-ack",
+      "type": "saisie",
+      "q": "SYN, c'est une question. ACK, c'est un… ? (un mot)",
+      "reponses": [
+        "oui",
+        "un oui"
+      ],
+      "pourquoi": "ACK = acknowledgement = « bien reçu », un oui."
+    },
+    {
+      "id": "q141",
+      "paire": "syn-ack",
+      "q": "Le serveur répond à ton SYN. Que veut dire son SYN-ACK ?",
+      "choix": [
+        "« Oui, je t'entends. Et toi, tu m'entends ? »",
+        "« Voici la page »",
+        "« Je te donne ton numéro de port »",
+        "« Au revoir »"
+      ],
+      "bonne": 0,
+      "pourquoi": "ACK = le oui, SYN = sa propre question. C'est pour ça qu'il y a les deux mots dans un seul message."
+    },
+    {
+      "id": "q142",
+      "paire": "syn-ack",
+      "lang": "en",
+      "q": "In TCP, what does ACK stand for?",
+      "choix": [
+        "Acknowledgement: « I received it »",
+        "Access: « let me in »",
+        "Attack: a hacking attempt",
+        "Address: the IP of the server"
+      ],
+      "bonne": 0,
+      "pourquoi": "ACK = acknowledgement (accusé de réception). SYN = synchronize."
+    },
+    {
+      "id": "q143",
+      "paire": "ports",
+      "q": "Ta page s'ouvre depuis le port client 1028. Qui a choisi ce numéro ?",
+      "choix": [
+        "Le PC lui-même, dès son premier message (SYN)",
+        "Le serveur, selon le nombre de connexions reçues",
+        "La box, toujours",
+        "Le DNS"
+      ],
+      "bonne": 0,
+      "pourquoi": "C'est le PC qui commence : il doit écrire où lui répondre, comme l'adresse de l'expéditeur au dos d'une enveloppe. Une nouvelle connexion prend le ticket suivant (1025, 1026…)."
+    },
+    {
+      "id": "q144",
+      "paire": "ports",
+      "q": "Le PC (port 1028) demande une page au serveur (port 80). Dans la RÉPONSE du serveur, on lit…",
+      "choix": [
+        "Src 80, Dst 1028",
+        "Src 1028, Dst 80",
+        "Src 80, Dst 80",
+        "Src 443, Dst 1028"
+      ],
+      "bonne": 0,
+      "pourquoi": "Src = qui envoie, Dst = qui reçoit. Pour répondre, on inverse : le serveur écrit à l'adresse de l'expéditeur."
+    },
+    {
+      "id": "q145",
+      "paire": "ip-privee-publique",
+      "type": "erreur",
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Notre serveur est en 10.0.5.20 :",
+        "comme il ne commence pas par 192.168,",
+        "il est public et joignable depuis Internet."
+      ],
+      "faux": 2,
+      "pourquoi": "Tout ce qui commence par 10 est privé (la plus grande plage : celle des entreprises). Les 3 plages : 10.x, 172.16 à 172.31, 192.168.x."
+    },
+    {
+      "id": "q146",
+      "paire": "modem-routeur",
+      "type": "ordre",
+      "q": "Ton PC fixe, branché EN ETHERNET à la box, ouvre YouTube. Remets le trajet dans l'ordre.",
+      "etapes": [
+        "Le PC",
+        "Le switch (les prises de la box)",
+        "Le routeur",
+        "Le modem",
+        "L'opérateur et Internet",
+        "Le serveur de YouTube"
+      ],
+      "pourquoi": "Seule l'entrée change : le câble entre par le switch, le Wi-Fi par la borne. La sortie est toujours la même : routeur, puis modem."
+    },
+    {
+      "id": "q147",
+      "paire": "resolveur-autorite",
+      "q": "Qui fait tourner le serveur DNS qui fait autorité pour picard.fr ?",
+      "choix": [
+        "Le prestataire choisi par Picard (ici IPTwins)",
+        "Ton fournisseur d'accès (Orange, Free…)",
+        "Google, pour tout Internet",
+        "L'AFNIC, qui gère tous les sites en .fr"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le DNS est réparti : ton résolveur dépend de ton FAI (ou de ton choix), la racine de l'ICANN, le .fr de l'AFNIC, et la réponse finale du prestataire choisi par le site."
     }
   ],
   "entretien": [

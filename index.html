@@ -195,6 +195,8 @@ textarea.recherche { resize: vertical; line-height: 1.45; }
 .alphabet span { display: grid; text-align: center; font: 600 .95rem ui-monospace, Consolas, monospace; line-height: 1.15; padding: 3px 0; border-radius: 6px; background: var(--bg); }
 .alphabet span small { font-weight: 400; font-size: .68rem; color: var(--muted, inherit); opacity: .8; }
 .alphabet span.repere { outline: 1px solid var(--line); }
+.idees { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+.idees li { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; overflow-wrap: anywhere; }
 /* Courbe de progression et historique des simulations */
 .courbe svg { width: 100%; height: auto; display: block; overflow: visible; }
 .courbe .grille { stroke: var(--line); stroke-width: 1; }
@@ -252,7 +254,7 @@ let D = null, filtre = "Tous", recherche = "", onglet = "reviser", session = nul
 // logique : niveau et statistiques par famille d'exercices ; taille, tailleLogique : 10, 15 ou 20 questions ; concours : chrono limité ; famLogique : famille choisie ou "toutes".
 // simulations : historique des simulations de test (score, durée, par famille) ; simuDuree : 30 ou 45 min ; calc : mini-calculatrice autorisée ; oral : suivi des questions d'entretien.
 let etat = { cartes: {}, xp: 0, serie: 0, dernierJour: null, journal: [], envoye: null, logique: {}, taille: 10, tailleLogique: 10, concours: false, famLogique: "toutes",
-             simulations: [], simuDuree: 30, calc: false, alpha: false, oral: {} };
+             simulations: [], simuDuree: 30, calc: false, alpha: false, idees: [], oral: {} };
 let envoi = null;   // message ou texte de secours affiché sous le bouton d'envoi
 let stockage = true;
 try { const s = JSON.parse(localStorage.getItem(CLE)); if (s) etat = { ...etat, ...s }; } catch { stockage = false; }
@@ -346,11 +348,13 @@ function accueil() {
       <div class="paires">${lignes.map(({ p, pct }) =>
         `<div class="prow"><span>${esc(p.items.map(i => i.mot).join(" / "))}</span><div class="bar" aria-label="${pct} % maîtrisé"><i style="width:${pct}%"></i></div></div>`).join("")}</div>
     </section>
-    ${carteEnvoi()}`;
+    ${carteEnvoi()}
+    ${carteIdees()}`;
 }
 
 // ---- Bilan pour Claude : tout le journal + l'état des cartes, dans un fichier texte (JSON) ----
 const nonEnvoyees = () => etat.journal.filter(e => !etat.envoye || e.t > etat.envoye).length;
+const ideesNonEnvoyees = () => (etat.idees || []).filter(n => !etat.envoye || n.t > etat.envoye).length;
 
 function carteEnvoi() {
   const n = nonEnvoyees();
@@ -360,11 +364,31 @@ function carteEnvoi() {
       <span class="label">Envoyer à Claude</span>
       <p style="margin:0">${n ? `<b>${n}</b> réponse${n > 1 ? "s" : ""} pas encore envoyée${n > 1 ? "s" : ""}.` : "Tout est envoyé."} ${dernier ? `Dernier envoi : ${dernier}.` : "Aucun envoi pour l'instant."}</p>
       <p class="note" style="text-align:left;margin:0">Partage le fichier vers Google Drive (ou envoie-le-toi par Gmail) : Claude le récupère en début de séance et adapte les révisions à tes erreurs.</p>
-      <button class="big ${n ? "" : "ghost"}" id="envoyer">Envoyer mon bilan</button>
+      ${ideesNonEnvoyees() ? `<p class="note" style="text-align:left;margin:0">Et ${ideesNonEnvoyees()} note${ideesNonEnvoyees() > 1 ? "s" : ""} d'idées à envoyer.</p>` : ""}
+      <button class="big ${n || ideesNonEnvoyees() ? "" : "ghost"}" id="envoyer">Envoyer mon bilan</button>
       ${envoi ? (envoi.texte
         ? `<p class="note" style="text-align:left;margin:0">Le partage n'a pas marché ici : copie tout ce texte et colle-le à Claude.</p><textarea readonly class="recherche" rows="5" id="bilan-texte">${esc(envoi.texte)}</textarea>`
         : `<p class="note" role="status" style="margin:0">${esc(envoi.msg)}</p>`) : ""}
     </section>`;
+}
+
+// ---- Mes idées pour l'appli (13/11/2026, demande d'Arnaud) : des notes libres, gardées dans le téléphone et envoyées avec le bilan ----
+function carteIdees() {
+  const L = etat.idees || [];
+  return `
+    <section class="card">
+      <span class="label">Mes idées pour l'appli</span>
+      <p class="note" style="text-align:left;margin:0">Une amélioration, un bug, une gêne ? Note-la ici : elle part avec ton bilan, et Claude la lit en début de séance.</p>
+      <textarea class="recherche" rows="3" id="idee-texte" placeholder="Par exemple : la calculatrice devrait…"></textarea>
+      <button class="big ghost" id="idee-ajout">Ajouter la note</button>
+      ${L.length ? `<ul class="idees">${L.map((n, k) => `<li><span><b>${new Date(n.t).toLocaleDateString("fr-FR")}</b> · ${esc(n.texte)}</span> <button class="lien" data-idee-suppr="${k}" aria-label="Supprimer cette note">✕</button></li>`).join("")}</ul>` : ""}
+    </section>`;
+}
+function ajouterIdee() {
+  const z = document.getElementById("idee-texte"), v = (z?.value || "").trim();
+  if (!v) return z?.focus();
+  (etat.idees ||= []).push({ t: new Date().toISOString(), texte: v.slice(0, 2000) });
+  sauver(); afficher();
 }
 
 // ---- Courbe de progression (12/11/2026) : les 8 dernières semaines, tirées du journal ----
@@ -435,7 +459,7 @@ function courbe() {
 
 async function envoyer() {
   const b = { app: "memo-cyber", format: 1, exporte: new Date().toISOString(), cartesMaj: D.maj,
-              xp: etat.xp, serie: serieVisible(), dernierJour: etat.dernierJour, cartes: etat.cartes, logique: etat.logique, simulations: etat.simulations, oral: etat.oral, journal: etat.journal };
+              xp: etat.xp, serie: serieVisible(), dernierJour: etat.dernierJour, cartes: etat.cartes, logique: etat.logique, simulations: etat.simulations, oral: etat.oral, idees: etat.idees || [], journal: etat.journal };
   const texte = JSON.stringify(b);
   const nom = `memo-cyber-bilan-${jour()}.txt`;   // .txt : Chrome refuse de partager un .json
   const fait = msg => { etat.envoye = b.exporte; sauver(); envoi = { msg }; afficher(); };
@@ -1430,6 +1454,8 @@ document.getElementById("vue").addEventListener("click", e => {
   else if (session && !session.fini && clicSession(b)) return;
   else if (b.id === "retour") { session = null; afficher(); }
   else if (b.id === "envoyer") envoyer();
+  else if (b.id === "idee-ajout") ajouterIdee();
+  else if (b.dataset.ideeSuppr !== undefined) { etat.idees.splice(+b.dataset.ideeSuppr, 1); sauver(); afficher(); }
   else if (b.dataset.f) { filtre = b.dataset.f; afficher(); }
 });
 document.getElementById("vue").addEventListener("keydown", e => {
