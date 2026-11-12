@@ -1,5 +1,5 @@
 {
-  "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question est liée à une paire et a un format (champ type, qcm par défaut) : qcm (choix, bonne), saisie (reponses acceptées), ordre (etapes dans le bon ordre), erreur (texte en morceaux, faux = indice du morceau faux), associer (couples), generateur (gen = nom d’un générateur de l’appli ; pour suite-logique et suite-lettres, le niveau donne la difficulté de 1 à 3), explique (modele). Champ en (dans chaque mot d'une paire) : le terme anglais, affiché dans le lexique et utilisé par le générateur vocab-en. Champ lang = \"en\" (question) : question posée en anglais, avec une pastille English. Champ niveau facultatif : 1 reconnaître, 2 retrouver seul, 3 appliquer. Les choix des QCM sont mélangés par l’appli : l’ordre dans ce fichier n’a pas d’importance. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id.",
+  "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question est liée à une paire et a un format (champ type, qcm par défaut) : qcm (choix, bonne), saisie (reponses acceptées), ordre (etapes dans le bon ordre), erreur (texte en morceaux, faux = indice du morceau faux), associer (couples), generateur (gen = nom d’un générateur de l’appli ; pour suite-logique et suite-lettres, le niveau donne la difficulté de 1 à 3), explique (modele), terminal (invite, reponses acceptées, sortie affichée après la réponse ; casse: true = les majuscules comptent, comme sous Linux). Champ en (dans chaque mot d'une paire) : le terme anglais, affiché dans le lexique et utilisé par le générateur vocab-en. Champ extrait (question) : un court texte technique (sortie de commande, message d'erreur, doc, alerte) affiché avant la question. Champ lang = \"en\" (question) : question posée en anglais, avec une pastille English. Champ niveau facultatif : 1 reconnaître, 2 retrouver seul, 3 appliquer ; sans niveau, le format le donne (qcm, associer = 1 ; saisie, ordre, erreur, terminal, generateur = 2 ; explique = 3). Échelle de formats : une question jamais vue d'un niveau supérieur reste verrouillée tant que la moitié des questions des niveaux en dessous, dans la même paire, n'est pas en boîte 2 ou plus. Les choix des QCM sont mélangés par l’appli : l’ordre dans ce fichier n’a pas d’importance. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id. Tableau entretien : les questions du mode entretien oral (id, partie, q, points clés à cocher, modele, duree visée en secondes, lang facultatif), jamais dans les révisions du jour.",
   "maj": "2026-11-12",
   "paires": [
     {
@@ -576,6 +576,62 @@
         }
       ],
       "piege": "« Library » = bibliothèque de code ; « eventually » = finalement (pas éventuellement) ; « actually » = en fait ; « gateway » = passerelle."
+    },
+    {
+      "id": "commandes-windows",
+      "theme": "Commandes",
+      "items": [
+        {
+          "mot": "ipconfig",
+          "en": "IP configuration",
+          "phrase": "Affiche la configuration réseau de MA machine : son adresse IP, son masque, sa passerelle.",
+          "image": "Regarder sa propre carte d'identité."
+        },
+        {
+          "mot": "ping",
+          "en": "ICMP echo request",
+          "phrase": "Envoie un petit message à une AUTRE machine pour voir si elle répond, et en combien de temps.",
+          "image": "Dire « tu m'entends ? » au téléphone."
+        },
+        {
+          "mot": "nslookup",
+          "en": "name server lookup",
+          "phrase": "Demande au DNS l'adresse IP qui correspond à un nom.",
+          "image": "Chercher un numéro dans l'annuaire."
+        }
+      ],
+      "piege": "ipconfig ne contacte personne : il regarde chez toi. ping teste une autre machine. nslookup ne teste pas la machine : il interroge seulement le DNS."
+    },
+    {
+      "id": "commandes-linux",
+      "theme": "Commandes",
+      "items": [
+        {
+          "mot": "ls",
+          "en": "list",
+          "phrase": "Liste ce qu'il y a dans le dossier où je suis.",
+          "image": "Ouvrir un tiroir et regarder dedans."
+        },
+        {
+          "mot": "cd",
+          "en": "change directory",
+          "phrase": "Change de dossier : je me déplace.",
+          "image": "Passer dans une autre pièce."
+        },
+        {
+          "mot": "pwd",
+          "en": "print working directory",
+          "phrase": "Affiche le dossier où je suis en ce moment.",
+          "image": "Le plan « vous êtes ici » d'un centre commercial."
+        },
+        {
+          "mot": "cat",
+          "en": "concatenate",
+          "phrase": "Affiche le contenu d'un fichier.",
+          "image": "Lire une lettre."
+        }
+      ],
+      "piege": "ls montre les NOMS des fichiers, cat montre ce qu'il y a DANS un fichier. cd ne montre rien : il déplace. Sous Linux, les majuscules comptent : Documents ≠ documents."
     }
   ],
   "questions": [
@@ -2251,6 +2307,495 @@
       ],
       "bonne": 0,
       "pourquoi": "TCP is « reliable » (fiable): acknowledgements (accusés de réception) and retransmission. UDP is faster but does not check."
+    },
+    {
+      "id": "cmd-w1",
+      "paire": "commandes-windows",
+      "niveau": 1,
+      "q": "Quelle commande affiche TA propre adresse IP, ton masque et ta passerelle ?",
+      "choix": [
+        "ipconfig",
+        "ping",
+        "nslookup"
+      ],
+      "bonne": 0,
+      "pourquoi": "ipconfig regarde chez toi, sans contacter personne."
+    },
+    {
+      "id": "cmd-w2",
+      "paire": "commandes-windows",
+      "niveau": 1,
+      "q": "Quelle commande vérifie qu'une AUTRE machine répond ?",
+      "choix": [
+        "ping",
+        "ipconfig",
+        "nslookup"
+      ],
+      "bonne": 0,
+      "pourquoi": "ping envoie un message et attend la réponse : aller ET retour."
+    },
+    {
+      "id": "cmd-w3",
+      "paire": "commandes-windows",
+      "niveau": 1,
+      "type": "associer",
+      "q": "Relie chaque commande à la question qu'elle pose.",
+      "couples": [
+        [
+          "ipconfig",
+          "Quelle est ma configuration ?"
+        ],
+        [
+          "ping",
+          "Est-ce qu'elle répond ?"
+        ],
+        [
+          "nslookup",
+          "Quelle IP pour ce nom ?"
+        ]
+      ],
+      "pourquoi": "Trois commandes, trois questions différentes : moi, l'autre machine, le DNS."
+    },
+    {
+      "id": "cmd-l1",
+      "paire": "commandes-linux",
+      "niveau": 1,
+      "q": "Sous Linux, quelle commande affiche le CONTENU d'un fichier ?",
+      "choix": [
+        "cat",
+        "ls",
+        "cd",
+        "pwd"
+      ],
+      "bonne": 0,
+      "pourquoi": "cat lit le fichier. ls liste seulement les noms."
+    },
+    {
+      "id": "cmd-l2",
+      "paire": "commandes-linux",
+      "niveau": 1,
+      "type": "associer",
+      "q": "Relie chaque commande Linux à ce qu'elle fait.",
+      "couples": [
+        [
+          "ls",
+          "Lister le dossier"
+        ],
+        [
+          "cd",
+          "Changer de dossier"
+        ],
+        [
+          "pwd",
+          "Où suis-je ?"
+        ],
+        [
+          "cat",
+          "Lire un fichier"
+        ]
+      ],
+      "pourquoi": "ls (list), cd (change directory), pwd (print working directory), cat (concatenate)."
+    },
+    {
+      "id": "cmd-w4",
+      "paire": "commandes-windows",
+      "type": "terminal",
+      "niveau": 2,
+      "invite": "C:\\Users\\moi>",
+      "q": "Sur ton PC Windows, tu veux voir ton adresse IP, ton masque et ta passerelle.",
+      "reponses": [
+        "ipconfig",
+        "ipconfig /all"
+      ],
+      "sortie": "Carte Ethernet Ethernet :\n   Adresse IPv4. . . . . . . . . . : 192.168.1.23\n   Masque de sous-réseau . . . . . : 255.255.255.0\n   Passerelle par défaut . . . . . : 192.168.1.1",
+      "pourquoi": "ipconfig affiche la configuration réseau de TA machine. Avec /all, on voit en plus l'adresse MAC et les serveurs DNS."
+    },
+    {
+      "id": "cmd-w5",
+      "paire": "commandes-windows",
+      "type": "terminal",
+      "niveau": 2,
+      "invite": "C:\\Users\\moi>",
+      "q": "Tu veux vérifier que ta passerelle, 192.168.1.1, répond.",
+      "reponses": [
+        "ping 192.168.1.1"
+      ],
+      "sortie": "Réponse de 192.168.1.1 : octets=32 temps=2 ms TTL=64\nRéponse de 192.168.1.1 : octets=32 temps=1 ms TTL=64\n…\nPaquets : envoyés = 4, reçus = 4, perdus = 0 (perte 0%)",
+      "pourquoi": "ping + l'adresse à tester. Quatre réponses : la passerelle est joignable."
+    },
+    {
+      "id": "cmd-w6",
+      "paire": "commandes-windows",
+      "type": "terminal",
+      "niveau": 2,
+      "invite": "C:\\Users\\moi>",
+      "q": "Tu veux savoir quelle adresse IP correspond au nom www.exemple.fr.",
+      "reponses": [
+        "nslookup www.exemple.fr"
+      ],
+      "sortie": "Serveur :   box\nAddress:  192.168.1.1\n\nRéponse ne faisant pas autorité :\nNom :    www.exemple.fr\nAddress:  203.0.113.10",
+      "pourquoi": "nslookup interroge le DNS. « Réponse ne faisant pas autorité » : c'est ton résolveur qui répond (souvent de mémoire), pas le serveur du domaine."
+    },
+    {
+      "id": "cmd-l3",
+      "paire": "commandes-linux",
+      "type": "terminal",
+      "niveau": 2,
+      "casse": true,
+      "invite": "moi@lab:~$",
+      "q": "Tu veux voir les fichiers du dossier où tu es.",
+      "reponses": [
+        "ls",
+        "ls -l",
+        "ls -a",
+        "ls -la",
+        "ls -al"
+      ],
+      "sortie": "Documents  notes.txt  scripts",
+      "pourquoi": "ls liste le dossier courant. -l donne les détails (droits, taille), -a montre aussi les fichiers cachés."
+    },
+    {
+      "id": "cmd-l4",
+      "paire": "commandes-linux",
+      "type": "terminal",
+      "niveau": 2,
+      "casse": true,
+      "invite": "moi@lab:~$",
+      "q": "Tu veux savoir dans quel dossier tu te trouves.",
+      "reponses": [
+        "pwd"
+      ],
+      "sortie": "/home/moi",
+      "pourquoi": "pwd = print working directory : le chemin complet du dossier où tu es."
+    },
+    {
+      "id": "cmd-l5",
+      "paire": "commandes-linux",
+      "type": "terminal",
+      "niveau": 2,
+      "casse": true,
+      "invite": "moi@lab:~$",
+      "q": "Tu veux entrer dans le dossier Documents.",
+      "reponses": [
+        "cd Documents",
+        "cd Documents/",
+        "cd ./Documents"
+      ],
+      "sortie": "moi@lab:~/Documents$\n(cd n'affiche rien quand ça marche : seule l'invite change)",
+      "pourquoi": "cd + le nom du dossier. Attention : sous Linux, « documents » sans majuscule serait un autre dossier."
+    },
+    {
+      "id": "cmd-l6",
+      "paire": "commandes-linux",
+      "type": "terminal",
+      "niveau": 2,
+      "casse": true,
+      "invite": "moi@lab:~$",
+      "q": "Tu veux lire le contenu du fichier notes.txt.",
+      "reponses": [
+        "cat notes.txt",
+        "cat ./notes.txt"
+      ],
+      "sortie": "Lundi : changer le mot de passe du routeur.",
+      "pourquoi": "cat affiche le contenu du fichier. ls ne donnerait que son nom."
+    },
+    {
+      "id": "en-x1",
+      "paire": "anglais",
+      "lang": "en",
+      "niveau": 2,
+      "extrait": "C:\\> ping 10.0.0.5\n\nPinging 10.0.0.5 with 32 bytes of data:\nRequest timed out.\nRequest timed out.\nRequest timed out.\nRequest timed out.\n\nPing statistics for 10.0.0.5:\n    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss)",
+      "q": "What does this output tell you?",
+      "choix": [
+        "No reply came back from 10.0.0.5: all 4 packets were lost",
+        "The address 10.0.0.5 does not exist anywhere",
+        "The ping worked, but slowly",
+        "The DNS server is down"
+      ],
+      "bonne": 0,
+      "pourquoi": "Request timed out = aucune réponse dans le temps prévu. Ça ne dit pas pourquoi : machine éteinte, pare-feu qui bloque le ping, ou réponse qui ne trouve pas le chemin du retour."
+    },
+    {
+      "id": "en-x2",
+      "paire": "anglais",
+      "lang": "en",
+      "niveau": 2,
+      "extrait": "> nslookup www.exemple-introuvable.fr\n*** dns.google can't find www.exemple-introuvable.fr: Non-existent domain",
+      "q": "What is the problem?",
+      "choix": [
+        "This name does not exist in the DNS",
+        "The website is down, but the name exists",
+        "The network cable is unplugged",
+        "The password is wrong"
+      ],
+      "bonne": 0,
+      "pourquoi": "Non-existent domain : le DNS répond bien, mais ce nom n'existe pas. Le DNS marche ; c'est le nom qui est faux (souvent une faute de frappe)."
+    },
+    {
+      "id": "en-x3",
+      "paire": "anglais",
+      "lang": "en",
+      "niveau": 2,
+      "extrait": "HTTP/1.1 403 Forbidden\nContent-Type: text/html\n\n<h1>Forbidden</h1>\n<p>You don't have permission to access this resource.</p>",
+      "q": "What does the server say?",
+      "choix": [
+        "The page exists, but you are not allowed to see it",
+        "The page does not exist",
+        "The server crashed",
+        "The connection is not encrypted"
+      ],
+      "bonne": 0,
+      "pourquoi": "403 Forbidden = interdit : la ressource existe, l'accès est refusé. 404 = introuvable. 500 = le serveur a planté."
+    },
+    {
+      "id": "en-x4",
+      "paire": "anglais",
+      "lang": "en",
+      "niveau": 2,
+      "extrait": "ALERT: 50 failed login attempts for user 'admin' from 203.0.113.45 in 2 minutes. Account locked.",
+      "q": "What is most likely happening?",
+      "choix": [
+        "Someone is trying to guess the admin password (brute force)",
+        "The admin forgot to pay the Internet bill",
+        "The server is being updated",
+        "A user logged in successfully"
+      ],
+      "bonne": 0,
+      "pourquoi": "Beaucoup d'échecs en peu de temps sur un même compte = une attaque par force brute (brute force) : on essaie des mots de passe à la chaîne. Le compte a été verrouillé (locked) pour la bloquer."
+    },
+    {
+      "id": "en-x5",
+      "paire": "anglais",
+      "lang": "en",
+      "niveau": 2,
+      "extrait": "ipconfig /all\n  Displays the full TCP/IP configuration for all adapters,\n  including the physical (MAC) address and the DNS servers.",
+      "q": "According to this documentation, what does /all add?",
+      "choix": [
+        "More details, such as the MAC address and the DNS servers",
+        "It pings every machine on the network",
+        "It resets the network configuration",
+        "It shows only the IP address"
+      ],
+      "bonne": 0,
+      "pourquoi": "Full configuration = la configuration complète : en plus de l'IP, du masque et de la passerelle, l'adresse MAC (physical address) et les serveurs DNS."
+    },
+    {
+      "id": "en-x6",
+      "paire": "anglais",
+      "lang": "en",
+      "niveau": 2,
+      "extrait": "C:\\> ping 10.20.0.8\n\nPinging 10.20.0.8 with 32 bytes of data:\nReply from 192.168.1.1: Destination host unreachable.",
+      "q": "Who answers, and what does it mean?",
+      "choix": [
+        "The router 192.168.1.1 answers: it cannot reach the destination",
+        "10.20.0.8 answers: it is busy",
+        "Nobody answers at all",
+        "The DNS cannot find the name"
+      ],
+      "bonne": 0,
+      "pourquoi": "Ici, c'est le routeur (192.168.1.1) qui répond : « je ne sais pas joindre cette machine ». Ce n'est pas un silence (timed out) : quelqu'un répond, mais pour dire que le chemin n'existe pas."
+    }
+  ],
+  "entretien": [
+    {
+      "id": "o1",
+      "partie": "Motivation",
+      "duree": 120,
+      "q": "Présentez votre parcours en 2 minutes.",
+      "points": [
+        "Ma formation initiale (ma licence)",
+        "Mon emploi actuel et ce qu'il m'apprend (rigueur, procédures, relation avec les clients)",
+        "Le déclic : pourquoi l'informatique et la sécurité",
+        "Ce que je fais déjà pour me préparer, avec UN exemple précis (une salle TryHackMe, une mission Packet Tracer)",
+        "Où je vais : la formation, puis un premier poste"
+      ],
+      "modele": "Une histoire avec un fil, pas une liste de dates : d'où je viens, ce qui m'a amené ici, ce que je fais déjà, où je vais. Deux minutes, c'est environ 250 mots. Finir sur l'objectif, pas sur le passé."
+    },
+    {
+      "id": "o2",
+      "partie": "Motivation",
+      "duree": 90,
+      "q": "Pourquoi la cybersécurité, et pourquoi maintenant ?",
+      "points": [
+        "Une raison personnelle et concrète (pas seulement « c'est l'avenir »)",
+        "Ce que j'aime dedans : comprendre comment un système marche, et comment il casse",
+        "Un métier qui recrute : des débouchés réels",
+        "Pourquoi maintenant : le projet est préparé (autoformation commencée, financement prévu)"
+      ],
+      "modele": "Le jury cherche une motivation qui tiendra un an. Montrer que ce n'est pas un coup de tête : une raison personnelle, ce qui plaît vraiment dans le métier, et la preuve qu'on s'y est déjà mis."
+    },
+    {
+      "id": "o3",
+      "partie": "Motivation",
+      "duree": 60,
+      "q": "Votre licence de psychologie vous sert-elle ?",
+      "points": [
+        "L'ingénierie sociale et l'hameçonnage exploitent des biais de la pensée",
+        "Le facteur humain est à l'origine d'une grande partie des incidents",
+        "Sensibiliser les utilisateurs : savoir expliquer et convaincre",
+        "Communiquer avec un utilisateur stressé pendant un incident"
+      ],
+      "modele": "Oui, et c'est un atout à revendiquer : l'attaquant vise souvent l'humain avant la machine. Comprendre les biais aide à repérer l'hameçonnage, à former les collègues et à gérer la relation pendant une crise."
+    },
+    {
+      "id": "o4",
+      "partie": "Motivation",
+      "duree": 60,
+      "q": "Comment allez-vous tenir un an de formation intensive ?",
+      "points": [
+        "Des habitudes déjà prises (une séance chaque jour, une série sur TryHackMe)",
+        "Une organisation concrète (planning, révisions espacées)",
+        "Le financement réglé (projet de transition professionnelle)",
+        "Un objectif à long terme qui donne du sens (le poste visé)"
+      ],
+      "modele": "Répondre par des preuves, pas des promesses : ce que je fais déjà chaque jour depuis des semaines est la meilleure preuve que je tiendrai."
+    },
+    {
+      "id": "o5",
+      "partie": "Technique",
+      "duree": 90,
+      "q": "Que se passe-t-il quand vous tapez une adresse dans un navigateur ?",
+      "points": [
+        "Le DNS traduit le nom en adresse IP (le résolveur répond, parfois de mémoire)",
+        "Le navigateur ouvre une connexion TCP vers le serveur, port 443 (ou 80)",
+        "En HTTPS, la connexion est chiffrée (TLS) avant d'échanger quoi que ce soit",
+        "Le navigateur envoie une requête HTTP (GET), le serveur répond (200 OK et le HTML)",
+        "Le navigateur affiche la page et demande le reste (CSS, JavaScript, images)"
+      ],
+      "modele": "Dans l'ordre : nom → DNS → adresse IP ; connexion TCP vers le port 443 ; chiffrement TLS ; requête HTTP GET ; réponse 200 avec le HTML ; affichage, puis les autres fichiers de la page."
+    },
+    {
+      "id": "o6",
+      "partie": "Technique",
+      "duree": 60,
+      "q": "Quelle est la différence entre TCP et UDP ? Donnez un usage de chacun.",
+      "points": [
+        "TCP vérifie : accusés de réception, renvoi de ce qui est perdu, ordre respecté",
+        "UDP envoie sans vérifier : plus léger et plus rapide",
+        "Un usage de TCP : le web (HTTP/HTTPS), SSH, le courriel",
+        "Un usage d'UDP : le DNS, la visio, les jeux en ligne",
+        "Fiable ne veut pas dire sécurisé : TCP ne chiffre rien"
+      ],
+      "modele": "TCP, c'est la lettre recommandée : on sait si elle est arrivée, et on la renvoie sinon. UDP, c'est la carte postale : rapide, sans garantie. Le web passe par TCP, le DNS et la visio surtout par UDP."
+    },
+    {
+      "id": "o7",
+      "partie": "Technique",
+      "duree": 30,
+      "q": "Citez les ports de SSH, DNS, HTTPS et RDP.",
+      "points": [
+        "SSH : 22",
+        "DNS : 53",
+        "HTTPS : 443",
+        "RDP (bureau à distance de Windows) : 3389"
+      ],
+      "modele": "22, 53, 443, 3389. Réponse attendue sans hésiter : c'est du « par cœur » d'entretien."
+    },
+    {
+      "id": "o8",
+      "partie": "Technique",
+      "duree": 90,
+      "q": "Un utilisateur n'a plus Internet, mais ses collègues oui. Que vérifiez-vous, et dans quel ordre ?",
+      "points": [
+        "Le physique d'abord : câble branché, Wi-Fi connecté",
+        "ipconfig : a-t-il une adresse IP, un masque et une passerelle corrects ?",
+        "ping vers la passerelle : le réseau local marche-t-il ?",
+        "ping vers une adresse IP sur Internet : la sortie marche-t-elle ?",
+        "Si l'IP répond mais pas les noms : le DNS (nslookup)"
+      ],
+      "modele": "Du plus simple au plus compliqué, du plus proche au plus loin : câble, configuration (ipconfig), passerelle (ping), Internet par une IP (ping), puis les noms (nslookup). Comme les collègues ont Internet, le problème est sur SON poste ou sa prise."
+    },
+    {
+      "id": "o9",
+      "partie": "Technique",
+      "duree": 60,
+      "q": "Qu'est-ce qu'une machine virtuelle ? Pourquoi en utiliser ?",
+      "points": [
+        "Un ordinateur simulé par un logiciel, sur une machine physique",
+        "L'hyperviseur partage les ressources (processeur, mémoire, disque) entre les VM",
+        "Plusieurs serveurs sur un seul matériel : moins de machines, moins de coûts",
+        "Isolement : tester, faire un lab ou ouvrir un fichier suspect sans risque pour le reste",
+        "Instantanés (snapshots) : revenir en arrière en un clic"
+      ],
+      "modele": "Une VM est un ordinateur complet, mais simulé. Une PME peut faire tourner son serveur de fichiers, son annuaire et son site sur une seule machine physique, chacun isolé dans sa VM, et revenir en arrière si une mise à jour casse tout."
+    },
+    {
+      "id": "o10",
+      "partie": "Technique",
+      "duree": 45,
+      "q": "À quoi sert le DNS ?",
+      "points": [
+        "Il traduit un nom (www.exemple.fr) en adresse IP",
+        "Les humains retiennent des noms, les machines ont besoin d'adresses",
+        "Le résolveur cherche la réponse et la garde en mémoire (cache)",
+        "Port 53 ; on le teste avec nslookup"
+      ],
+      "modele": "Le DNS est l'annuaire d'Internet : on lui donne un nom, il rend l'adresse IP. Sans lui, il faudrait retenir les adresses de chaque site."
+    },
+    {
+      "id": "o11",
+      "partie": "Technique",
+      "duree": 45,
+      "q": "Que dit la loi sur le fait de tester la sécurité d'un système ?",
+      "points": [
+        "Article 323-1 du Code pénal : entrer ou se maintenir frauduleusement dans un système est un délit",
+        "Jamais de test sans autorisation écrite (périmètre et dates précisés)",
+        "S'entraîner seulement sur des plateformes prévues pour ça (TryHackMe) ou sur son propre lab"
+      ],
+      "modele": "Même « pour aider », tester un système sans autorisation écrite est un délit (article 323-1 du Code pénal). Un professionnel travaille avec un contrat qui fixe le périmètre."
+    },
+    {
+      "id": "o12",
+      "partie": "Savoir-être",
+      "duree": 60,
+      "q": "Utilisez-vous l'IA ? Comment vérifiez-vous ce qu'elle produit ?",
+      "points": [
+        "Oui, pour aller plus vite (premier jet, explication d'une notion)",
+        "Je ne lance jamais une commande que je ne comprends pas",
+        "Je vérifie : test dans un lab, comparaison avec la documentation officielle",
+        "Je dois pouvoir l'expliquer moi-même sans l'IA",
+        "Aucune donnée confidentielle dans un outil d'IA"
+      ],
+      "modele": "L'IA accélère, elle ne remplace pas la compréhension. Je relis, je teste dans un lab, je compare à la doc, et je ne donne jamais de données de l'entreprise à un outil externe."
+    },
+    {
+      "id": "o13",
+      "partie": "Savoir-être",
+      "duree": 30,
+      "q": "Que faites-vous quand vous ne connaissez pas la réponse ?",
+      "points": [
+        "Je le dis honnêtement, je n'invente jamais",
+        "Je dis comment je chercherais (documentation, collègue, test)",
+        "Je reviens avec la réponse"
+      ],
+      "modele": "« Je ne sais pas, mais voici comment je le trouverais. » En sécurité, une réponse inventée est plus dangereuse qu'un « je vérifie et je reviens vers vous »."
+    },
+    {
+      "id": "o14",
+      "partie": "Anglais",
+      "lang": "en",
+      "duree": 60,
+      "q": "Introduce yourself in three sentences, in English.",
+      "points": [
+        "Who I am and what I do now (« I work in retail »)",
+        "What I do to prepare (« I train every day on TryHackMe and Cisco Packet Tracer »)",
+        "What I want (« I want to join a security program and become a security administrator »)"
+      ],
+      "modele": "My name is … I currently work in retail, and I have a degree in psychology. I train in cybersecurity every day on TryHackMe and Cisco Packet Tracer. I want to join an infrastructure security program and become a security administrator."
+    },
+    {
+      "id": "o15",
+      "partie": "Anglais",
+      "lang": "en",
+      "duree": 45,
+      "q": "What does the ping command do? When would you use it?",
+      "points": [
+        "It checks whether another machine answers (an ICMP echo request, then a reply)",
+        "It measures the round-trip time",
+        "I use it to troubleshoot: is the gateway reachable? Is the server reachable?",
+        "A reply does not prove that the service works (the website may still be down)"
+      ],
+      "modele": "Ping sends a small message to another machine and waits for the reply. It tells me if the machine is reachable and how long the round trip takes. I use it to troubleshoot a connection, step by step. But a reply only proves the machine answers, not that the service works."
     }
   ]
 }
