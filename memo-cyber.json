@@ -1,5 +1,5 @@
 {
-  "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question est liée à une paire et a un format (champ type, qcm par défaut) : qcm (choix, bonne), saisie (reponses acceptées), ordre (etapes dans le bon ordre), erreur (texte en morceaux, faux = indice du morceau faux), associer (couples), generateur (gen = nom d’un générateur de l’appli ; pour suite-logique et suite-lettres, le niveau donne la difficulté de 1 à 3), explique (modele). Champ niveau facultatif : 1 reconnaître, 2 retrouver seul, 3 appliquer. Les choix des QCM sont mélangés par l’appli : l’ordre dans ce fichier n’a pas d’importance. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id.",
+  "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question est liée à une paire et a un format (champ type, qcm par défaut) : qcm (choix, bonne), saisie (reponses acceptées), ordre (etapes dans le bon ordre), erreur (texte en morceaux, faux = indice du morceau faux), associer (couples), generateur (gen = nom d’un générateur de l’appli ; pour suite-logique et suite-lettres, le niveau donne la difficulté de 1 à 3), explique (modele). Champ en (dans chaque mot d'une paire) : le terme anglais, affiché dans le lexique et utilisé par le générateur vocab-en. Champ lang = \"en\" (question) : question posée en anglais, avec une pastille English. Champ niveau facultatif : 1 reconnaître, 2 retrouver seul, 3 appliquer. Les choix des QCM sont mélangés par l’appli : l’ordre dans ce fichier n’a pas d’importance. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id.",
   "maj": "2026-11-12",
   "paires": [
     {
@@ -9,12 +9,14 @@
         {
           "mot": "HTTP",
           "phrase": "Les règles de la conversation entre le navigateur et le serveur : comment on demande, et comment on répond.",
-          "image": "La façon de commander au restaurant : tu demandes un plat, le serveur répond « ça arrive » ou « on n'en a plus »."
+          "image": "La façon de commander au restaurant : tu demandes un plat, le serveur répond « ça arrive » ou « on n'en a plus ».",
+          "en": "HTTP (HyperText Transfer Protocol)"
         },
         {
           "mot": "HTML",
           "phrase": "Le document que le serveur renvoie. Il décrit la page : titres, textes, boutons.",
-          "image": "L'assiette qui arrive sur ta table."
+          "image": "L'assiette qui arrive sur ta table.",
+          "en": "HTML (HyperText Markup Language)"
         }
       ],
       "piege": "HTTP n'est pas « la requête » : la réponse aussi est du HTTP. Le « 200 OK » en première ligne, c'est du HTTP."
@@ -26,17 +28,20 @@
         {
           "mot": "HTML",
           "phrase": "Décrit ce qu'il y a sur la page. Il ne fait rien tout seul : le navigateur l'affiche.",
-          "image": "Les murs et les meubles d'une maison."
+          "image": "Les murs et les meubles d'une maison.",
+          "en": "HTML"
         },
         {
           "mot": "CSS",
           "phrase": "L'apparence : couleurs, tailles, polices, positions.",
-          "image": "La peinture et la déco."
+          "image": "La peinture et la déco.",
+          "en": "CSS (Cascading Style Sheets)"
         },
         {
           "mot": "JavaScript (JS)",
           "phrase": "Des instructions que le navigateur exécute : ce qui se passe quand on clique.",
-          "image": "L'électricité : tu appuies sur l'interrupteur, la lumière s'allume."
+          "image": "L'électricité : tu appuies sur l'interrupteur, la lumière s'allume.",
+          "en": "JavaScript (JS)"
         }
       ],
       "piege": "Le HTML ne s'exécute pas, il décrit. Seul le JS s'exécute. Sans JS, la page s'affiche quand même : seuls les boutons ne réagissent plus."
@@ -48,22 +53,26 @@
         {
           "mot": "200",
           "phrase": "Ça a marché, voici ce que tu as demandé. Famille 2xx = succès.",
-          "image": "« Voici votre plat. »"
+          "image": "« Voici votre plat. »",
+          "en": "200 OK"
         },
         {
           "mot": "404",
           "phrase": "Introuvable. Le serveur a bien répondu : il n'a pas ça. Famille 4xx = erreur du client.",
-          "image": "« Ce plat n'existe pas à la carte. »"
+          "image": "« Ce plat n'existe pas à la carte. »",
+          "en": "404 Not Found"
         },
         {
           "mot": "403",
           "phrase": "Interdit. Ça existe, mais tu n'as pas le droit d'y accéder.",
-          "image": "« Ce salon est privé, vous n'entrez pas. »"
+          "image": "« Ce salon est privé, vous n'entrez pas. »",
+          "en": "403 Forbidden"
         },
         {
           "mot": "500",
           "phrase": "Le serveur a planté. Famille 5xx = erreur du serveur.",
-          "image": "« La cuisine a pris feu. »"
+          "image": "« La cuisine a pris feu. »",
+          "en": "500 Internal Server Error"
         }
       ],
       "piege": "404 ne veut pas dire « pas de réponse » : le serveur a répondu « je n'ai pas ça ». 4 = c'est ta faute, 5 = c'est la sienne."
@@ -75,12 +84,14 @@
         {
           "mot": "Masque",
           "phrase": "La règle qui dit si une adresse est dans mon réseau ou ailleurs.",
-          "image": "Savoir si le destinataire habite dans ton immeuble."
+          "image": "Savoir si le destinataire habite dans ton immeuble.",
+          "en": "subnet mask"
         },
         {
           "mot": "Passerelle",
           "phrase": "La porte de sortie : tout ce qui n'est pas dans mon réseau lui est envoyé. Chez toi, c'est la box.",
-          "image": "La boîte aux lettres de La Poste, au coin de la rue, pour tout le reste."
+          "image": "La boîte aux lettres de La Poste, au coin de la rue, pour tout le reste.",
+          "en": "default gateway"
         }
       ],
       "piege": "Pour savoir si on passe par la passerelle, on regarde le masque. Avec 255.255.255.0 : mêmes 3 premiers nombres = même réseau, sinon passerelle."
@@ -92,17 +103,20 @@
         {
           "mot": "IP privée",
           "phrase": "Adresse à l'intérieur de ton réseau (192.168…, 10…, 172.16 à 172.31). Elle ne sort jamais sur Internet.",
-          "image": "Le numéro de poste interne au bureau : « poste 94 »."
+          "image": "Le numéro de poste interne au bureau : « poste 94 ».",
+          "en": "private IP address"
         },
         {
           "mot": "IP publique",
           "phrase": "L'adresse de ta box sur Internet, unique au monde.",
-          "image": "Le numéro du standard de l'entreprise."
+          "image": "Le numéro du standard de l'entreprise.",
+          "en": "public IP address"
         },
         {
           "mot": "NAT",
           "phrase": "La box remplace l'IP privée par l'IP publique à la sortie, et fait le chemin inverse au retour.",
-          "image": "Le standard qui transfère chaque appel au bon poste."
+          "image": "Le standard qui transfère chaque appel au bon poste.",
+          "en": "NAT (Network Address Translation)"
         }
       ],
       "piege": "Un site ne voit jamais ton IP privée. ifconfig.me te montre l'IP publique de ta box."
@@ -114,12 +128,14 @@
         {
           "mot": "Port serveur",
           "phrase": "Numéro fixe et connu de tous : 443 = HTTPS, 80 = HTTP, 53 = DNS, 22 = SSH.",
-          "image": "Le guichet n° 4 de la poste : tout le monde sait où aller."
+          "image": "Le guichet n° 4 de la poste : tout le monde sait où aller.",
+          "en": "server port (well-known port)"
         },
         {
           "mot": "Port client",
           "phrase": "Numéro tiré au hasard par mon PC, un par connexion, pour que chaque réponse revienne au bon onglet.",
-          "image": "Le ticket de la file d'attente : ton numéro à toi pour être appelé."
+          "image": "Le ticket de la file d'attente : ton numéro à toi pour être appelé.",
+          "en": "client port (ephemeral port)"
         }
       ],
       "piege": "3 onglets vers le même site = 3 ports différents de mon côté, sur la même machine."
@@ -131,12 +147,14 @@
         {
           "mot": "DNS",
           "phrase": "Traduit un nom (picard.fr) en adresse IP. Il ne donne que l'adresse, jamais de port.",
-          "image": "L'annuaire : il te donne l'adresse de l'immeuble."
+          "image": "L'annuaire : il te donne l'adresse de l'immeuble.",
+          "en": "DNS (Domain Name System)"
         },
         {
           "mot": "Le port",
           "phrase": "Vient du protocole tapé : https:// donne 443, http:// donne 80.",
-          "image": "Le numéro de la porte, que tout le monde connaît déjà."
+          "image": "Le numéro de la porte, que tout le monde connaît déjà.",
+          "en": "port"
         }
       ],
       "piege": "Le DNS ne renvoie jamais « IP:443 ». Et il passe toujours avant la requête HTTP : pas de colis sans adresse."
@@ -148,12 +166,14 @@
         {
           "mot": "Résolveur",
           "phrase": "Celui qui cherche la réponse DNS pour toi et la garde en mémoire. Chez toi, c'est la box.",
-          "image": "Le collègue qui te répète les horaires du magasin."
+          "image": "Le collègue qui te répète les horaires du magasin.",
+          "en": "resolver (recursive resolver)"
         },
         {
           "mot": "Serveur qui fait autorité",
           "phrase": "Le serveur officiel du domaine, qui détient la vraie réponse.",
-          "image": "Le responsable du magasin."
+          "image": "Le responsable du magasin.",
+          "en": "authoritative name server"
         }
       ],
       "piege": "« Réponse ne faisant pas autorité » = c'est le résolveur qui a répondu, de mémoire. Rien à voir avec privé ou public."
@@ -165,12 +185,14 @@
         {
           "mot": "TCP",
           "phrase": "Vérifie que tout arrive, dans l'ordre (poignée de main SYN, SYN-ACK, ACK). Pour les pages web et les fichiers.",
-          "image": "Le colis avec accusé de réception."
+          "image": "Le colis avec accusé de réception.",
+          "en": "TCP (Transmission Control Protocol)"
         },
         {
           "mot": "UDP",
           "phrase": "Envoie sans vérifier, donc plus rapide. Pour les jeux en ligne, les appels et le DNS.",
-          "image": "La radio : si tu rates une phrase, l'émission continue."
+          "image": "La radio : si tu rates une phrase, l'émission continue.",
+          "en": "UDP (User Datagram Protocol)"
         }
       ],
       "piege": "Dans un jeu, une position perdue est déjà périmée : la renvoyer ne sert à rien, d'où UDP."
@@ -182,12 +204,14 @@
         {
           "mot": "Fiable",
           "phrase": "Tout arrive, rien ne manque. C'est ce que fait TCP.",
-          "image": "Une carte postale en recommandé : elle arrive à coup sûr, mais le facteur peut la lire."
+          "image": "Une carte postale en recommandé : elle arrive à coup sûr, mais le facteur peut la lire.",
+          "en": "reliable"
         },
         {
           "mot": "Sécurisé (chiffré)",
           "phrase": "Personne ne peut lire en route. C'est TLS, le « S » de HTTPS.",
-          "image": "Une lettre dans une enveloppe scellée."
+          "image": "Une lettre dans une enveloppe scellée.",
+          "en": "secure (encrypted)"
         }
       ],
       "piege": "TCP est fiable, pas sécurisé. HTTPS protège le trajet, pas la page une fois arrivée : le visiteur peut lire tout le HTML."
@@ -199,12 +223,14 @@
         {
           "mot": "Hyperviseur type 1",
           "phrase": "Installé directement sur la machine, sans Windows dessous. Dans les centres de données (ESXi, Proxmox).",
-          "image": "Le propriétaire de l'immeuble, qui loue les appartements."
+          "image": "Le propriétaire de l'immeuble, qui loue les appartements.",
+          "en": "type 1 hypervisor (bare-metal)"
         },
         {
           "mot": "Hyperviseur type 2",
           "phrase": "Un logiciel qui tourne sur ton Windows (VirtualBox).",
-          "image": "Le locataire qui sous-loue une chambre de son appartement."
+          "image": "Le locataire qui sous-loue une chambre de son appartement.",
+          "en": "type 2 hypervisor (hosted)"
         }
       ],
       "piege": "Centre de données = type 1. Ton PC avec VirtualBox = type 2."
@@ -216,12 +242,14 @@
         {
           "mot": "Machine virtuelle (VM)",
           "phrase": "Un ordinateur complet, virtuel, avec son propre système. Isolée : on peut tout casser sans risque, et revenir en arrière avec un instantané.",
-          "image": "Une maison entière, avec ses propres fondations."
+          "image": "Une maison entière, avec ses propres fondations.",
+          "en": "virtual machine (VM)"
         },
         {
           "mot": "Conteneur",
           "phrase": "Une petite boîte pour une seule appli, qui partage le système de la machine.",
-          "image": "Une chambre en colocation : la cuisine est commune."
+          "image": "Une chambre en colocation : la cuisine est commune.",
+          "en": "container"
         }
       ],
       "piege": "Tester une mise à jour sans risque = une VM (isolée) + un instantané (pour revenir en arrière)."
@@ -233,12 +261,14 @@
         {
           "mot": "Énumération (scan)",
           "phrase": "Un robot essaie des dizaines de chemins (/admin, /.env…) pour trouver des pages cachées.",
-          "image": "Quelqu'un qui tourne toutes les poignées de porte d'un couloir."
+          "image": "Quelqu'un qui tourne toutes les poignées de porte d'un couloir.",
+          "en": "enumeration (scanning)"
         },
         {
           "mot": "Fuite d'information",
           "phrase": "Le serveur révèle trop, par exemple son logiciel et sa version dans l'en-tête Server:.",
-          "image": "Laisser la notice de son coffre-fort scotchée dessus."
+          "image": "Laisser la notice de son coffre-fort scotchée dessus.",
+          "en": "information disclosure (data leak)"
         }
       ],
       "piege": "Dans une rafale de 404, la ligne grave est le 200 : la porte trouvée ouverte."
@@ -250,12 +280,14 @@
         {
           "mot": "Protocole",
           "phrase": "Les règles d'une conversation : qui parle, dans quel ordre, avec quelles formules. HTTP, TCP et DNS sont des protocoles.",
-          "image": "Le « allô ? », « oui, c'est moi », « au revoir » du téléphone."
+          "image": "Le « allô ? », « oui, c'est moi », « au revoir » du téléphone.",
+          "en": "protocol"
         },
         {
           "mot": "Langage",
           "phrase": "Une façon d'écrire un document ou un programme. HTML et JavaScript sont des langages.",
-          "image": "La langue dans laquelle la lettre est écrite."
+          "image": "La langue dans laquelle la lettre est écrite.",
+          "en": "language"
         }
       ],
       "piege": "Le P de HTTP veut dire Protocol, le L de HTML veut dire Language. Dire « HTTP est un langage » ramène toute la confusion HTTP/HTML."
@@ -267,12 +299,14 @@
         {
           "mot": "Code de statut",
           "phrase": "La première ligne de la réponse HTTP (« 200 OK », « 404 »). Il dit au navigateur ce qui s'est passé.",
-          "image": "Le serveur du restaurant qui dit « voilà » ou « on n'en a plus »."
+          "image": "Le serveur du restaurant qui dit « voilà » ou « on n'en a plus ».",
+          "en": "status code"
         },
         {
           "mot": "Corps",
           "phrase": "La partie de la réponse qui vient après les en-têtes et une ligne vide. Elle transporte le document : du HTML, une image…",
-          "image": "L'assiette posée sur la table."
+          "image": "L'assiette posée sur la table.",
+          "en": "body (response body)"
         }
       ],
       "piege": "Même une erreur a souvent un corps : la page « Oups, introuvable » est du HTML envoyé avec un code 404 ou 410."
@@ -284,12 +318,14 @@
         {
           "mot": "Réseau (en informatique)",
           "phrase": "Un groupe d'adresses IP qui ont la même partie réseau, par exemple tous les 192.168.1.x. Gratuit, on en crée autant qu'on veut.",
-          "image": "Une rue : toutes les maisons portent le même nom de rue."
+          "image": "Une rue : toutes les maisons portent le même nom de rue.",
+          "en": "network"
         },
         {
           "mot": "Abonnement Internet",
           "phrase": "Le contrat avec un opérateur (Orange, Free…) qui donne l'accès à Internet.",
-          "image": "Le contrat d'eau ou d'électricité de la maison."
+          "image": "Le contrat d'eau ou d'électricité de la maison.",
+          "en": "Internet subscription (Internet plan)"
         }
       ],
       "piege": "Un réseau n'a pas besoin d'Internet ni d'abonnement : deux PC reliés dans Packet Tracer forment déjà un réseau."
@@ -301,12 +337,14 @@
         {
           "mot": "Switch",
           "phrase": "Relie plusieurs appareils DANS le même réseau et transmet chaque message seulement au bon destinataire.",
-          "image": "Le facteur de l'immeuble : il dépose chaque lettre dans la bonne boîte."
+          "image": "Le facteur de l'immeuble : il dépose chaque lettre dans la bonne boîte.",
+          "en": "switch"
         },
         {
           "mot": "Routeur",
           "phrase": "Relie des réseaux DIFFÉRENTS entre eux. Il a un pied dans chaque réseau.",
-          "image": "Le carrefour entre deux rues."
+          "image": "Le carrefour entre deux rues.",
+          "en": "router"
         }
       ],
       "piege": "La box de la maison contient les deux (plus un modem et le Wi-Fi) : son switch relie tes appareils entre eux, son routeur te relie à Internet."
@@ -318,12 +356,14 @@
         {
           "mot": "Routeur",
           "phrase": "Décide où va chaque message : il relie des réseaux différents. Vu depuis ton PC, c’est la passerelle.",
-          "image": "Le bureau de poste au bout de la rue : le seul qui envoie le courrier vers les autres rues."
+          "image": "Le bureau de poste au bout de la rue : le seul qui envoie le courrier vers les autres rues.",
+          "en": "router"
         },
         {
           "mot": "Modem",
           "phrase": "Traduit le signal pour la ligne de l’opérateur (fibre, ADSL). Il ne décide rien.",
-          "image": "Le traducteur à la frontière : il fait passer le message dans la langue de la ligne."
+          "image": "Le traducteur à la frontière : il fait passer le message dans la langue de la ligne.",
+          "en": "modem"
         }
       ],
       "piege": "Pour aller sur YouTube, ce n’est pas « le modem » qui compte : le routeur décide que ça sort, le modem traduit. Dans la box, les deux sont réunis."
@@ -335,12 +375,14 @@
         {
           "mot": "Adresse IP",
           "phrase": "L’adresse complète d’une machine : la rue (partie réseau) et le numéro (partie machine). Exemple : 192.168.1.20.",
-          "image": "L’adresse écrite sur l’enveloppe."
+          "image": "L’adresse écrite sur l’enveloppe.",
+          "en": "IP address"
         },
         {
           "mot": "Masque",
           "phrase": "La règle qui dit quelle partie de l’adresse est la rue. Exemple : 255.255.255.0 (/24) = les 3 premiers nombres.",
-          "image": "La consigne du postier : « pour savoir la rue, lis les 3 premiers nombres »."
+          "image": "La consigne du postier : « pour savoir la rue, lis les 3 premiers nombres ».",
+          "en": "subnet mask"
         }
       ],
       "piege": "L’adresse existe sans le masque. On ne compare jamais deux masques : on applique le masque pour comparer les parties réseau des deux adresses."
@@ -352,12 +394,14 @@
         {
           "mot": "Adresse privée du routeur (côté réseau local)",
           "phrase": "L’adresse du routeur dans MON réseau, par exemple 192.168.1.1. C’est elle qu’on règle comme passerelle sur le PC.",
-          "image": "La porte de la maison, vue de l’intérieur."
+          "image": "La porte de la maison, vue de l’intérieur.",
+          "en": "router's private address (LAN side)"
         },
         {
           "mot": "Adresse publique du routeur (côté Internet)",
           "phrase": "L’adresse donnée par l’opérateur, visible depuis Internet. Elle ne se règle jamais sur un PC.",
-          "image": "La même porte, vue depuis la rue."
+          "image": "La même porte, vue depuis la rue.",
+          "en": "router's public address (WAN side)"
         }
       ],
       "piege": "Le routeur a les deux adresses en permanence. La passerelle d’un PC est toujours l’adresse privée, avec la même partie réseau que lui."
@@ -369,12 +413,14 @@
         {
           "mot": "Recevoir (sans passerelle)",
           "phrase": "Un PC sans passerelle reçoit quand même un paquet venu d’un autre réseau : le routeur le lui livre dans son réseau.",
-          "image": "Le facteur dépose la lettre dans ta boîte, même si tu ne connais pas l’adresse de la poste."
+          "image": "Le facteur dépose la lettre dans ta boîte, même si tu ne connais pas l’adresse de la poste.",
+          "en": "receive (no gateway needed)"
         },
         {
           "mot": "Répondre (il faut une passerelle)",
           "phrase": "Pour ENVOYER hors de son réseau (une réponse, par exemple), le PC doit connaître sa passerelle. Sinon, il abandonne sa réponse.",
-          "image": "Pour répondre à une autre rue, il faut savoir où est le bureau de poste."
+          "image": "Pour répondre à une autre rue, il faut savoir où est le bureau de poste.",
+          "en": "reply (a gateway is needed)"
         }
       ],
       "piege": "Un ping est un aller ET un retour : il faut une passerelle des deux côtés. Le ping n’est pas un sonar : la cible doit fabriquer et envoyer sa réponse."
@@ -386,12 +432,14 @@
         {
           "mot": "Box (Wireless Router dans Packet Tracer)",
           "phrase": "Routeur + switch + Wi-Fi dans un seul boîtier. Ses prises sont un switch intégré : tout ce qu’on y branche est dans le même réseau.",
-          "image": "Un appartement avec plusieurs pièces : c’est toujours la même adresse."
+          "image": "Un appartement avec plusieurs pièces : c’est toujours la même adresse.",
+          "en": "home router (ISP box, Wireless Router in Packet Tracer)"
         },
         {
           "mot": "Routeur (2911 dans Packet Tracer)",
           "phrase": "Il a une interface (une adresse) dans chaque réseau qu’il relie. Ses ports sont éteints par défaut.",
-          "image": "Le bureau de poste au carrefour, avec une porte sur chaque rue."
+          "image": "Le bureau de poste au carrefour, avec une porte sur chaque rue.",
+          "en": "router (2911 in Packet Tracer)"
         }
       ],
       "piege": "Brancher deux switchs sur deux prises d’une box ne crée pas deux réseaux. Pour relier deux réseaux, il faut un routeur avec une adresse dans chacun."
@@ -403,12 +451,14 @@
         {
           "mot": "ARP",
           "phrase": "La question criée à tout le réseau : « Qui est 192.168.1.1 ? ». Seul le bon répond. Elle sert à trouver l’adresse matérielle (MAC) avant d’envoyer.",
-          "image": "Dans une salle d’attente, on crie un nom : seul le bon lève la main."
+          "image": "Dans une salle d’attente, on crie un nom : seul le bon lève la main.",
+          "en": "ARP (Address Resolution Protocol)"
         },
         {
           "mot": "ICMP (le ping)",
           "phrase": "Le message du ping : une demande d’écho (echo request), puis la réponse (echo reply).",
-          "image": "« Tu es là ? » « Oui ! »"
+          "image": "« Tu es là ? » « Oui ! »",
+          "en": "ICMP (ping)"
         }
       ],
       "piege": "La première fois, le premier ping est souvent perdu (Request timed out) : c’est le temps de la question ARP, pas une panne. En mode Simulation, une croix rouge sur un ARP qui ne vous concerne pas est normale."
@@ -420,12 +470,14 @@
         {
           "mot": "Suite arithmétique",
           "phrase": "On ajoute toujours le même nombre : 3, 7, 11, 15… (+4). Les écarts sont égaux.",
-          "image": "Monter un escalier : chaque marche a la même hauteur."
+          "image": "Monter un escalier : chaque marche a la même hauteur.",
+          "en": "arithmetic sequence"
         },
         {
           "mot": "Suite géométrique",
           "phrase": "On multiplie toujours par le même nombre : 3, 6, 12, 24… (×2). Les écarts grandissent de plus en plus vite.",
-          "image": "Une rumeur : chaque personne la répète à deux autres."
+          "image": "Une rumeur : chaque personne la répète à deux autres.",
+          "en": "geometric sequence"
         }
       ],
       "piege": "Si les écarts ne sont pas égaux, ce n’est pas forcément une multiplication : regarde les écarts des écarts (+2, +4, +6…), ou une alternance (+5, −2, +5, −2…)."
@@ -437,12 +489,14 @@
         {
           "mot": "Le PC (il décide)",
           "phrase": "Avant d’envoyer, le PC compare les adresses avec son masque. Même réseau : il envoie directement. Autre réseau : il écrit la MAC de la passerelle sur l’enveloppe. Pas de passerelle : il jette lui-même le paquet.",
-          "image": "L’habitant qui écrit « bureau de poste » sur l’enveloppe."
+          "image": "L’habitant qui écrit « bureau de poste » sur l’enveloppe.",
+          "en": "the PC (it decides)"
         },
         {
           "mot": "Le switch (il livre)",
           "phrase": "Il ne regarde pas les adresses IP. Il lit l’adresse MAC de destination et transmet le paquet à la prise où est branchée cette machine.",
-          "image": "Le gardien de l’immeuble qui porte l’enveloppe à la porte écrite dessus."
+          "image": "Le gardien de l’immeuble qui porte l’enveloppe à la porte écrite dessus.",
+          "en": "the switch (it delivers)"
         }
       ],
       "piege": "Le switch ne compare jamais les parties réseau et ne « décide » pas d’envoyer au routeur : c’est le PC qui a décidé avant. Dans Packet Tracer, l’enveloppe passe bien par le switch, mais c’est parce que la MAC du routeur est écrite dessus."
@@ -454,12 +508,14 @@
         {
           "mot": "Adresse IP",
           "phrase": "L’adresse de la machine sur un réseau. Elle peut changer, elle peut être privée ou publique. Le PC s’en sert pour savoir dans quel réseau est la destination.",
-          "image": "L’adresse postale : elle change si tu déménages."
+          "image": "L’adresse postale : elle change si tu déménages.",
+          "en": "IP address"
         },
         {
           "mot": "Adresse MAC",
           "phrase": "L’adresse matérielle d’une carte réseau, fixée par le fabricant (une par carte : Wi-Fi et Ethernet en ont chacune une). Le switch s’en sert pour livrer à la bonne prise. Elle ne sort jamais du réseau local.",
-          "image": "Le numéro de série gravé sur l’appareil."
+          "image": "Le numéro de série gravé sur l’appareil.",
+          "en": "MAC address"
         }
       ],
       "piege": "Une MAC peut être modifiée par logiciel (usurpée) et circule en clair : un filtrage par MAC n’est jamais une protection à lui seul. Et un serveur sur Internet ne voit jamais ta MAC."
@@ -471,12 +527,14 @@
         {
           "mot": "Internet",
           "phrase": "Des réseaux du monde entier reliés entre eux : le réseau des réseaux. Le Web, le mail, les jeux en ligne passent dessus.",
-          "image": "Le réseau des routes."
+          "image": "Le réseau des routes.",
+          "en": "the Internet"
         },
         {
           "mot": "Le Web",
           "phrase": "Un service qui tourne sur Internet : les pages et les sites, demandés en HTTP(S) avec un navigateur.",
-          "image": "Les camions de livraison qui roulent sur les routes : un usage parmi d’autres."
+          "image": "Les camions de livraison qui roulent sur les routes : un usage parmi d’autres.",
+          "en": "the Web (World Wide Web)"
         }
       ],
       "piege": "« Le Web est composé de réseaux » est faux : ça, c’est Internet. Le mail passe par Internet sans être le Web."
@@ -488,15 +546,36 @@
         {
           "mot": "Le ping répond",
           "phrase": "La machine est joignable : elle a reçu la demande d’écho ICMP et a pu répondre. Ça ne dit rien de ses services.",
-          "image": "Tu frappes à la porte du restaurant, quelqu’un répond."
+          "image": "Tu frappes à la porte du restaurant, quelqu’un répond.",
+          "en": "the host replies to ping"
         },
         {
           "mot": "Le service répond",
           "phrase": "Le logiciel qui écoute sur un port (443 pour un site en HTTPS) marche. C’est un autre test que le ping.",
-          "image": "La cuisine est ouverte : tu peux avoir ton plat."
+          "image": "La cuisine est ouverte : tu peux avoir ton plat.",
+          "en": "the service responds"
         }
       ],
       "piege": "Pas de réponse au ping ≠ machine éteinte (pare-feu qui bloque ICMP, passerelle manquante, câble coupé). Ping qui répond ≠ site qui marche. Et un ping n’est pas une « connexion » : c’est un simple message ICMP."
+    },
+    {
+      "id": "anglais",
+      "theme": "Anglais",
+      "items": [
+        {
+          "mot": "Vocabulaire en anglais",
+          "en": "English vocabulary",
+          "phrase": "La documentation, les outils, TryHackMe et les entretiens techniques parlent anglais : chaque mot s'apprend dans les deux langues.",
+          "image": "Un technicien réseau lit de la documentation en anglais tous les jours."
+        },
+        {
+          "mot": "Faux ami",
+          "en": "false friend",
+          "phrase": "Un mot anglais qui ressemble à un mot français sans avoir le même sens : « library » = bibliothèque (de code), pas librairie.",
+          "image": "« Actually » veut dire « en fait », pas « actuellement »."
+        }
+      ],
+      "piege": "« Library » = bibliothèque de code ; « eventually » = finalement (pas éventuellement) ; « actually » = en fait ; « gateway » = passerelle."
     }
   ],
   "questions": [
@@ -2009,6 +2088,169 @@
         "Sinon, regarder une case sur deux (deux suites entrelacées)"
       ],
       "pourquoi": "On va du plus fréquent au plus rare : addition, puis écarts qui changent, puis multiplication, puis alternance. Pour les lettres, on les numérote d’abord (A = 1, B = 2…) et on applique la même méthode."
+    },
+    {
+      "id": "q121",
+      "paire": "anglais",
+      "type": "generateur",
+      "gen": "vocab-en",
+      "niveau": 1,
+      "q": "Traduction"
+    },
+    {
+      "id": "q122",
+      "paire": "anglais",
+      "type": "generateur",
+      "gen": "vocab-en",
+      "niveau": 2,
+      "q": "Traduction"
+    },
+    {
+      "id": "q123",
+      "paire": "masque-passerelle",
+      "lang": "en",
+      "niveau": 2,
+      "q": "A PC wants to reach another network. Which setting tells it where to send the packets?",
+      "choix": [
+        "The default gateway",
+        "The subnet mask",
+        "The MAC address",
+        "The DNS server"
+      ],
+      "bonne": 0,
+      "pourquoi": "The default gateway (la passerelle) is the router's address: the PC sends it every packet meant for another network. The mask only tells the PC whether the destination is local."
+    },
+    {
+      "id": "q124",
+      "paire": "codes",
+      "lang": "en",
+      "niveau": 1,
+      "q": "The server answers « 404 Not Found ». What does it mean?",
+      "choix": [
+        "The page does not exist on the server",
+        "You are not allowed to see the page",
+        "The server crashed",
+        "The page was found"
+      ],
+      "bonne": 0,
+      "pourquoi": "404 Not Found = la ressource n'existe pas. 403 Forbidden = interdit ; 500 Internal Server Error = le serveur a planté."
+    },
+    {
+      "id": "q125",
+      "paire": "dns-port",
+      "lang": "en",
+      "type": "saisie",
+      "niveau": 2,
+      "q": "Which port does HTTPS use by default? (type the number)",
+      "reponses": [
+        "443"
+      ],
+      "pourquoi": "HTTPS listens on port 443 (HTTP on port 80). « By default » = par défaut."
+    },
+    {
+      "id": "q126",
+      "paire": "switch-routeur",
+      "lang": "en",
+      "niveau": 2,
+      "q": "Which device forwards traffic between two different networks?",
+      "choix": [
+        "A router",
+        "A switch",
+        "A modem",
+        "A network cable"
+      ],
+      "bonne": 0,
+      "pourquoi": "« To forward » = faire suivre. The router (le routeur) links networks; the switch (le commutateur) links devices inside one network."
+    },
+    {
+      "id": "q127",
+      "paire": "ip-mac",
+      "lang": "en",
+      "niveau": 2,
+      "q": "Which address does a switch read to deliver a frame?",
+      "choix": [
+        "The destination MAC address",
+        "The destination IP address",
+        "The subnet mask",
+        "The default gateway"
+      ],
+      "bonne": 0,
+      "pourquoi": "A switch reads the MAC address (l'adresse physique). « Frame » = trame : le paquet tel que le switch le voit."
+    },
+    {
+      "id": "q128",
+      "paire": "hyperviseurs",
+      "lang": "en",
+      "niveau": 2,
+      "q": "VirtualBox runs on top of Windows. What kind of hypervisor is it?",
+      "choix": [
+        "Type 2 (hosted)",
+        "Type 1 (bare-metal)",
+        "A container",
+        "A physical server"
+      ],
+      "bonne": 0,
+      "pourquoi": "« Hosted » = hébergé dans un système existant : type 2. « Bare-metal » = directement sur le matériel : type 1 (Proxmox, ESXi)."
+    },
+    {
+      "id": "q129",
+      "paire": "anglais",
+      "lang": "en",
+      "niveau": 1,
+      "q": "In a technical document, « the software library » means…",
+      "choix": [
+        "la bibliothèque logicielle (du code réutilisable)",
+        "la librairie du logiciel",
+        "la licence du logiciel",
+        "le magasin d'applications"
+      ],
+      "bonne": 0,
+      "pourquoi": "Faux ami : « library » = bibliothèque. Une librairie (où l'on achète des livres) se dit « bookshop »."
+    },
+    {
+      "id": "q130",
+      "paire": "anglais",
+      "lang": "en",
+      "niveau": 2,
+      "q": "« Eventually, the attacker gained access. » What happened?",
+      "choix": [
+        "Finalement, l'attaquant a obtenu l'accès",
+        "L'attaquant pourrait peut-être obtenir l'accès",
+        "L'attaquant a obtenu l'accès pendant un événement",
+        "L'attaquant n'a jamais eu l'accès"
+      ],
+      "bonne": 0,
+      "pourquoi": "Faux ami : « eventually » = finalement, au bout du compte. « Éventuellement » se dit « possibly »."
+    },
+    {
+      "id": "q131",
+      "paire": "vm-conteneur",
+      "lang": "en",
+      "niveau": 2,
+      "q": "Which one shares the host's kernel instead of running its own operating system?",
+      "choix": [
+        "A container",
+        "A virtual machine",
+        "A type 1 hypervisor",
+        "A physical server"
+      ],
+      "bonne": 0,
+      "pourquoi": "« Kernel » = noyau du système. A container (Docker) shares the host kernel; a VM runs a full operating system of its own."
+    },
+    {
+      "id": "q132",
+      "paire": "tcp-udp",
+      "lang": "en",
+      "niveau": 2,
+      "q": "Which protocol checks that every packet arrives, and sends it again if it is lost?",
+      "choix": [
+        "TCP",
+        "UDP",
+        "ICMP",
+        "ARP"
+      ],
+      "bonne": 0,
+      "pourquoi": "TCP is « reliable » (fiable): acknowledgements (accusés de réception) and retransmission. UDP is faster but does not check."
     }
   ]
 }

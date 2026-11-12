@@ -1,7 +1,7 @@
 // Réseau d'abord (pour recevoir les nouvelles cartes), cache en secours si pas de réseau.
 // `cache: 'no-cache'` : GitHub Pages laisse le navigateur garder un fichier 10 minutes ; là, le serveur est toujours interrogé.
 // Le numéro de CACHE est changé automatiquement par deployer-memo.js (dossier Formation Cyber) à chaque version.
-var CACHE = 'memo-cyber-v14';
+var CACHE = 'memo-cyber-v15';
 var FILES = ['./', 'index.html', 'memo-cyber.json', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', function (event) {

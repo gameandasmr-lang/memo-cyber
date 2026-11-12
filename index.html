@@ -136,6 +136,10 @@ textarea.recherche { resize: vertical; line-height: 1.45; }
 .segment button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px color-mix(in srgb, var(--ink) 15%, transparent); }
 .bascule { justify-self: start; color: var(--muted); font-size: .9rem; text-decoration: none; }
 .bascule[aria-pressed="true"] { color: var(--flame); }
+.badges { display: flex; gap: 8px; align-items: center; }
+.anglais { font-size: .75rem; font-weight: 600; color: var(--good); border: 1px solid var(--good); border-radius: 999px; padding: 1px 8px; }
+.item .en { font-size: .88rem; color: var(--good); font-weight: 500; }
+.en-inline { color: var(--muted); }
 .chrono { font-size: .85rem; font-weight: 600; color: var(--flame); font-variant-numeric: tabular-nums; }
 .stats { display: grid; gap: 12px; }
 .srow { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: .92rem; }
@@ -380,6 +384,19 @@ const GENERATEURS = {
     const q = `${lettres.slice(0, 5).join(" · ")} · ?\nQuelle lettre vient ensuite ?`;
     return { q, enonce: q.replace(/\n/g, " "), choix: choix.map(i => L[i]), bonne: 0,
       pourquoi: `Numérote les lettres (A = 1, B = 2…) : ${t.slice(0, 5).map(i => i + 1).join(", ")}. La règle : ${regle}, donc ${lettres[5]} (${bonne + 1}). Astuce : E = 5, J = 10, O = 15, T = 20 servent de repères.` };
+  },
+
+  // Traduction (12/11/2026) : tiré du lexique (champ en de chaque mot). Niveau 1 : français → anglais ; niveau 2 : anglais → français.
+  // Les mauvais choix viennent du même thème quand c'est possible (sinon on reconnaîtrait la bonne réponse au sujet).
+  "vocab-en"(niveau) {
+    const SANS = ["anglais", "codes", "decide-livre", "recevoir-repondre", "box-routeur", "ping-service", "passerelle-faces", "suite-logique"];   // phrases ou codes, pas du vocabulaire à traduire
+    const mots = D.paires.filter(p => !SANS.includes(p.id)).flatMap(p => p.items.filter(i => i.en && norm(i.en) !== norm(i.mot)).map(i => ({ ...i, theme: p.theme })));
+    const m = mots[alea(0, mots.length - 1)], versEn = niveau !== 2;
+    const autres = melanger(mots.filter(o => o.en !== m.en && o.mot !== m.mot)).sort((a, b) => (b.theme === m.theme) - (a.theme === m.theme));
+    const choix = [versEn ? m.en : m.mot], vus = new Set(choix);
+    for (const o of autres) { const c = versEn ? o.en : o.mot; if (choix.length < 4 && !vus.has(c)) { vus.add(c); choix.push(c); } }
+    const q = versEn ? `Comment dit-on « ${m.mot} » en anglais ?` : `What does « ${m.en} » mean in French?`;
+    return { q, enonce: q, choix, bonne: 0, lang: versEn ? undefined : "en", pourquoi: `${m.mot} = ${m.en}. ${m.phrase}` };
   },
 
   // ---- Onglet Logique (12/11/2026) : les familles des tests psychotechniques d'admission ----
@@ -710,14 +727,14 @@ function vueSession() {
         ${x.pourquoi ? `<p>${esc(x.pourquoi)}</p>` : ""}
         ${logique ? `<p class="note" style="text-align:left;margin:0">Réponse en ${Math.round(res.ms / 1000)} s (objectif du test : moins de ${lim} s).${session.niveauMsg ? ` <b>${esc(session.niveauMsg)}</b>` : ""}</p>` : ""}
         ${res.ok && res.conf === "hesite" ? `<p class="note" style="text-align:left;margin:0">Elle revient demain : une réponse devinée ne compte pas comme sue.</p>` : ""}
-        ${p ? `<div class="rappel">${p.items.map(i => `<span><b>${esc(i.mot)}</b> : ${esc(i.image)}</span>`).join("")}</div>` : ""}
+        ${p ? `<div class="rappel">${p.items.map(i => `<span><b>${esc(i.mot)}</b>${i.en ? ` <i class="en-inline">(${esc(i.en)})</i>` : ""} : ${esc(i.image)}</span>`).join("")}</div>` : ""}
       </div>
       <button class="big" id="suite">Continuer</button>`;
   }
   return `
     <div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
     <section class="card">
-      <div class="qhead"><span class="theme">${logique ? `${esc(FAMILLES[x.fam].nom)} · Difficulté ${x.niveau}/3` : `${esc(p.theme)}${x.niveau ? ` · ${NIVEAUX[x.niveau]}` : ""}`}</span>${logique ? (session.etape === "repondre" ? `<span class="chrono" id="chrono">${chronoTexte(x)}</span>` : "") : x._retour ? `<span class="retry">Deuxième essai</span>` : x._rappel ? `<span class="retry">Rappel</span>` : ""}</div>
+      <div class="qhead"><span class="theme">${logique ? `${esc(FAMILLES[x.fam].nom)} · Difficulté ${x.niveau}/3` : `${esc(p.theme)}${x.niveau ? ` · ${NIVEAUX[x.niveau]}` : ""}`}</span>${logique ? (session.etape === "repondre" ? `<span class="chrono" id="chrono">${chronoTexte(x)}</span>` : "") : `<span class="badges">${x.lang === "en" ? `<span class="anglais">English</span>` : ""}${x._retour ? `<span class="retry">Deuxième essai</span>` : x._rappel ? `<span class="retry">Rappel</span>` : ""}</span>`}</div>
       <div class="question">${esc(x.q).replace(/\n/g, "<br>")}</div>
       ${x.figure || ""}
       ${zoneReponse(x)}
@@ -840,7 +857,7 @@ function vueFin() {
 
 // Recherche insensible à la casse et aux accents : « regle » trouve « règle ».
 const sansAccents = s => String(s).normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
-const textePaire = p => sansAccents([p.theme, p.piege, ...p.items.flatMap(i => [i.mot, i.phrase, i.image])].join(" "));
+const textePaire = p => sansAccents([p.theme, p.piege, ...p.items.flatMap(i => [i.mot, i.en || "", i.phrase, i.image])].join(" "));   // on peut chercher en anglais (« gateway » trouve la passerelle)
 
 // Le champ de recherche est rendu une seule fois ; à chaque lettre, seule la liste est remplacée (sinon le champ perdrait le focus et le clavier du téléphone se fermerait).
 function vueLexique() {
@@ -861,7 +878,7 @@ function listeLexique() {
         <span class="label">${esc(p.theme)} · ne pas confondre</span>
         <h3>${esc(p.items.map(i => i.mot).join(" / "))}</h3>
         <div class="items">${p.items.map(i => `
-          <div class="item"><span class="mot">${esc(i.mot)}</span><p>${esc(i.phrase)}</p><p class="img">${esc(i.image)}</p></div>`).join("")}</div>
+          <div class="item"><span class="mot">${esc(i.mot)}</span>${i.en ? `<span class="en">🇬🇧 ${esc(i.en)}</span>` : ""}<p>${esc(i.phrase)}</p><p class="img">${esc(i.image)}</p></div>`).join("")}</div>
         <div class="piege"><b>Le piège :</b> ${esc(p.piege)}</div>
       </section>`).join("")}`;
 }
