@@ -1,6 +1,6 @@
 {
   "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question est liée à une paire et a un format (champ type, qcm par défaut) : qcm (choix, bonne), saisie (reponses acceptées), ordre (etapes dans le bon ordre), erreur (texte en morceaux, faux = indice du morceau faux), associer (couples), generateur (gen = nom d’un générateur de l’appli ; pour suite-logique et suite-lettres, le niveau donne la difficulté de 1 à 3), explique (modele), terminal (invite, reponses acceptées, sortie affichée après la réponse ; casse: true = les majuscules comptent, comme sous Linux). Champ en (dans chaque mot d'une paire) : le terme anglais, affiché dans le lexique et utilisé par le générateur vocab-en. Champ extrait (question) : un court texte technique (sortie de commande, message d'erreur, doc, alerte) affiché avant la question. Champ lang = \"en\" (question) : question posée en anglais, avec une pastille English. Champ niveau facultatif : 1 reconnaître, 2 retrouver seul, 3 appliquer ; sans niveau, le format le donne (qcm, associer = 1 ; saisie, ordre, erreur, terminal, generateur = 2 ; explique = 3). Échelle de formats : une question jamais vue d'un niveau supérieur reste verrouillée tant que la moitié des questions des niveaux en dessous, dans la même paire, n'est pas en boîte 2 ou plus. Les choix des QCM sont mélangés par l’appli : l’ordre dans ce fichier n’a pas d’importance. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id. Tableau entretien : les questions du mode entretien oral (id, partie, q, points clés à cocher, modele, duree visée en secondes, lang facultatif), jamais dans les révisions du jour.",
-  "maj": "2026-11-12",
+  "maj": "2026-11-13",
   "paires": [
     {
       "id": "http-html",
@@ -596,11 +596,17 @@
         {
           "mot": "nslookup",
           "en": "name server lookup",
-          "phrase": "Demande au DNS l'adresse IP qui correspond à un nom.",
-          "image": "Chercher un numéro dans l'annuaire."
+          "phrase": "Demande à un RÉSOLVEUR l'adresse IP qui correspond à un nom. Il ne contacte pas le site.",
+          "image": "Appeler les renseignements : on te donne le numéro, tu n'as appelé personne d'autre."
+        },
+        {
+          "mot": "curl",
+          "en": "client URL",
+          "phrase": "Fait la VRAIE demande au site (le GET), sans navigateur, et affiche sa réponse brute : code de statut, en-têtes, HTML.",
+          "image": "Passer vraiment commande au téléphone, et recevoir la baguette (ou « on n'en a plus »)."
         }
       ],
-      "piege": "ipconfig ne contacte personne : il regarde chez toi. ping teste une autre machine. nslookup ne teste pas la machine : il interroge seulement le DNS."
+      "piege": "ipconfig ne contacte personne : il regarde chez toi. ping fait sonner une autre machine (ICMP, pas de poignée de main). nslookup ne teste pas la machine : il interroge seulement un résolveur. curl teste le service lui-même. Ordre de dépannage : ma machine → le réseau (ping vers une IP) → les noms → le service."
     },
     {
       "id": "commandes-linux",
@@ -670,6 +676,63 @@
         }
       ],
       "piege": "SYN = une question, ACK = un oui. Ordre : SYN (PC) → SYN-ACK (serveur : oui + question) → ACK (PC : oui). Le GET part APRÈS, tout seul : il n'est pas dans la poignée de main."
+    },
+    {
+      "id": "hote-delai",
+      "theme": "Commandes",
+      "items": [
+        {
+          "mot": "« Impossible de trouver l'hôte »",
+          "en": "could not find host",
+          "phrase": "Le nom n'a pas été traduit en adresse IP : c'est le DNS. Le PC n'a contacté aucun serveur.",
+          "image": "Les renseignements ne trouvent pas le numéro : tu n'as encore appelé personne."
+        },
+        {
+          "mot": "« Délai d'attente dépassé »",
+          "en": "request timed out",
+          "phrase": "L'adresse est trouvée (elle s'affiche entre crochets), mais personne ne répond : serveur, ou pare-feu qui bloque le ping.",
+          "image": "Tu as le numéro, ça sonne, personne ne décroche."
+        }
+      ],
+      "piege": "Lis le message, il dit où ça casse. « Trouver l'hôte » = trouver l'adresse = le DNS : tape nslookup avant d'accuser le site. Et « délai dépassé » ne prouve pas que le site est en panne."
+    },
+    {
+      "id": "ssh-telnet",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "SSH (port 22)",
+          "en": "Secure Shell",
+          "phrase": "Piloter une machine à distance dans un terminal, en CHIFFRÉ. Créé en 1995 par Tatu Ylönen.",
+          "image": "Un coup de fil sur une ligne brouillée : personne ne peut écouter."
+        },
+        {
+          "mot": "Telnet (port 23)",
+          "en": "teletype network",
+          "phrase": "L'ancêtre : la même chose, mais tout passe EN CLAIR, mots de passe compris.",
+          "image": "Un coup de fil sur haut-parleur, dans un couloir plein de monde."
+        }
+      ],
+      "piege": "La rue des anciens outils : 20-21 FTP, 22 SSH, 23 Telnet. SSH a pris le 22, juste avant Telnet qu'il remplace. Et le DNS, c'est 53 (pas 20, qui est FTP)."
+    },
+    {
+      "id": "domaine-www",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "picard.fr",
+          "en": "apex domain",
+          "phrase": "Un nom, avec sa propre entrée dans le DNS : 51.91.60.233, qui ne sert qu'à rediriger (301) vers www.",
+          "image": "L'ancienne adresse d'un magasin, avec une affiche « nous avons déménagé »."
+        },
+        {
+          "mot": "www.picard.fr",
+          "en": "subdomain",
+          "phrase": "Un AUTRE nom, avec une autre entrée DNS (chez Cloudflare) : c'est lui qui sert le vrai site.",
+          "image": "Le nouveau magasin, à une autre adresse."
+        }
+      ],
+      "piege": "www n'est pas une décoration : c'est un autre nom de domaine. Deux noms = deux entrées DNS, parfois deux adresses et deux serveurs."
     }
   ],
   "questions": [
@@ -2829,6 +2892,250 @@
       ],
       "bonne": 0,
       "pourquoi": "Le DNS est réparti : ton résolveur dépend de ton FAI (ou de ton choix), la racine de l'ICANN, le .fr de l'AFNIC, et la réponse finale du prestataire choisi par le site."
+    },
+    {
+      "id": "q148",
+      "paire": "hote-delai",
+      "q": "Sur le PC d'un collègue, « ping 8.8.8.8 » répond. Mais « ping picard.fr » affiche : « La requête Ping n'a pas pu trouver l'hôte picard.fr ». Le coupable le plus probable ?",
+      "choix": [
+        "Le DNS : le nom n'a pas été traduit en adresse",
+        "Le serveur de Picard est en panne",
+        "Le site a déménagé à une autre adresse",
+        "La passerelle du PC est mal réglée"
+      ],
+      "bonne": 0,
+      "pourquoi": "« Trouver l'hôte » = trouver l'adresse. Le PC n'a jamais rien envoyé à Picard. Et 8.8.8.8 répond : le réseau et la passerelle marchent. Il reste le DNS : on le confirme avec nslookup."
+    },
+    {
+      "id": "q149",
+      "paire": "hote-delai",
+      "type": "erreur",
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "ping affiche « Envoi d'une requête à picard.fr [51.91.60.233] »,",
+        "puis quatre fois « Délai d'attente de la demande dépassé » :",
+        "c'est donc le DNS qui est en panne."
+      ],
+      "faux": 2,
+      "pourquoi": "L'adresse s'affiche entre crochets : le DNS a marché. Personne ne répond au ping : serveur injoignable, ou un pare-feu qui bloque le ping (ce qui ne prouve pas que le site est en panne)."
+    },
+    {
+      "id": "q150",
+      "paire": "hote-delai",
+      "type": "terminal",
+      "invite": "C:\\Users\\moi>",
+      "q": "« Impossible de trouver l'hôte picard.fr ». Tu veux confirmer que ce nom ne se traduit plus en adresse.",
+      "reponses": [
+        "nslookup picard.fr",
+        "nslookup picard.fr.",
+        "nslookup picard.fr 8.8.8.8"
+      ],
+      "sortie": "Serveur :   UnKnown\nAddress:  192.168.1.254\n\n*** UnKnown ne parvient pas à trouver picard.fr : Server failed",
+      "pourquoi": "nslookup interroge seulement le résolveur. Ici, il ne renvoie pas d'adresse : c'est bien le DNS. Plan B : « nslookup picard.fr 8.8.8.8 » demande à un autre résolveur (le nom d'abord, puis le résolveur)."
+    },
+    {
+      "id": "q151",
+      "paire": "commandes-windows",
+      "type": "ordre",
+      "q": "Un utilisateur n'a plus Internet, ses collègues oui. Remets ton dépannage dans l'ordre.",
+      "etapes": [
+        "Le physique : le câble, le Wi-Fi",
+        "ipconfig : ma configuration (IP, masque, passerelle)",
+        "ping vers la passerelle, puis vers 8.8.8.8",
+        "nslookup picard.fr : les noms se traduisent-ils ?",
+        "Le navigateur ou curl : le service lui-même"
+      ],
+      "pourquoi": "On part du bas : chaque étage a besoin de celui d'en dessous. Le premier étage qui échoue, c'est la panne ; les échecs au-dessus ne sont que des ricochets."
+    },
+    {
+      "id": "q152",
+      "paire": "commandes-windows",
+      "q": "Quelle commande fait vraiment la demande HTTP au site, sans navigateur, et affiche sa réponse brute (code de statut, en-têtes) ?",
+      "choix": [
+        "curl",
+        "ping",
+        "nslookup",
+        "ipconfig"
+      ],
+      "bonne": 0,
+      "pourquoi": "curl (Client URL, 1998) envoie le GET comme un navigateur, mais affiche la réponse en texte, sans rien corriger : c'est pour ça qu'il sert à diagnostiquer."
+    },
+    {
+      "id": "q153",
+      "paire": "commandes-windows",
+      "type": "terminal",
+      "casse": true,
+      "invite": "C:\\Users\\moi>",
+      "q": "Dans cmd, tu veux voir seulement la ligne du code de statut et les en-têtes de https://www.picard.fr (sans le HTML).",
+      "reponses": [
+        "curl -I https://www.picard.fr",
+        "curl -I https://www.picard.fr/",
+        "curl.exe -I https://www.picard.fr",
+        "curl --head https://www.picard.fr"
+      ],
+      "sortie": "HTTP/1.1 200 OK\nContent-Type: text/html;charset=UTF-8\nServer: cloudflare",
+      "pourquoi": "-I (i majuscule) = seulement le début de la réponse. Dans PowerShell, « curl » est un faux ami : tape curl.exe, ou utilise cmd."
+    },
+    {
+      "id": "q154",
+      "paire": "syn-ack",
+      "q": "curl répond : « Failed to connect to picard.fr port 443 after 21051 ms ». Que s'est-il passé ?",
+      "choix": [
+        "Le SYN est parti, le SYN-ACK n'est jamais revenu",
+        "Le DNS n'a pas trouvé l'adresse",
+        "Le serveur a répondu 404",
+        "Le GET est parti, mais la réponse s'est perdue"
+      ],
+      "bonne": 0,
+      "pourquoi": "« Failed to connect » = la poignée de main n'a pas abouti : pas de connexion, donc pas de GET. Le DNS, lui, avait marché (curl connaissait l'adresse)."
+    },
+    {
+      "id": "q155",
+      "paire": "codes",
+      "q": "curl -I http://picard.fr affiche « HTTP/1.1 301 Moved Permanently » et « location: https://www.picard.fr/ ». Ça veut dire…",
+      "choix": [
+        "Redirection : ce que tu cherches est ailleurs, à l'adresse indiquée",
+        "Le site n'existe pas",
+        "Le DNS a échoué",
+        "Succès : voici la page"
+      ],
+      "bonne": 0,
+      "pourquoi": "3xx = redirection. Ici, le DNS et la connexion ont marché : c'est le serveur qui répond « va voir ailleurs ». Le navigateur le suit tout seul, sans que tu le voies."
+    },
+    {
+      "id": "q156",
+      "paire": "codes",
+      "type": "saisie",
+      "q": "Les codes 2xx veulent dire « réussite », les 4xx « la faute du client ». Et les 3xx ? (un mot)",
+      "reponses": [
+        "redirection",
+        "une redirection",
+        "redirections"
+      ],
+      "pourquoi": "3xx = redirection (301 : définitivement ailleurs). 5xx = la faute du serveur."
+    },
+    {
+      "id": "q157",
+      "paire": "resolveur-autorite",
+      "type": "ordre",
+      "q": "Tu tapes nslookup picard.fr. Ni ta box ni ton fournisseur ne l'ont en mémoire. Remets la chaîne dans l'ordre.",
+      "etapes": [
+        "Mon PC demande à ma box",
+        "Ma box demande au résolveur de mon fournisseur d'accès",
+        "Le résolveur demande à la racine, qui l'envoie vers les serveurs du .fr",
+        "Les serveurs du .fr l'envoient vers le serveur de picard.fr",
+        "Le serveur de picard.fr donne l'adresse officielle",
+        "L'adresse revient à mon PC ; chacun la garde en mémoire un moment"
+      ],
+      "pourquoi": "Un jeu de piste : la racine et le .fr ne connaissent pas l'adresse, ils disent seulement qui interroger ensuite. Seul le dernier serveur (celui qui fait autorité) a la réponse officielle."
+    },
+    {
+      "id": "q158",
+      "paire": "resolveur-autorite",
+      "type": "erreur",
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Dans nslookup, « Réponse ne faisant pas autorité » veut dire",
+        "que la réponse vient de la mémoire d'un résolveur,",
+        "car la box possède tout l'annuaire du DNS."
+      ],
+      "faux": 2,
+      "pourquoi": "La box n'a qu'une petite mémoire (le cache), avec une date d'expiration pour chaque réponse. Quand elle ne sait pas, elle demande en ligne au résolveur du fournisseur d'accès."
+    },
+    {
+      "id": "q159",
+      "paire": "resolveur-autorite",
+      "q": "La racine du DNS connaît-elle l'adresse IP de picard.fr ?",
+      "choix": [
+        "Non : elle sait seulement qui interroger ensuite (les serveurs du .fr)",
+        "Oui : elle connaît toutes les adresses du monde",
+        "Oui, mais seulement pour les sites en .fr",
+        "Non : c'est la box qui la connaît depuis le départ"
+      ],
+      "bonne": 0,
+      "pourquoi": "L'annuaire mondial est découpé en morceaux : chaque serveur qui fait autorité ne possède que sa page. Le résolveur va de guichet en guichet."
+    },
+    {
+      "id": "q160",
+      "paire": "ssh-telnet",
+      "type": "saisie",
+      "q": "Port du serveur SSH ? (un nombre)",
+      "reponses": [
+        "22"
+      ],
+      "pourquoi": "22 : juste entre FTP (21) et Telnet (23), les outils que SSH a remplacés."
+    },
+    {
+      "id": "q161",
+      "paire": "ssh-telnet",
+      "q": "Pourquoi SSH a-t-il remplacé Telnet ?",
+      "choix": [
+        "Telnet envoie tout en clair, mots de passe compris ; SSH chiffre",
+        "Telnet est trop lent",
+        "SSH marche sans réseau",
+        "Telnet ne marche que sous Windows"
+      ],
+      "bonne": 0,
+      "pourquoi": "En 1995, Tatu Ylönen écrit SSH après une attaque où des mots de passe avaient été interceptés sur le réseau de son université."
+    },
+    {
+      "id": "q162",
+      "paire": "ssh-telnet",
+      "type": "associer",
+      "q": "Relie chaque port à son service.",
+      "couples": [
+        [
+          "21",
+          "FTP"
+        ],
+        [
+          "22",
+          "SSH"
+        ],
+        [
+          "23",
+          "Telnet"
+        ],
+        [
+          "53",
+          "DNS"
+        ]
+      ],
+      "pourquoi": "La rue des anciens outils (21, 22, 23), et le 53 pour l'annuaire."
+    },
+    {
+      "id": "q163",
+      "paire": "domaine-www",
+      "q": "Pour le DNS, picard.fr et www.picard.fr, c'est…",
+      "choix": [
+        "Deux noms différents, chacun avec sa propre entrée (parfois une autre adresse)",
+        "Le même nom : www est une décoration",
+        "Forcément le même serveur",
+        "www.picard.fr est l'adresse IP de picard.fr"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le 13/11, picard.fr (51.91.60.233) ne répondait pas sur le 443 et redirigeait (301) vers www.picard.fr, servi par Cloudflare à une autre adresse."
+    },
+    {
+      "id": "q164",
+      "paire": "commandes-windows",
+      "lang": "en",
+      "q": "Which command asks a resolver for the IP address of a name?",
+      "choix": [
+        "nslookup",
+        "ping",
+        "ipconfig",
+        "curl"
+      ],
+      "bonne": 0,
+      "pourquoi": "nslookup = name server lookup : « consulter un serveur de noms »."
+    },
+    {
+      "id": "q165",
+      "paire": "commandes-windows",
+      "type": "explique",
+      "q": "Un utilisateur n'a plus Internet, mais ses collègues, oui. Explique ce que tu vérifies, et dans quel ordre.",
+      "modele": "Ses collègues ont Internet : la box, l'accès et le DNS de l'entreprise marchent, donc la panne est de son côté. Je pars du bas : (1) le physique, câble et Wi-Fi ; (2) ipconfig : adresse, masque, passerelle (169.254 = pas d'adresse reçue) ; (3) ping vers sa passerelle, puis 8.8.8.8 : le réseau sans les noms ; (4) nslookup picard.fr : les noms se traduisent-ils ? (5) le service, avec le navigateur ou curl, et je compare avec un collègue. Le premier étage qui échoue, c'est la panne."
     }
   ],
   "entretien": [

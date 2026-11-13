@@ -166,6 +166,14 @@ textarea.recherche { resize: vertical; line-height: 1.45; }
 .m-gris { fill: color-mix(in srgb, var(--ink) 35%, transparent); stroke: var(--ink); stroke-width: 1.2; }
 .err { color: var(--bad); }
 .rang .case { width: 52px; height: 52px; }
+/* Superposition (13/11/2026) : trois calques par ligne, « A + B → C » ; trois couleurs distinctes, lisibles en clair comme en sombre. */
+.sp { display: grid; gap: 8px; justify-content: center; }
+.sp-ligne { display: flex; align-items: center; gap: 6px; font: 700 20px var(--f-display); color: var(--ink); }
+.sp-ligne .case { width: 64px; height: 64px; }
+.sp-vide { fill: none; stroke: color-mix(in srgb, var(--ink) 30%, transparent); stroke-width: 1; }
+.sp-a { fill: #c4504a; stroke: var(--ink); stroke-width: 1; }
+.sp-b { fill: #1f7f8f; stroke: var(--ink); stroke-width: 1; }
+.sp-c { fill: #e3951f; stroke: var(--ink); stroke-width: 1; }
 .f-fleche { stroke: var(--ink); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; }
 .f-fleche.inv { stroke: var(--surface); }
 
@@ -728,8 +736,54 @@ const GENERATEURS = {
     for (const v of [c + (R.f(a) - a), c * 2, bonne + 1, bonne - 1, bonne + c, bonne + 2]) if (choix.length < 4 && v > 0 && !vus.has(v)) { vus.add(v); choix.push(v); }
     return { q, enonce: q.replace(/\n/g, " ; "), choix: choix.map(String), bonne: 0,
       pourquoi: `La règle : ${R.dit}. ${a} → ${R.f(a)} et ${b} → ${R.f(b)}, donc ${c} → ${bonne}. Deux exemples servent à vérifier la règle : « +${R.f(a) - a} » marcherait pour le premier, mais pas forcément pour le second.` };
+  },
+
+  // Superposition (13/11/2026, d'après les captures d'une autre appli envoyées par Arnaud ; tout est généré ici) :
+  // deux calques de cases colorées en donnent un troisième. Deux lignes d'exemple montrent la règle, la troisième est à compléter.
+  // N1 : on garde tout (OU), 3 × 3 ; N2 : ce qui se chevauche s'annule (OU exclusif), 3 × 3 ; N3 : idem en 4 × 4 ;
+  // N4 : la règle est à trouver parmi quatre (tout, s'annule, seulement le commun, le 1er sans le 2e), 4 × 4 ;
+  // N5 : idem, et le résultat est retourné comme dans un miroir (la gauche passe à droite).
+  "superposition"(niveau) {
+    const n = niveau <= 2 ? 3 : 4, N = n * n, miroir = niveau >= 5;
+    const OPS = { ou: [(a, b) => a || b, "on garde toutes les cases colorées des deux calques"],
+      xor: [(a, b) => a !== b, "une case colorée des deux côtés s'annule ; une case colorée d'un seul côté reste"],
+      et: [(a, b) => a && b, "on ne garde que les cases colorées des deux côtés à la fois"],
+      moins: [(a, b) => a && !b, "on garde les cases du 1er calque, sauf celles que le 2e recouvre"] };
+    const regles = niveau === 1 ? ["ou"] : niveau <= 3 ? ["xor"] : Object.keys(OPS);
+    const calque = () => { let c; do c = [...Array(N)].map(() => Math.random() < .45); while (c.filter(Boolean).length < Math.ceil(N / 4)); return c; };
+    const brut = (op, a, b) => a.map((v, k) => OPS[op][0](v, b[k]));
+    const appliquer = (op, a, b) => { const r = brut(op, a, b); return miroir ? r.map((_, k) => r[Math.floor(k / n) * n + (n - 1 - k % n)]) : r; };
+    const cle = c => c.map(Number).join("");
+    let op, ex, q;
+    for (let essai = 0; essai < 300; essai++) {
+      op = regles[alea(0, regles.length - 1)];
+      ex = [0, 1].map(() => { const a = calque(), b = calque(); return [a, b, appliquer(op, a, b)]; });
+      const a = calque(), b = calque(); q = [a, b, appliquer(op, a, b)];
+      const autres = Object.keys(OPS).filter(o => o !== op);
+      const tranche = autres.every(o => ex.some(([a, b, c]) => cle(appliquer(o, a, b)) !== cle(c)));   // les exemples écartent toute autre règle
+      const distincte = autres.every(o => cle(appliquer(o, q[0], q[1])) !== cle(q[2]));                 // et la réponse n'est pas celle d'une autre règle
+      if (tranche && distincte && q[2].some(Boolean) && ex.every(e => e[2].some(Boolean))) break;
+    }
+    const flip = () => { const c = [...q[2]], k = alea(0, N - 1); c[k] = !c[k]; return c; };
+    const candidats = [...Object.keys(OPS).filter(o => o !== op).map(o => appliquer(o, q[0], q[1])), miroir ? brut(op, q[0], q[1]) : null, ...[...Array(8)].map(flip)];
+    const vus = new Set([cle(q[2])]), choix = [q[2]];
+    for (const c of candidats) if (c && choix.length < 4 && c.some(Boolean) && !vus.has(cle(c))) { vus.add(cle(c)); choix.push(c); }
+    const ligne = ([a, b, c], question) => `<div class="sp-ligne">${svgCalque(a, n, "sp-a")}<span aria-hidden="true">+</span>${svgCalque(b, n, "sp-b")}<span aria-hidden="true">→</span>${question ? svgCalque(null, n) : svgCalque(c, n, "sp-c")}</div>`;
+    return { q: "Les deux premières lignes montrent la règle. Quel calque complète la dernière ?",
+      figure: `<div class="sp">${ex.map(e => ligne(e)).join("")}${ligne(q, true)}</div>`,
+      enonce: `superposition N${niveau} (${op}${miroir ? " + miroir" : ""}) : ${cle(q[0])} + ${cle(q[1])}`,
+      choix: choix.map(c => svgCalque(c, n, "sp-c")), texte: choix.map(cle), html: true, bonne: 0,
+      pourquoi: `La règle : ${OPS[op][1]}${miroir ? ", puis le résultat est retourné comme dans un miroir (la colonne de gauche passe à droite)" : ""}. Méthode : compare case par case (colorée des deux côtés, d'un seul, d'aucun) et vérifie ta règle sur les deux exemples avant de regarder les choix.` };
   }
 };
+
+// Un calque de superposition : une grille n × n de cases, colorées (classe cls) ou vides ; null = la case « ? ».
+function svgCalque(c, n, cls) {
+  if (!c) return svgCase(null);
+  const t = 60 / n;
+  return `<svg class="case" viewBox="0 0 70 70" role="img" aria-label="grille ${n} par ${n}, cases colorées : ${c.map((v, k) => v ? k + 1 : null).filter(Boolean).join(", ") || "aucune"}"><rect x="1" y="1" width="68" height="68" rx="8" class="m-fond"/>${c.map((v, k) =>
+    `<rect x="${(5 + (k % n) * t).toFixed(1)}" y="${(5 + Math.floor(k / n) * t).toFixed(1)}" width="${t.toFixed(1)}" height="${t.toFixed(1)}" class="${v ? cls : "sp-vide"}"/>`).join("")}</svg>`;
+}
 
 // Une figure de suite : polygone (ou rond) au centre, flèche qui part du centre ; null = la case « ? ».
 function svgFigure(f) {
@@ -836,8 +890,11 @@ const FAMILLES = {
   deduction: { nom: "Déduction",         gen: "deduction",     limite: 60 },
   figures:   { nom: "Suites de figures", gen: "figures",       limite: 60 },
   intrus:    { nom: "L'intrus",          gen: "intrus",        limite: 45 },
-  analogies: { nom: "Analogies",         gen: "analogies",     limite: 45 }
+  analogies: { nom: "Analogies",         gen: "analogies",     limite: 45 },
+  superposition: { nom: "Superposition",  gen: "superposition", limite: 60, max: 5 }
 };
+// max : niveau le plus haut de la famille (3 par défaut ; les niveaux 4 et 5 arrivent famille par famille, décision du 13/11/2026).
+const maxNiv = f => FAMILLES[f]?.max || 3;
 const statLogique = f => (etat.logique[f] ||= { niveau: 1, serie: 0, ko: 0, n: 0, ok: 0, ms: 0 });
 const duree = ms => { const s = Math.round(ms / 1000); return s < 60 ? `${s} s` : `${Math.floor(s / 60)} min${s % 60 ? ` ${String(s % 60).padStart(2, "0")}` : ""}`; };
 const chronoTexte = x => {
@@ -931,10 +988,10 @@ function finaliserLogique() {
   s.n++; s.ms += res.ms; session.ms += res.ms;
   if (res.ok) {
     s.ok++; s.ko = 0; session.justes++; session.xp += 10;
-    if (++s.serie >= 3 && s.niveau < 3) { s.niveau++; s.serie = 0; session.niveauMsg = `Niveau ${s.niveau}/3 débloqué en ${FAMILLES[x.fam].nom.toLowerCase()} !`; session.changements.push(`${FAMILLES[x.fam].nom} : niveau ${s.niveau} ↑`); }
+    if (++s.serie >= 3 && s.niveau < maxNiv(x.fam)) { s.niveau++; s.serie = 0; session.niveauMsg = `Niveau ${s.niveau}/${maxNiv(x.fam)} débloqué en ${FAMILLES[x.fam].nom.toLowerCase()} !`; session.changements.push(`${FAMILLES[x.fam].nom} : niveau ${s.niveau} ↑`); }
   } else {
     s.serie = 0; session.ratees.add(x.fam);
-    if (++s.ko >= 2 && s.niveau > 1) { s.niveau--; s.ko = 0; session.niveauMsg = `On redescend au niveau ${s.niveau}/3 pour consolider.`; session.changements.push(`${FAMILLES[x.fam].nom} : niveau ${s.niveau} ↓`); }
+    if (++s.ko >= 2 && s.niveau > 1) { s.niveau--; s.ko = 0; session.niveauMsg = `On redescend au niveau ${s.niveau}/${maxNiv(x.fam)} pour consolider.`; session.changements.push(`${FAMILLES[x.fam].nom} : niveau ${s.niveau} ↓`); }
   }
   const e = { t: new Date().toISOString(), q: x.id, type: "logique", fam: x.fam, niveau: x.niveau, rep: x.texte ? (res.r !== undefined ? x.texte[res.r] : res.rep) : res.rep, ok: res.ok, essai: 1, mode: "logique", ms: res.ms, enonce: x.enonce };
   if (res.nsp) e.nsp = true;
@@ -963,7 +1020,7 @@ function vueLogique() {
       <span class="label">Tes familles</span>
       <div class="stats">${fams.map(([f, F]) => { const s = statLogique(f);
         return `<div class="srow"><span><b>${esc(F.nom)}</b><br><small>${s.n ? `${Math.round(100 * s.ok / s.n)} % justes · ${Math.round(s.ms / s.n / 1000)} s en moyenne (objectif ${F.limite} s) · ${s.n} faits` : "pas encore essayé"}</small></span>
-          <span class="niv" aria-label="niveau ${s.niveau} sur 3">${"●".repeat(s.niveau)}${"○".repeat(3 - s.niveau)}</span></div>`; }).join("")}</div>
+          <span class="niv" aria-label="niveau ${s.niveau} sur ${maxNiv(f)}">${"●".repeat(s.niveau)}${"○".repeat(maxNiv(f) - s.niveau)}</span></div>`; }).join("")}</div>
     </section>
     <section class="card">
       <span class="label">La méthode, avant de deviner</span>
@@ -1042,8 +1099,9 @@ function clicSimulation(b) {
     session.file.push(session.file.shift()); session.passees++; session.calc = ""; session.confirmer = false;
     afficher(); return true;
   }
-  if (b.dataset.i === undefined) return false;
-  const i = +b.dataset.i, ms = (x.ms0 || 0) + Date.now() - x.debut, ok = i === x.bonne;
+  if (b.dataset.i !== undefined) { x.choisi = +b.dataset.i; afficher(); document.getElementById("verifier")?.focus(); return true; }
+  if (b.id !== "verifier" || x.choisi === undefined) return false;
+  const i = x.choisi, ms = (x.ms0 || 0) + Date.now() - x.debut, ok = i === x.bonne;
   session.reponses.push({ x, ok, r: i, ms });
   const e = { t: new Date().toISOString(), q: x.id, type: "logique", fam: x.fam, niveau: x.niveau, rep: x.texte ? x.texte[i] : x.choix[i], ok, essai: 1, mode: "simulation", ms, enonce: x.enonce };
   if (x.calc) e.calc = true;
@@ -1188,8 +1246,8 @@ function zoneReponse(x) {
     }
     case "erreur":
       return `<div class="choix">${x.texte.map((m, i) => {
-        const cls = fini ? (i === x.faux ? "ok" : i === res.r ? "ko" : "") : res && i === res.r ? "sel" : "";
-        return `<button data-i="${i}" class="${cls}" ${res ? "disabled" : ""}>${esc(m)}</button>`; }).join("")}</div>`;
+        const cls = fini ? (i === x.faux ? "ok" : i === res.r ? "ko" : "") : (res ? i === res.r : i === x.choisi) ? "sel" : "";
+        return `<button data-i="${i}" class="${cls}" ${res ? "disabled" : ""} aria-pressed="${!res && i === x.choisi}">${esc(m)}</button>`; }).join("")}</div>${boutonVerifier(x, res)}`;
     case "associer": {
       const btn = (cote, i, txt) => {
         const trouve = x.trouves.includes(i);
@@ -1209,9 +1267,16 @@ function zoneReponse(x) {
         <div class="duo"><button class="big ghost" data-auto="0">Il me manquait des choses</button><button class="big" data-auto="1">J'avais l'essentiel</button></div>`}`;
     default:   // qcm, generateur et logique (x.html : les choix sont des dessins SVG produits par l'appli, pas du texte)
       return `<div class="choix${x.html ? " visuel" : ""}">${x.ordreChoix.map(i => {
-        const cls = fini ? (i === x.bonne ? "ok" : i === res.r ? "ko" : "") : res && i === res.r ? "sel" : "";
-        return `<button data-i="${i}" class="${cls}" ${res ? "disabled" : ""} ${x.html ? `aria-label="Choix ${i + 1}"` : ""}>${x.html ? x.choix[i] : esc(x.choix[i])}</button>`; }).join("")}</div>`;
+        const cls = fini ? (i === x.bonne ? "ok" : i === res.r ? "ko" : "") : (res ? i === res.r : i === x.choisi) ? "sel" : "";
+        return `<button data-i="${i}" class="${cls}" ${res ? "disabled" : ""} aria-pressed="${!res && i === x.choisi}" ${x.html ? `aria-label="Choix ${i + 1}"` : ""}>${x.html ? x.choix[i] : esc(x.choix[i])}</button>`; }).join("")}</div>${boutonVerifier(x, res)}`;
   }
+}
+
+// Choisir puis « Vérifier » (demande d'Arnaud, 12-13/11/2026) : un clic sélectionne, on peut changer d'avis, et seul « Vérifier » valide.
+function boutonVerifier(x, res) {
+  if (res) return "";
+  const simu = session.mode === "simulation";
+  return `<button class="big" id="verifier" ${x.choisi === undefined ? "disabled" : ""}>${simu ? "Valider et continuer" : "Vérifier"}</button>`;
 }
 
 function solution(x) {
@@ -1258,7 +1323,7 @@ function vueSession() {
   return `
     <div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
     <section class="card">
-      <div class="qhead"><span class="theme">${logique ? `${esc(FAMILLES[x.fam].nom)} · Difficulté ${x.niveau}/3` : oral ? `Entretien · ${esc(x.partie)}` : `${esc(p.theme)} · ${NIVEAUX[niv(x)]}`}</span>${logique || oral ? (session.etape === "repondre" ? `<span class="chrono" id="chrono">${chronoTexte(x)}</span>` : "") : ""}<span class="badges">${x.lang === "en" ? `<span class="anglais">English</span>` : ""}${x._retour ? `<span class="retry">Deuxième essai</span>` : x._rappel ? `<span class="retry">Rappel</span>` : ""}</span></div>
+      <div class="qhead"><span class="theme">${logique ? `${esc(FAMILLES[x.fam].nom)} · Difficulté ${x.niveau}/${maxNiv(x.fam)}` : oral ? `Entretien · ${esc(x.partie)}` : `${esc(p.theme)} · ${NIVEAUX[niv(x)]}`}</span>${logique || oral ? (session.etape === "repondre" ? `<span class="chrono" id="chrono">${chronoTexte(x)}</span>` : "") : ""}<span class="badges">${x.lang === "en" ? `<span class="anglais">English</span>` : ""}${x._retour ? `<span class="retry">Deuxième essai</span>` : x._rappel ? `<span class="retry">Rappel</span>` : ""}</span></div>
       ${x.extrait ? `<pre class="extrait" lang="en">${esc(x.extrait)}</pre>` : ""}
       <div class="question"${x.lang === "en" ? ' lang="en"' : ""}>${esc(x.q).replace(/\n/g, "<br>")}</div>
       ${x.figure || ""}
@@ -1371,8 +1436,9 @@ function clicSession(b) {
       else afficher();
       return true;
     }
-    if (b.dataset.i !== undefined) {
-      const i = +b.dataset.i;
+    if (b.dataset.i !== undefined) { x.choisi = +b.dataset.i; afficher(); document.getElementById("verifier")?.focus(); return true; }
+    if (b.id === "verifier" && x.choisi !== undefined) {
+      const i = x.choisi;
       if (x.type === "erreur") proposer({ ok: i === x.faux, r: i, rep: x.texte[i] });
       else proposer({ ok: i === x.bonne, r: i, rep: x.choix[i] });
       return true;
