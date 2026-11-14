@@ -774,8 +774,51 @@ const GENERATEURS = {
       enonce: `superposition N${niveau} (${op}${miroir ? " + miroir" : ""}) : ${cle(q[0])} + ${cle(q[1])}`,
       choix: choix.map(c => svgCalque(c, n, "sp-c")), texte: choix.map(cle), html: true, bonne: 0,
       pourquoi: `La règle : ${OPS[op][1]}${miroir ? ", puis le résultat est retourné comme dans un miroir (la colonne de gauche passe à droite)" : ""}. Méthode : compare case par case (colorée des deux côtés, d'un seul, d'aucun) et vérifie ta règle sur les deux exemples avant de regarder les choix.` };
+  },
+
+  // Rotations dans un cercle (14/11/2026, d'après les erreurs d'Arnaud sur les décagones de l'autre appli ; tout est généré ici) :
+  // un cercle coupé en secteurs ; chaque secteur coloré tourne avec son propre pas et son propre sens. Quatre cercles, puis « ? ».
+  // N1 : 8 secteurs, un marqueur, pas de 1 ; N2 : un marqueur, pas de 2 ou 3, dans un sens ou l'autre ; N3 : deux marqueurs, sens opposés ;
+  // N4 : 10 secteurs, deux marqueurs aux pas différents ; N5 : 10 secteurs, trois marqueurs, dont un dont le pas grandit (1, 2, 3, 4).
+  "rotations"(niveau) {
+    const n = niveau >= 4 ? 10 : 8, COUL = ["sp-a", "sp-b", "sp-c"], NOMS = ["le rouge", "le bleu", "l'orange"];
+    const pasAlea = (min, max) => alea(min, max) * (Math.random() < .5 ? 1 : -1);
+    let regles;
+    if (niveau === 1) regles = [{ pas: 1 }];
+    else if (niveau === 2) regles = [{ pas: pasAlea(2, 3) }];
+    else if (niveau === 3) { const p = alea(1, 2); regles = [{ pas: p }, { pas: -alea(1, 2) }]; }
+    else if (niveau === 4) { let a, b; do { a = pasAlea(1, 3); b = pasAlea(1, 3); } while (a === b); regles = [{ pas: a }, { pas: b }]; }
+    else { let a, b; do { a = pasAlea(1, 3); b = pasAlea(1, 3); } while (a === b); regles = [{ pas: a }, { pas: b }, { grandit: Math.random() < .5 ? 1 : -1 }]; }
+    const pos = (r, d, i) => { const dep = r.grandit ? r.grandit * i * (i + 1) / 2 : r.pas * i; return (((d + dep) % n) + n) % n; };
+    let departs, t;
+    for (let essai = 0; essai < 300; essai++) {
+      departs = regles.map(() => alea(0, n - 1));
+      t = [0, 1, 2, 3, 4].map(i => regles.map((r, k) => pos(r, departs[k], i)));
+      if (t.every(c => new Set(c).size === c.length)) break;   // deux marqueurs ne tombent jamais dans le même secteur
+    }
+    const a = t[4], cle = c => c.join("-"), vus = new Set([cle(a)]), choix = [a];
+    const autre = (k, p) => a.map((v, j) => j === k ? (((v + p) % n) + n) % n : v);
+    const candidats = [];
+    regles.forEach((r, k) => { const dernier = r.grandit ? r.grandit * 4 : r.pas; candidats.push(autre(k, -2 * dernier), autre(k, 1), autre(k, -1)); });
+    candidats.push(t[3]);
+    if (a.length > 1) candidats.push([a[1], a[0], ...a.slice(2)]);
+    for (const c of melanger(candidats)) if (choix.length < 4 && new Set(c).size === c.length && !vus.has(cle(c))) { vus.add(cle(c)); choix.push(c); }
+    const sens = p => p > 0 ? "dans le sens des aiguilles d'une montre" : "dans le sens inverse des aiguilles d'une montre";
+    const dit = regles.map((r, k) => `${regles.length > 1 ? NOMS[k] : "le secteur coloré"} ${r.grandit ? `avance de 1, puis 2, puis 3, puis 4 secteurs (le pas grandit), ${sens(r.grandit)}` : `avance de ${Math.abs(r.pas)} secteur${Math.abs(r.pas) > 1 ? "s" : ""} ${sens(r.pas)}`}`);
+    return { q: "Quel cercle vient ensuite ?", figure: `<div class="rang">${t.slice(0, 4).map(c => svgCercle(c, n, COUL)).join("")}${svgCercle(null)}</div>`,
+      enonce: `rotations N${niveau} (${n} secteurs) : ${t.slice(0, 4).map(cle).join(" | ")} ?`, choix: choix.map(c => svgCercle(c, n, COUL)), texte: choix.map(cle), html: true, bonne: 0,
+      pourquoi: `La règle : ${dit.join(" ; ")}. Méthode : suis UNE couleur à la fois sur les quatre cercles, compte ses secteurs d'un cercle au suivant, et vérifie le sens avant de regarder les choix.` };
   }
 };
+
+// Un cercle de rotation : n secteurs, ceux des marqueurs colorés (une couleur par marqueur) ; null = la case « ? ».
+function svgCercle(c, n, coul) {
+  if (!c) return svgCase(null);
+  const R = 30, pt = a => `${(35 + R * Math.sin(a)).toFixed(1)},${(35 - R * Math.cos(a)).toFixed(1)}`;
+  const secteur = (k, cls) => { const a0 = 2 * Math.PI * k / n, a1 = 2 * Math.PI * (k + 1) / n; return `<path d="M35,35 L${pt(a0)} A${R},${R} 0 0 1 ${pt(a1)} Z" class="${cls}"/>`; };
+  const coul_de = k => { const i = c.indexOf(k); return i < 0 ? "sp-vide" : coul[i]; };
+  return `<svg class="case" viewBox="0 0 70 70" role="img" aria-label="cercle de ${n} secteurs, secteurs colorés : ${c.map((v, i) => `${["rouge", "bleu", "orange"][i]} en ${v + 1}`).join(", ")}"><rect x="1" y="1" width="68" height="68" rx="8" class="m-fond"/>${[...Array(n).keys()].map(k => secteur(k, coul_de(k))).join("")}<circle cx="35" cy="35" r="${R}" class="m-creux"/><circle cx="35" cy="5" r="2" class="m-plein"/></svg>`;
+}
 
 // Un calque de superposition : une grille n × n de cases, colorées (classe cls) ou vides ; null = la case « ? ».
 function svgCalque(c, n, cls) {
@@ -891,7 +934,8 @@ const FAMILLES = {
   figures:   { nom: "Suites de figures", gen: "figures",       limite: 60 },
   intrus:    { nom: "L'intrus",          gen: "intrus",        limite: 45 },
   analogies: { nom: "Analogies",         gen: "analogies",     limite: 45 },
-  superposition: { nom: "Superposition",  gen: "superposition", limite: 60, max: 5 }
+  superposition: { nom: "Superposition",  gen: "superposition", limite: 60, max: 5 },
+  rotations: { nom: "Rotations",          gen: "rotations",     limite: 60, max: 5 }
 };
 // max : niveau le plus haut de la famille (3 par défaut ; les niveaux 4 et 5 arrivent famille par famille, décision du 13/11/2026).
 const maxNiv = f => FAMILLES[f]?.max || 3;
