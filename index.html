@@ -67,6 +67,7 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .p-niv small, .p-obj { color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
 .fl { color: var(--muted); font-size: 1.2rem; line-height: 1; }
 .grandebarre { display: block; height: 10px; border-radius: 5px; background: var(--line); overflow: hidden; }
+.profil.logique .grandebarre i, .grandebarre.bleue i, .fenetre .grandebarre.bleue i { background: var(--accent); }
 .grandebarre i { display: block; height: 100%; background: var(--flame); border-radius: 5px; transition: width 1s cubic-bezier(.2, .8, .2, 1); }
 .tuiles { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); }
 .profil .tuile { display: grid; justify-items: center; text-align: center; padding: 8px 4px; font-variant-numeric: tabular-nums; }
@@ -375,10 +376,24 @@ function serieVisible() {
 // Niveaux du Mémo (15/11/2026) : calculés sur l'XP gardée dans le téléphone ; il en faut de plus en plus pour monter.
 const SEUIL_MEMO = n => 40 * n * n * (n - 1);   // niveau 2 à 160 XP, 5 à 4 000, 7 à 11 760, 10 à 36 000
 const TITRES_MEMO = [[1, "Débutant"], [3, "Habitué"], [5, "Assidu"], [7, "Tenace"], [10, "Mémoire d'acier"], [13, "Encyclopédie réseau"], [16, "Légende du Mémo"]];
-function niveauMemo(xp) {
-  let n = 1; while (xp >= SEUIL_MEMO(n + 1)) n++;
-  const bas = SEUIL_MEMO(n), haut = SEUIL_MEMO(n + 1);
-  return { n, titre: TITRES_MEMO.filter(t => n >= t[0]).pop()[1], pct: Math.round(100 * (xp - bas) / (haut - bas)), reste: haut - xp };
+function niveauDe(xp, seuil, titres) {
+  let n = 1; while (xp >= seuil(n + 1)) n++;
+  const bas = seuil(n), haut = seuil(n + 1);
+  return { n, titre: titres.filter(t => n >= t[0]).pop()[1], pct: Math.round(100 * (xp - bas) / (haut - bas)), reste: haut - xp };
+}
+const niveauMemo = xp => niveauDe(xp, SEUIL_MEMO, TITRES_MEMO);
+// Progression propre à la logique (v26, 16/11/2026, demande d'Arnaud) : l'XP gagnée en Logique et en simulation compte deux fois,
+// dans l'XP générale et dans l'XP Logique, qui a ses propres niveaux (courbe plus douce : il y a moins d'exercices de logique que de cartes).
+const SEUIL_LOGIQUE = n => 25 * n * n * (n - 1);   // niveau 2 à 100 XP, 3 à 450, 5 à 2 500, 10 à 22 500
+const TITRES_LOGIQUE = [[1, "Novice"], [3, "Esprit vif"], [5, "Logicien"], [7, "Stratège"], [10, "Cerveau d'acier"], [13, "As des tests"], [16, "Maître de la logique"]];
+const niveauLogique = xp => niveauDe(xp, SEUIL_LOGIQUE, TITRES_LOGIQUE);
+function xpLogique() {   // première ouverture : on reprend l'historique (10 XP par exercice juste, 5 par réponse juste en simulation)
+  if (etat.xpLogique === undefined) {
+    etat.xpLogique = etat.journal.filter(e => e.ok && !e.passe && e.mode === "logique").length * 10
+      + (etat.simulations || []).reduce((t, b) => t + 5 * (b.justes || 0), 0);
+    sauver();
+  }
+  return etat.xpLogique;
 }
 // Objectif du jour (v25) : 15 questions répondues dans la journée, tous onglets confondus ; +15 XP une fois par jour, donnés en fin de session.
 const OBJECTIF = 15, XP_OBJECTIF = 15;
@@ -456,7 +471,7 @@ function detailXP() {
     <table class="tableau"><tr><th>Ce qui rapporte</th><th>XP</th></tr>
       <tr><td>Réviser : juste du premier coup, en étant sûr</td><td>+10</td></tr>
       <tr><td>Réviser : juste en hésitant, ou au 2ᵉ essai</td><td>+5</td></tr>
-      <tr><td>Logique : exercice juste</td><td>+10</td></tr>
+      <tr><td>Logique : exercice juste (compte aussi en XP Logique)</td><td>+10</td></tr>
       <tr><td>Simulation de test : réponse juste</td><td>+5</td></tr>
       <tr><td>Entretien oral : réponse solide / incomplète</td><td>+15 / +5</td></tr>
       <tr><td>Fin de session : 70 % / 90 % de réussite</td><td>+10 / +20</td></tr>
@@ -485,7 +500,7 @@ function detailSues() {
 }
 function ouvrirDetail(k) {
   const d = document.getElementById("detail");
-  document.getElementById("detail-corps").innerHTML = { niveau: detailNiveau, serie: detailSerie, xp: detailXP, sues: detailSues }[k]();
+  document.getElementById("detail-corps").innerHTML = { niveau: detailNiveau, serie: detailSerie, xp: detailXP, sues: detailSues, logique: detailLogique }[k]();
   if (d.showModal) { if (!d.open) d.showModal(); } else d.setAttribute("open", "");
   d.scrollTop = 0;
 }
@@ -493,13 +508,14 @@ function ouvrirDetail(k) {
 // Le bloc « XP gagnée » des écrans de fin.
 function blocGain() {
   const g = session.gain; if (!g || !g.lignes.length) return "";
-  const a = niveauMemo(g.avant), b = niveauMemo(g.apres), anim = !session.anime, total = g.apres - g.avant;
+  const N = g.logique ? niveauLogique : niveauMemo, a = N(g.logique ? g.logique.avant : g.avant), b = N(g.logique ? g.logique.apres : g.apres);
+  const anim = !session.anime, total = g.apres - g.avant;
   return `<div class="gain${anim ? " anim" : ""}${g.sansFaute ? " parfait" : ""}">
     ${g.lignes.map((l, i) => `<div class="g-ligne" style="--i:${i}"><span>${esc(l[0])}</span><b>+${l[1]}</b></div>`).join("")}
     <div class="g-total" style="--i:${g.lignes.length}"><span>XP gagnée</span><b id="g-total" data-a="${total}">+${anim ? 0 : total}</b></div>
-    <div class="g-niv"><span>Niv. ${b.n} · ${esc(b.titre)}</span><small>${nombre(b.reste)} XP avant le niveau ${b.n + 1}</small></div>
-    <span class="grandebarre"><i id="g-barre" data-pct="${b.pct}" style="width:${anim ? (b.n > a.n ? 0 : a.pct) : b.pct}%"></i></span>
-    ${b.n > a.n ? `<div class="g-up" style="--i:${g.lignes.length}">Niveau ${b.n} gagné !${b.titre !== a.titre ? " Nouveau titre : " + esc(b.titre) : ""}</div>` : ""}
+    <div class="g-niv"><span>${g.logique ? "Logique · " : ""}Niv. ${b.n} · ${esc(b.titre)}</span><small>${nombre(b.reste)} XP avant le niveau ${b.n + 1}</small></div>
+    <span class="grandebarre${g.logique ? " bleue" : ""}"><i id="g-barre" data-pct="${b.pct}" style="width:${anim ? (b.n > a.n ? 0 : a.pct) : b.pct}%"></i></span>
+    ${b.n > a.n ? `<div class="g-up" style="--i:${g.lignes.length}">Niveau ${b.n}${g.logique ? " de logique" : ""} gagné !${b.titre !== a.titre ? " Nouveau titre : " + esc(b.titre) : ""}</div>` : ""}
   </div>
   ${session.records?.length ? `<div class="record"><b>🏆 Nouveau record</b>${session.records.map(r => `<span>${esc(r)}</span>`).join("")}</div>` : ""}`;
 }
@@ -508,7 +524,7 @@ function animerGain() {
   if (!session?.fini || !session.gain || session.anime) return;
   session.anime = true;
   const el = document.getElementById("g-total"), barre = document.getElementById("g-barre"); if (!el) return;
-  const fin = +el.dataset.a, g = session.gain, monte = niveauMemo(g.apres).n > niveauMemo(g.avant).n;
+  const fin = +el.dataset.a, g = session.gain, monte = niveauMemo(g.apres).n > niveauMemo(g.avant).n || (g.logique && niveauLogique(g.logique.apres).n > niveauLogique(g.logique.avant).n);
   const fete = () => { el.classList.add("pop"); if (monte || g.sansFaute || session.records?.length) try { navigator.vibrate?.(monte ? [60, 60, 160] : [40, 50, 80]); } catch {} };
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = "+" + fin; barre.style.width = barre.dataset.pct + "%"; return fete(); }
   setTimeout(() => {
@@ -530,8 +546,7 @@ function groupesLogique(entrees, cle) {
   }
   return Object.values(g).filter(x => x.n >= 3).map(x => ({ ...x, k: x.fam + "-" + x.niveau, taux: x.ok / x.n, moy: x.ok >= 3 ? x.ms / x.ok : null }));
 }
-function majRecords() {
-  const avant = etat.journal.filter(e => e.t < session.t0);
+function initRecords(avant = etat.journal) {
   if (!etat.records) {
     etat.records = {};
     for (const x of groupesLogique(avant, e => jourDe(e.t) + "|" + e.fam + "-" + e.niveau)) {
@@ -539,6 +554,9 @@ function majRecords() {
       r.taux = Math.max(r.taux, x.taux); if (x.moy && (!r.moy || x.moy < r.moy)) r.moy = x.moy;
     }
   }
+}
+function majRecords() {
+  initRecords(etat.journal.filter(e => e.t < session.t0));
   const msgs = [];
   for (const x of groupesLogique(etat.journal.filter(e => e.t >= session.t0), e => e.fam + "-" + e.niveau)) {
     const nom = `${FAMILLES[x.fam].nom}, niveau ${x.niveau}`, r = etat.records[x.k];
@@ -1273,9 +1291,50 @@ function finaliserLogique() {
   sauver();
 }
 
+function profilLogique() {
+  const nv = niveauLogique(xpLogique()), fams = Object.keys(FAMILLES);
+  const st = fams.map(statLogique), n = st.reduce((t, x) => t + x.n, 0), ok = st.reduce((t, x) => t + x.ok, 0);
+  const niv = st.reduce((t, x) => t + x.niveau, 0), max = fams.reduce((t, f) => t + maxNiv(f), 0);
+  const monte = etat.niveauLogiqueVu && nv.n > etat.niveauLogiqueVu;
+  if (etat.niveauLogiqueVu !== nv.n) { etat.niveauLogiqueVu = nv.n; sauver(); }
+  return `<div class="profil logique${monte ? " up" : ""}">
+    <button class="p-niv" data-detail="logique" aria-label="Logique, niveau ${nv.n}, ${nv.titre} : voir les niveaux et les familles">
+      <span class="l1"><span>${monte ? "Niveau gagné ! " : ""}<b>Logique · Niv. ${nv.n}</b> · ${nv.titre}</span><span class="fl" aria-hidden="true">›</span></span>
+      <span class="grandebarre"><i style="width:${nv.pct}%"></i></span>
+      <small>${nombre(xpLogique())} XP Logique · ${nombre(nv.reste)} avant le niveau ${nv.n + 1}</small>
+    </button>
+    <div class="tuiles">
+      <button class="tuile" data-detail="logique"><b>${n ? Math.round(100 * ok / n) : 0} %</b><small>Réussite</small></button>
+      <button class="tuile" data-detail="logique"><b>${nombre(n)}</b><small>Exercices</small></button>
+      <button class="tuile" data-detail="logique"><b>${niv}<span>/${max}</span></b><small>Niveaux de famille</small></button>
+    </div>
+  </div>`;
+}
+function detailLogique() {
+  const xp = xpLogique(), nv = niveauLogique(xp), lignes = [];
+  for (let n = 1; n <= 16; n++) {
+    const t = TITRES_LOGIQUE.find(x => x[0] === n);
+    lignes.push(`<tr class="${n === nv.n ? "ici" : n > nv.n ? "loin" : ""}"><td>${n}</td><td>${t ? "<b>" + esc(t[1]) + "</b>" : ""}</td><td>${nombre(SEUIL_LOGIQUE(n))}</td></tr>`);
+  }
+  if (!etat.records) { initRecords(); sauver(); }
+  const rec = etat.records;
+  const fams = Object.entries(FAMILLES).map(([f, F]) => { const x = statLogique(f), r = rec[f + "-" + x.niveau];
+    return `<tr><td>${esc(F.nom)}</td><td>${x.niveau}/${maxNiv(f)}</td><td>${x.n ? Math.round(100 * x.ok / x.n) + " %" : "–"}</td><td>${r?.moy ? (r.moy / 1000).toFixed(1) + " s" : "–"}</td></tr>`; }).join("");
+  return `<h2 id="detail-titre">Logique · Niv. ${nv.n} · ${esc(nv.titre)}</h2>
+    <span class="grandebarre bleue"><i style="width:${nv.pct}%"></i></span>
+    <p>Tu as <b>${nombre(xp)} XP Logique</b>. Encore <b>${nombre(nv.reste)} XP</b> avant le niveau ${nv.n + 1}.</p>
+    <h3>Tes familles</h3>
+    <table class="tableau"><tr><th>Famille</th><th>Niveau</th><th>Réussite</th><th>Record</th></tr>${fams}</table>
+    <p class="muted">Record = ton meilleur temps moyen par bonne réponse, au niveau où tu es dans la famille. Le niveau d'une famille monte après 3 réussites d'affilée et descend après 2 erreurs.</p>
+    <h3>Les niveaux de logique</h3>
+    <table class="tableau"><tr><th>Niveau</th><th>Nouveau titre</th><th>XP Logique</th></tr>${lignes.join("")}</table>
+    <p class="muted">L'XP Logique vient de l'onglet Logique et des simulations de test (exercice juste +10, réponse juste en simulation +5, bonus de réussite en fin de session). Elle compte aussi dans ton XP générale.</p>`;
+}
+
 function vueLogique() {
   const fams = Object.entries(FAMILLES);
   return `
+    ${profilLogique()}
     <section class="card hero">
       <span class="label">Entraînement logique</span>
       <h2>Les tests d'admission, exercice par exercice</h2>
@@ -1673,6 +1732,11 @@ function terminerSiVide() {
   etat.recordSerie = Math.max(etat.recordSerie || 0, etat.serie);
   if (session.mode === "logique") session.records = majRecords();
   session.gain = { avant, apres: etat.xp, lignes, sansFaute: palier?.[0] === 1 };
+  if (["logique", "simulation"].includes(session.mode)) {
+    const l0 = xpLogique(), gl = lignes.filter(l => !l[0].startsWith("Objectif")).reduce((t, l) => t + l[1], 0);
+    etat.xpLogique = l0 + gl;
+    session.gain.logique = { avant: l0, apres: etat.xpLogique };
+  }
   sauver();
   session.fini = true;
 }
@@ -1795,7 +1859,8 @@ function afficher() {
 
 document.getElementById("vue").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
-  if (b.id === "go") demarrer(false);
+  if (b.dataset.detail) ouvrirDetail(b.dataset.detail);
+  else if (b.id === "go") demarrer(false);
   else if (b.id === "bonus") demarrer(true);
   else if (b.id === "go-logique") demarrerLogique();
   else if (b.id === "go-simu") demarrerSimulation();
