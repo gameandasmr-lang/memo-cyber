@@ -55,16 +55,69 @@ h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; }
 button { font: inherit; color: inherit; cursor: pointer; }
 button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
-.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.top { display: grid; gap: 10px; }
 .top h1 { font-size: 1.5rem; font-weight: 800; }
-.chips { display: flex; gap: 8px; }
-.chip { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: .85rem; font-weight: 500; font-variant-numeric: tabular-nums; }
-.chip.flame b { color: var(--flame); }
-.chip b { font-weight: 600; }
-.chip.niv { display: inline-flex; align-items: center; gap: 6px; }
-.chip.niv.up { border-color: var(--flame); }
-.nivbar { display: inline-block; width: 46px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
-.nivbar i { display: block; height: 100%; background: var(--flame); border-radius: 3px; }
+/* Carte profil (v25, 16/11/2026) : le niveau en grand, puis trois tuiles et l'objectif du jour ; chaque partie s'ouvre en détail d'un toucher. */
+.profil { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.profil.up { border-color: var(--flame); }
+.profil button { background: none; border: 0; width: 100%; text-align: left; }
+.p-niv { display: grid; gap: 6px; padding: 12px 14px; }
+.p-niv .l1 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.p-niv .l1 b { font-family: var(--f-display); font-size: 1.15rem; font-weight: 800; }
+.p-niv small, .p-obj { color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
+.fl { color: var(--muted); font-size: 1.2rem; line-height: 1; }
+.grandebarre { display: block; height: 10px; border-radius: 5px; background: var(--line); overflow: hidden; }
+.grandebarre i { display: block; height: 100%; background: var(--flame); border-radius: 5px; transition: width 1s cubic-bezier(.2, .8, .2, 1); }
+.tuiles { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); }
+.profil .tuile { display: grid; justify-items: center; text-align: center; padding: 8px 4px; font-variant-numeric: tabular-nums; }
+.tuile + .tuile { border-left: 1px solid var(--line); }
+.tuile b { font-size: 1.15rem; font-weight: 600; }
+.tuile b span { color: var(--muted); font-weight: 400; font-size: .85rem; }
+.tuile small { color: var(--muted); font-size: .78rem; }
+.tuile.flame b { color: var(--flame); }
+.tuile.danger { animation: pouls 1.6s ease-in-out infinite; }
+.tuile.danger small { color: var(--flame); font-weight: 600; }
+@keyframes pouls { 50% { background: color-mix(in srgb, var(--flame) 20%, transparent); } }
+.profil .p-obj { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-top: 1px solid var(--line); }
+.p-obj b { color: var(--ink); }
+.anneau { flex: none; transform: rotate(-90deg); }
+.anneau .fond { stroke: var(--line); } .anneau .plein { stroke: var(--good); transition: stroke-dashoffset .8s; }
+/* Fenêtre de détail (niveau, série, XP, questions sues) */
+.fenetre { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); padding: 18px; width: min(520px, calc(100vw - 32px)); max-height: 85vh; }
+.fenetre::backdrop { background: rgb(0 0 0 / .45); }
+.fenetre[open] { display: grid; gap: 14px; }
+.fenetre h2 { font-size: 1.3rem; }
+.fenetre p { margin: 0; }
+.fenetre .muted { color: var(--muted); font-size: .88rem; }
+.tableau tr.ici td { background: var(--accent-soft); font-weight: 600; }
+.tableau tr.loin td { color: var(--muted); }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: .8rem; font-variant-numeric: tabular-nums; }
+.cal .tete { color: var(--muted); font-weight: 600; }
+.cal span { padding: 6px 0; border-radius: 8px; background: var(--bg); }
+.cal .fait { background: var(--flame); color: var(--surface); font-weight: 600; }
+.cal .auj { outline: 2px solid var(--accent); }
+.cal .futur { opacity: .35; }
+.chiffres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.chiffres div { background: var(--bg); border-radius: 10px; padding: 8px 4px; display: grid; }
+.chiffres b { font: 800 1.3rem var(--f-display); }
+.chiffres small { color: var(--muted); font-size: .75rem; }
+.mini { display: block; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 4px; }
+.mini i { display: block; height: 100%; background: var(--accent); }
+/* Gain d'XP en fin de session : les lignes arrivent une à une, le total monte, la barre de niveau se remplit. */
+.gain { display: grid; gap: 6px; background: var(--bg); border-radius: 12px; padding: 12px 14px; font-variant-numeric: tabular-nums; }
+.gain.parfait { box-shadow: inset 0 0 0 2px var(--good); }
+.g-ligne, .g-total, .g-niv { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.g-ligne b { color: var(--good); }
+.g-total { border-top: 1px solid var(--line); padding-top: 6px; font-weight: 600; }
+.g-total b { font: 800 1.6rem var(--f-display); color: var(--flame); display: inline-block; }
+.g-niv { font-size: .85rem; } .g-niv small { color: var(--muted); }
+.g-up, .record { text-align: center; font-weight: 700; color: var(--flame); }
+.record { font-weight: 500; font-size: .9rem; display: grid; gap: 2px; } .record b { font-weight: 700; }
+.pop { animation: pop .4s ease-out; }
+.gain.anim .g-ligne, .gain.anim .g-total { animation: entre .35s ease-out both; animation-delay: calc(var(--i) * 350ms); }
+.gain.anim .g-up { animation: entre .35s ease-out both, pop .5s ease-out; animation-delay: calc(var(--i) * 350ms + 1000ms); }
+@keyframes entre { from { opacity: 0; transform: translateY(8px); } }
+@keyframes pop { 50% { transform: scale(1.2); } }
 
 .tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 4px; }
 .tabs button { border: 0; background: none; border-radius: 9px; padding: 9px; font-weight: 500; color: var(--muted); }
@@ -230,7 +283,8 @@ details.revue { border: 1px solid var(--line); border-radius: 12px; padding: 10p
 details.revue[open] { display: grid; gap: 8px; }
 details.revue summary { color: var(--ink); }
 .cadenas { font-size: .88rem; color: var(--muted); margin: 0; }
-@media (prefers-reduced-motion: reduce) { .progress i { transition: none; } .big:active { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .progress i, .grandebarre i, .anneau .plein { transition: none; } .big:active { transform: none; }
+  .tuile.danger, .pop, .gain.anim .g-ligne, .gain.anim .g-total, .gain.anim .g-up { animation: none; } }
 </style>
 
 </head>
@@ -240,6 +294,7 @@ details.revue summary { color: var(--ink); }
     <h1>Mémo cyber</h1>
     <div class="chips" id="chips"></div>
   </header>
+  <dialog class="fenetre" id="detail" aria-labelledby="detail-titre"><div id="detail-corps" style="display:grid;gap:14px"></div><form method="dialog" style="display:grid"><button class="big ghost">Fermer</button></form></dialog>
   <nav class="tabs" role="tablist">
     <button id="tab-reviser" role="tab" aria-selected="true">Réviser</button>
     <button id="tab-logique" role="tab" aria-selected="false">Logique</button>
@@ -325,16 +380,173 @@ function niveauMemo(xp) {
   const bas = SEUIL_MEMO(n), haut = SEUIL_MEMO(n + 1);
   return { n, titre: TITRES_MEMO.filter(t => n >= t[0]).pop()[1], pct: Math.round(100 * (xp - bas) / (haut - bas)), reste: haut - xp };
 }
+// Objectif du jour (v25) : 15 questions répondues dans la journée, tous onglets confondus ; +15 XP une fois par jour, donnés en fin de session.
+const OBJECTIF = 15, XP_OBJECTIF = 15;
+const jourDe = t => jour(new Date(t));
+const faitesAujourdhui = () => { const a = jour(); return etat.journal.filter(e => !e.passe && jourDe(e.t) === a).length; };
+// Bonus de fin de session selon la réussite (du premier coup en Réviser) : le premier palier atteint compte.
+const PALIERS = [[1, 30, "Sans faute !"], [.9, 20, "Bonus réussite 90 %"], [.7, 10, "Bonus réussite 70 %"]];
+// Série en danger : rien fait aujourd'hui alors qu'on a travaillé hier, et il est 18 h passées.
+const enDanger = () => serieVisible() > 0 && etat.dernierJour !== jour() && new Date().getHours() >= 18;
+const decaler = (j, n) => { const d = new Date(j + "T12:00:00"); d.setDate(d.getDate() + n); return jour(d); };
+function joursActifs() {
+  const s = new Set(etat.journal.filter(e => !e.passe).map(e => jourDe(e.t)));
+  if (etat.dernierJour) s.add(etat.dernierJour);
+  return s;
+}
+function recordSerie() {   // la plus longue suite de jours actifs (le journal commence le 09/11/2026), ou le record gardé
+  let best = 0, run = 0, prec = null;
+  for (const j of [...joursActifs()].sort()) { run = prec && decaler(prec, 1) === j ? run + 1 : 1; best = Math.max(best, run); prec = j; }
+  return Math.max(best, etat.recordSerie || 0, serieVisible());
+}
+const anneau = (k, r = 9) => { const c = 2 * Math.PI * r; return `<svg class="anneau" width="${2 * r + 6}" height="${2 * r + 6}" viewBox="0 0 ${2 * r + 6} ${2 * r + 6}" aria-hidden="true"><circle class="fond" cx="${r + 3}" cy="${r + 3}" r="${r}" fill="none" stroke-width="4"/><circle class="plein" cx="${r + 3}" cy="${r + 3}" r="${r}" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${(c * (1 - Math.min(1, k))).toFixed(1)}"/></svg>`; };
+const nombre = n => n.toLocaleString("fr-FR");
+
 function chips() {
   const maitrisees = D.questions.filter(q => carte(q.id).boite >= 4).length;
   const nv = niveauMemo(etat.xp);
   const monte = etat.niveauVu && nv.n > etat.niveauVu;   // un niveau gagné depuis le dernier affichage : on le fête une fois
   if (etat.niveauVu !== nv.n) { etat.niveauVu = nv.n; sauver(); }
-  document.getElementById("chips").innerHTML =
-    `<span class="chip niv${monte ? " up" : ""}" title="${nv.reste} XP avant le niveau ${nv.n + 1}">${monte ? "Niveau gagné ! " : ""}Niv. <b>${nv.n}</b> · ${nv.titre}<i class="nivbar"><i style="width:${nv.pct}%"></i></i></span>
-     <span class="chip flame">Série <b>${serieVisible()} j</b></span>
-     <span class="chip"><b>${etat.xp}</b> XP</span>
-     <span class="chip"><b>${maitrisees}</b>/${D.questions.length} sues</span>`;
+  const danger = enDanger(), f = faitesAujourdhui(), atteint = etat.objectifFait === jour();
+  document.getElementById("chips").innerHTML = `<div class="profil${monte ? " up" : ""}">
+    <button class="p-niv" data-detail="niveau" aria-label="Niveau ${nv.n}, ${nv.titre} : voir tous les niveaux">
+      <span class="l1"><span>${monte ? "Niveau gagné ! " : ""}<b>Niv. ${nv.n}</b> · ${nv.titre}</span><span class="fl" aria-hidden="true">›</span></span>
+      <span class="grandebarre"><i style="width:${nv.pct}%"></i></span>
+      <small>${nombre(nv.reste)} XP avant le niveau ${nv.n + 1}</small>
+    </button>
+    <div class="tuiles">
+      <button class="tuile flame${danger ? " danger" : ""}" data-detail="serie"><b>🔥 ${serieVisible()} j</b><small>${danger ? "Série en danger" : "Série"}</small></button>
+      <button class="tuile" data-detail="xp"><b>${nombre(etat.xp)}</b><small>XP</small></button>
+      <button class="tuile" data-detail="sues"><b>${maitrisees}<span>/${D.questions.length}</span></b><small>Sues</small></button>
+    </div>
+    <button class="p-obj" data-detail="xp">${anneau(f / OBJECTIF)}<span>Objectif du jour : <b>${Math.min(f, OBJECTIF)}/${OBJECTIF}</b> questions${atteint ? " · atteint ✓" : f >= OBJECTIF ? " · +" + XP_OBJECTIF + " XP à la fin de la session" : " · +" + XP_OBJECTIF + " XP"}</span></button>
+  </div>`;
+}
+
+// Fenêtres de détail : un toucher sur une partie de la carte profil.
+function detailNiveau() {
+  const nv = niveauMemo(etat.xp), lignes = [];
+  for (let n = 1; n <= 16; n++) {
+    const t = TITRES_MEMO.find(x => x[0] === n);
+    lignes.push(`<tr class="${n === nv.n ? "ici" : n > nv.n ? "loin" : ""}"><td>${n}</td><td>${t ? "<b>" + esc(t[1]) + "</b>" : ""}</td><td>${nombre(SEUIL_MEMO(n))}</td></tr>`);
+  }
+  return `<h2 id="detail-titre">Niveau ${nv.n} · ${esc(nv.titre)}</h2>
+    <span class="grandebarre"><i style="width:${nv.pct}%"></i></span>
+    <p>Tu as <b>${nombre(etat.xp)} XP</b>. Encore <b>${nombre(nv.reste)} XP</b> avant le niveau ${nv.n + 1}.</p>
+    <table class="tableau"><tr><th>Niveau</th><th>Nouveau titre</th><th>XP à atteindre</th></tr>${lignes.join("")}</table>
+    <p class="muted">Il faut de plus en plus d'XP pour monter. C'est l'XP de l'appli seule (le carnet de quête a ses propres niveaux).</p>`;
+}
+function detailSerie() {
+  const actifs = joursActifs(), auj = jour(), d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 6) % 7) - 21);   // lundi d'il y a 3 semaines
+  const cases = [];
+  for (let i = 0; i < 28; i++) { const j = jour(d); cases.push(`<span class="${[actifs.has(j) ? "fait" : "", j === auj ? "auj" : "", j > auj ? "futur" : ""].join(" ").trim()}" title="${j}">${d.getDate()}</span>`); d.setDate(d.getDate() + 1); }
+  const n28 = [...actifs].filter(j => j > decaler(auj, -28) && j <= auj).length, s = serieVisible();
+  return `<h2 id="detail-titre">🔥 Série de ${s} jour${s > 1 ? "s" : ""}</h2>
+    <div class="chiffres"><div><b>${s}</b><small>série actuelle</small></div><div><b>${recordSerie()}</b><small>record</small></div><div><b>${n28}</b><small>jours sur 28</small></div></div>
+    <div class="cal">${["L", "M", "M", "J", "V", "S", "D"].map(x => `<span class="tete">${x}</span>`).join("")}${cases.join("")}</div>
+    <p class="${enDanger() ? "" : "muted"}">${etat.dernierJour === auj ? "Série tenue aujourd'hui ✓" : s ? "<b>Fais une session avant minuit pour garder ta série.</b>" : "Une session aujourd'hui relance la série."}</p>
+    <p class="muted">Un jour compte dès qu'une session est terminée (Réviser, Logique ou oral). Le calendrier part du 09/11/2026, début du journal.</p>`;
+}
+function detailXP() {
+  const lundi = (() => { const d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return jour(d); })();
+  const xj = etat.xpJours || {}, semaine = Object.entries(xj).filter(([j]) => j >= lundi).reduce((s, [, v]) => s + v, 0), depuis = Object.keys(xj).sort()[0];
+  const f = faitesAujourdhui();
+  return `<h2 id="detail-titre">${nombre(etat.xp)} XP</h2>
+    <div class="chiffres"><div><b>${depuis ? nombre(semaine) : "–"}</b><small>XP cette semaine</small></div><div><b>${depuis ? nombre(xj[jour()] || 0) : "–"}</b><small>XP aujourd'hui</small></div><div><b>${Math.min(f, OBJECTIF)}/${OBJECTIF}</b><small>objectif du jour</small></div></div>
+    <table class="tableau"><tr><th>Ce qui rapporte</th><th>XP</th></tr>
+      <tr><td>Réviser : juste du premier coup, en étant sûr</td><td>+10</td></tr>
+      <tr><td>Réviser : juste en hésitant, ou au 2ᵉ essai</td><td>+5</td></tr>
+      <tr><td>Logique : exercice juste</td><td>+10</td></tr>
+      <tr><td>Simulation de test : réponse juste</td><td>+5</td></tr>
+      <tr><td>Entretien oral : réponse solide / incomplète</td><td>+15 / +5</td></tr>
+      <tr><td>Fin de session : 70 % / 90 % de réussite</td><td>+10 / +20</td></tr>
+      <tr><td>Fin de session : sans faute</td><td>+30</td></tr>
+      <tr><td>Objectif du jour : ${OBJECTIF} questions (une fois par jour)</td><td>+${XP_OBJECTIF}</td></tr>
+    </table>
+    <p class="muted">${depuis ? "XP par jour comptée depuis le " + new Date(depuis + "T12:00:00").toLocaleDateString("fr-FR") + "." : "L'XP par jour sera comptée à partir de ta prochaine session."} La réussite se calcule du premier coup en Réviser.</p>`;
+}
+function detailSues() {
+  const B = ["Jamais vues", "À revoir (boîte 0)", "Boîte 1", "Boîte 2", "Boîte 3", "Sues (boîte 4 et +)"], nb = B.map(() => 0);
+  for (const q of D.questions) { const c = etat.cartes[q.id]; nb[!c ? 0 : Math.min(c.boite, 4) + 1]++; }
+  const tot = D.questions.length, th = {};
+  for (const q of D.questions) { const t = (th[paire(q.paire)?.theme || "Autre"] ||= { n: 0, sues: 0, ok: 0, rep: 0 }); t.n++; if (carte(q.id).boite >= 4) t.sues++; }
+  const qs = new Map(D.questions.map(q => [q.id, q]));
+  for (const e of etat.journal) {
+    if (e.passe || e.essai !== 1 || ["logique", "entretien", "simulation"].includes(e.mode) || !qs.has(e.q)) continue;
+    const t = th[paire(qs.get(e.q).paire)?.theme || "Autre"]; t.rep++; if (e.ok) t.ok++;
+  }
+  const lignesT = Object.entries(th).map(([k, t]) => ({ k, ...t, pct: t.rep ? Math.round(100 * t.ok / t.rep) : null })).sort((a, b) => (a.pct ?? 101) - (b.pct ?? 101));
+  return `<h2 id="detail-titre">${nb[5]} questions sues sur ${tot}</h2>
+    <p class="muted">Une question est « sue » quand elle a été réussie, sûr de toi, assez de fois d'affilée pour monter en boîte 4 (révisée tous les 8 jours ou plus).</p>
+    <div class="stats">${B.map((b, i) => `<div><div class="srow"><span>${b}</span><b>${nb[i]}</b></div><span class="mini"><i style="width:${Math.round(100 * nb[i] / tot)}%"></i></span></div>`).join("")}</div>
+    <h3>Par thème</h3>
+    <table class="tableau"><tr><th>Thème</th><th>Sues</th><th>Réussite</th></tr>${lignesT.map(t => `<tr><td>${esc(t.k)}</td><td>${t.sues}/${t.n}</td><td>${t.pct === null ? "–" : t.pct + " %"}</td></tr>`).join("")}</table>
+    <p class="muted">Réussite = réponses justes du premier coup dans Réviser, depuis le 09/11/2026. Les thèmes les plus fragiles sont en haut.</p>`;
+}
+function ouvrirDetail(k) {
+  const d = document.getElementById("detail");
+  document.getElementById("detail-corps").innerHTML = { niveau: detailNiveau, serie: detailSerie, xp: detailXP, sues: detailSues }[k]();
+  if (d.showModal) { if (!d.open) d.showModal(); } else d.setAttribute("open", "");
+  d.scrollTop = 0;
+}
+
+// Le bloc « XP gagnée » des écrans de fin.
+function blocGain() {
+  const g = session.gain; if (!g || !g.lignes.length) return "";
+  const a = niveauMemo(g.avant), b = niveauMemo(g.apres), anim = !session.anime, total = g.apres - g.avant;
+  return `<div class="gain${anim ? " anim" : ""}${g.sansFaute ? " parfait" : ""}">
+    ${g.lignes.map((l, i) => `<div class="g-ligne" style="--i:${i}"><span>${esc(l[0])}</span><b>+${l[1]}</b></div>`).join("")}
+    <div class="g-total" style="--i:${g.lignes.length}"><span>XP gagnée</span><b id="g-total" data-a="${total}">+${anim ? 0 : total}</b></div>
+    <div class="g-niv"><span>Niv. ${b.n} · ${esc(b.titre)}</span><small>${nombre(b.reste)} XP avant le niveau ${b.n + 1}</small></div>
+    <span class="grandebarre"><i id="g-barre" data-pct="${b.pct}" style="width:${anim ? (b.n > a.n ? 0 : a.pct) : b.pct}%"></i></span>
+    ${b.n > a.n ? `<div class="g-up" style="--i:${g.lignes.length}">Niveau ${b.n} gagné !${b.titre !== a.titre ? " Nouveau titre : " + esc(b.titre) : ""}</div>` : ""}
+  </div>
+  ${session.records?.length ? `<div class="record"><b>🏆 Nouveau record</b>${session.records.map(r => `<span>${esc(r)}</span>`).join("")}</div>` : ""}`;
+}
+// Animation jouée une seule fois, juste après l'affichage de l'écran de fin.
+function animerGain() {
+  if (!session?.fini || !session.gain || session.anime) return;
+  session.anime = true;
+  const el = document.getElementById("g-total"), barre = document.getElementById("g-barre"); if (!el) return;
+  const fin = +el.dataset.a, g = session.gain, monte = niveauMemo(g.apres).n > niveauMemo(g.avant).n;
+  const fete = () => { el.classList.add("pop"); if (monte || g.sansFaute || session.records?.length) try { navigator.vibrate?.(monte ? [60, 60, 160] : [40, 50, 80]); } catch {} };
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = "+" + fin; barre.style.width = barre.dataset.pct + "%"; return fete(); }
+  setTimeout(() => {
+    const t0 = performance.now(), duree = 900;
+    const pas = t => { const k = Math.min(1, (t - t0) / duree); el.textContent = "+" + Math.round(fin * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(pas); else fete(); };
+    requestAnimationFrame(pas);
+    barre.style.width = barre.dataset.pct + "%";
+  }, 350 * g.lignes.length);
+}
+
+// Records de logique (v25) : par famille et par niveau, meilleure réussite et meilleur temps moyen des bonnes réponses,
+// mesurés sur une session (au moins 3 exercices). La toute première mesure devient le record à battre ; l'historique d'avant sert de base, jour par jour.
+function groupesLogique(entrees, cle) {
+  const g = {};
+  for (const e of entrees) {
+    if (e.mode !== "logique" || e.passe || !FAMILLES[e.fam]) continue;
+    const k = cle(e), x = (g[k] ||= { fam: e.fam, niveau: e.niveau, n: 0, ok: 0, ms: 0 });
+    x.n++; if (e.ok) { x.ok++; x.ms += e.ms || 0; }
+  }
+  return Object.values(g).filter(x => x.n >= 3).map(x => ({ ...x, k: x.fam + "-" + x.niveau, taux: x.ok / x.n, moy: x.ok >= 3 ? x.ms / x.ok : null }));
+}
+function majRecords() {
+  const avant = etat.journal.filter(e => e.t < session.t0);
+  if (!etat.records) {
+    etat.records = {};
+    for (const x of groupesLogique(avant, e => jourDe(e.t) + "|" + e.fam + "-" + e.niveau)) {
+      const r = (etat.records[x.k] ||= { taux: 0, moy: null });
+      r.taux = Math.max(r.taux, x.taux); if (x.moy && (!r.moy || x.moy < r.moy)) r.moy = x.moy;
+    }
+  }
+  const msgs = [];
+  for (const x of groupesLogique(etat.journal.filter(e => e.t >= session.t0), e => e.fam + "-" + e.niveau)) {
+    const nom = `${FAMILLES[x.fam].nom}, niveau ${x.niveau}`, r = etat.records[x.k];
+    if (!r) { etat.records[x.k] = { taux: x.taux, moy: x.moy }; continue; }
+    if (x.taux > r.taux) { msgs.push(`${nom} : ${Math.round(100 * x.taux)} % de réussite (avant ${Math.round(100 * r.taux)} %)`); r.taux = x.taux; }
+    if (x.moy && (!r.moy || x.moy < r.moy)) { if (r.moy) msgs.push(`${nom} : ${(x.moy / 1000).toFixed(1)} s par bonne réponse (avant ${(r.moy / 1000).toFixed(1)} s)`); r.moy = x.moy; }
+  }
+  return msgs;
 }
 
 // Sélecteur 10 / 15 / 20 questions (cle = "taille" pour Réviser, "tailleLogique" pour la Logique).
@@ -1036,7 +1248,7 @@ function choisirFamille(precedente) {
 function demarrerLogique() {
   const f = choisirFamille(null);
   session = { file: [exerciceLogique(f)], total: taille("tailleLogique"), faites: 0, justes: 0, xp: 0, ratees: new Set(), retoursPasses: 0, passees: 0,
-              ids: new Set(), etape: "repondre", res: null, mode: "logique", derniere: f, ms: 0, changements: [] };
+              ids: new Set(), etape: "repondre", res: null, mode: "logique", derniere: f, ms: 0, changements: [], t0: new Date().toISOString() };
   envoi = null;
   afficher();
 }
@@ -1192,7 +1404,8 @@ function vueFinSimulation() {
     <section class="card hero">
       <span class="label">Simulation terminée</span>
       <h2>${b.justes} / ${b.n} (${pc(b.justes, b.n)} %)</h2>
-      <p>${b.repondues}/${b.n} questions répondues en ${duree(b.ms)}${prec ? ` · la fois d'avant : ${pc(prec.justes, prec.n)} %` : ""} · +${session.xp} XP</p>
+      <p>${b.repondues}/${b.n} questions répondues en ${duree(b.ms)}${prec ? ` · la fois d'avant : ${pc(prec.justes, prec.n)} %` : ""}</p>
+      ${blocGain()}
       ${b.repondues < b.n ? `<div class="piege"><b>${b.n - b.repondues} sans réponse.</b> Le jour J, garde une minute pour répondre à tout : une réponse au hasard a une chance sur quatre, une case vide aucune (sauf si le test enlève des points aux erreurs : à demander à l'école).</div>` : ""}
       <table class="tableau"><thead><tr><th>Famille (de la plus ratée à la plus sûre)</th><th>Justes</th></tr></thead>
         <tbody>${fams.map(([f, [o, n]]) => `<tr><td>${esc(FAMILLES[f].nom)}</td><td>${o}/${n}</td></tr>`).join("")}</tbody></table>
@@ -1259,7 +1472,8 @@ function vueFinOral() {
     <section class="card hero">
       <span class="label">Entretien terminé</span>
       <h2>${session.justes} / ${session.total} réponse${session.total > 1 ? "s" : ""} solide${session.total > 1 ? "s" : ""}</h2>
-      <p>+${session.xp} XP · série de ${etat.serie} jour${etat.serie > 1 ? "s" : ""}</p>
+      <p>série de ${etat.serie} jour${etat.serie > 1 ? "s" : ""}</p>
+      ${blocGain()}
       ${a.length ? `<div class="piege"><b>À retravailler :</b> ${a.map(b => esc(b.x.q)).join(" · ")}</div>` : ""}
       <p class="note" style="text-align:left;margin:0">Envoie ton bilan : Claude relira tes notes et te fera repasser ces questions à l'oral en séance.</p>
       <button class="big" id="retour">Retour</button>
@@ -1273,7 +1487,8 @@ function vueFinLogique() {
     <section class="card hero">
       <span class="label">Entraînement terminé</span>
       <h2>${session.justes} / ${session.total} justes</h2>
-      <p>${moy} s par exercice en moyenne · +${session.xp} XP · série de ${etat.serie} jour${etat.serie > 1 ? "s" : ""}</p>
+      <p>${Math.round(100 * session.justes / session.total)} % de réussite · ${moy} s par exercice en moyenne · série de ${etat.serie} jour${etat.serie > 1 ? "s" : ""}</p>
+      ${blocGain()}
       ${session.changements.length ? `<div class="rappel">${session.changements.map(c => `<span>${esc(c)}</span>`).join("")}</div>` : ""}
       ${session.ratees.size ? `<div class="piege"><b>À retravailler :</b> ${[...session.ratees].map(f => esc(FAMILLES[f].nom)).join(" · ")}. Relis « La méthode » sur l'accueil de la logique.</div>` : ""}
       <button class="big" id="retour">Retour</button>
@@ -1444,9 +1659,20 @@ function suivant() {
 
 function terminerSiVide() {
   if (session.file.length) return;
-  etat.xp += session.xp;
-  const auj = jour();
+  const auj = jour(), avant = etat.xp, lignes = [];
+  if (session.xp) lignes.push([session.mode === "entretien" ? "Réponses à l'oral" : "Bonnes réponses", session.xp]);
+  const taux = session.total ? session.justes / session.total : 0;
+  const palier = session.mode !== "entretien" && session.faites ? PALIERS.find(p => taux >= p[0]) : null;
+  if (palier) lignes.push([palier[2], palier[1]]);
+  if (etat.objectifFait !== auj && faitesAujourdhui() >= OBJECTIF) { etat.objectifFait = auj; lignes.push([`Objectif du jour (${OBJECTIF} questions)`, XP_OBJECTIF]); }
+  const total = lignes.reduce((s, l) => s + l[1], 0);
+  etat.xp += total;
+  const xj = { ...(etat.xpJours || {}) }; xj[auj] = (xj[auj] || 0) + total;
+  etat.xpJours = Object.fromEntries(Object.entries(xj).filter(([j]) => j > decaler(auj, -60)));   // deux mois suffisent
   if (session.faites && etat.dernierJour !== auj) { etat.serie = etat.dernierJour === plusJours(-1) ? etat.serie + 1 : 1; etat.dernierJour = auj; }
+  etat.recordSerie = Math.max(etat.recordSerie || 0, etat.serie);
+  if (session.mode === "logique") session.records = majRecords();
+  session.gain = { avant, apres: etat.xp, lignes, sansFaute: palier?.[0] === 1 };
   sauver();
   session.fini = true;
 }
@@ -1517,7 +1743,8 @@ function vueFin() {
     <section class="card hero">
       <span class="label">Session terminée</span>
       <h2>${session.justes} / ${session.total} du premier coup</h2>
-      <p>+${session.xp} XP · série de ${etat.serie} jour${etat.serie > 1 ? "s" : ""}</p>
+      <p>${Math.round(100 * session.justes / session.total)} % de réussite · série de ${etat.serie} jour${etat.serie > 1 ? "s" : ""}</p>
+      ${blocGain()}
       ${ratees.length ? `<div class="piege"><b>À retravailler :</b> ${ratees.map(q => esc(paire(q.paire).items.map(i => i.mot).join(" / "))).filter((v, i, a) => a.indexOf(v) === i).join(" · ")}. Elles reviendront dès demain.</div>` : ""}
       <button class="big" id="retour">Retour</button>
     </section>
@@ -1563,6 +1790,7 @@ function afficher() {
   // Une session n'est affichée que dans son propre onglet (Réviser ou Logique).
   const s = session && (onglet === "logique") === ["logique", "simulation"].includes(session.mode) ? session : null;
   v.innerHTML = s ? (s.fini ? vueFin() : vueSession()) : onglet === "logique" ? vueLogique() : accueil();
+  if (s?.fini) animerGain();
 }
 
 document.getElementById("vue").addEventListener("click", e => {
@@ -1592,6 +1820,8 @@ document.getElementById("vue").addEventListener("input", e => {
   recherche = e.target.value;
   document.getElementById("liste-lexique").innerHTML = listeLexique();
 });
+document.getElementById("chips").addEventListener("click", e => { const b = e.target.closest("[data-detail]"); if (b && D) ouvrirDetail(b.dataset.detail); });
+document.getElementById("detail").addEventListener("click", e => { if (e.target.id === "detail") e.target.close(); });   // toucher le fond ferme la fenêtre
 document.getElementById("tab-reviser").addEventListener("click", () => { onglet = "reviser"; afficher(); });
 document.getElementById("tab-lexique").addEventListener("click", () => { onglet = "lexique"; afficher(); });
 document.getElementById("tab-logique").addEventListener("click", () => { onglet = "logique"; afficher(); });
