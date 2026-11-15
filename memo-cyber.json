@@ -122,6 +122,31 @@
       "piege": "Un site ne voit jamais ton IP privée. ifconfig.me te montre l'IP publique de ta box."
     },
     {
+      "id": "nat-sens",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "NAT à l'aller",
+          "en": "source NAT",
+          "phrase": "Le routeur remplace l'adresse SOURCE (l'adresse privée du téléphone) par l'adresse publique de la box.",
+          "image": "L'accueil de l'hôtel écrit l'adresse de l'hôtel comme expéditeur."
+        },
+        {
+          "mot": "NAT au retour",
+          "en": "translation back",
+          "phrase": "Le routeur remplace l'adresse de DESTINATION (l'adresse publique) par l'adresse privée de l'appareil qui avait demandé.",
+          "image": "L'accueil monte la réponse à la bonne chambre."
+        },
+        {
+          "mot": "Table NAT",
+          "en": "NAT table",
+          "phrase": "Le registre du routeur : chaque connexion avec son numéro de port. C'est le port qui retrouve le bon appareil.",
+          "image": "Le registre de l'accueil : lettre n° 50 000 → chambre 120."
+        }
+      ],
+      "piege": "Le routeur ne change jamais ses propres adresses (une privée, une publique, fixes), et aucune adresse MAC ne sort de la maison : le NAT travaille sur les adresses IP et les ports."
+    },
+    {
       "id": "ports",
       "theme": "Réseau",
       "items": [
@@ -3737,6 +3762,140 @@
       "q": "Explique le trajet de ta demande, de ton téléphone en Wi-Fi jusqu'au serveur de YouTube et retour, appareil par appareil, avec le rôle de chacun.",
       "modele": "1) Le téléphone compare l'adresse de YouTube avec son masque : autre réseau, donc il envoie à sa passerelle. 2) Par ondes, à la borne Wi-Fi de la box, qui fait entrer la demande dans le réseau local. 3) Le routeur de la box remplace l'adresse privée du téléphone par l'adresse publique de la box (NAT) et l'envoie vers Internet. 4) Le modem traduit le signal pour la ligne (fibre ou cuivre) jusqu'à l'opérateur. 5) Les routeurs d'Internet la font suivre jusqu'au serveur de YouTube. 6) Le serveur répond par le chemin inverse ; la box remet l'adresse privée du téléphone.",
       "pourquoi": "Claude relira ton texte dans le bilan. Le DNS se fait AVANT ce trajet : il donne seulement l'adresse, jamais la page."
+    },
+    {
+      "id": "q200",
+      "paire": "nat-sens",
+      "q": "Ton téléphone envoie une demande à YouTube. Au passage, le routeur de la box applique le NAT. Que remplace-t-il ?",
+      "choix": [
+        "L'adresse source : celle du téléphone devient celle de la box",
+        "Sa propre adresse privée, qui devient son adresse publique",
+        "L'adresse MAC du téléphone, notée pour que YouTube réponde",
+        "L'adresse de destination : celle de YouTube devient publique"
+      ],
+      "bonne": 0,
+      "pourquoi": "À l'aller, le NAT remplace l'adresse SOURCE. Les deux adresses du routeur ne changent jamais, et aucune MAC ne sort de la maison."
+    },
+    {
+      "id": "q201",
+      "paire": "nat-sens",
+      "type": "saisie",
+      "q": "La réponse de YouTube arrive à l'adresse publique de la box. Grâce à quoi, dans sa table NAT, le routeur retrouve-t-il l'appareil qui avait demandé ?",
+      "reponses": [
+        "port",
+        "le port",
+        "numéro de port",
+        "le numéro de port",
+        "numero de port",
+        "le numero de port",
+        "un port",
+        "son port"
+      ],
+      "pourquoi": "Le numéro de port. Chaque connexion a son propre port côté Internet, noté dans la table NAT. Pas la MAC : YouTube ne la connaît pas."
+    },
+    {
+      "id": "q202",
+      "paire": "nat-sens",
+      "type": "erreur",
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Le routeur remplace l'adresse privée du téléphone par l'adresse publique de la box,",
+        "il note la connexion dans sa table NAT avec un numéro de port,",
+        "et au retour, il retrouve le téléphone grâce à son adresse MAC."
+      ],
+      "faux": 2,
+      "pourquoi": "Au retour, c'est le numéro de port, lu dans la table NAT. La réponse vient d'Internet : elle ne porte aucune MAC de chez toi."
+    },
+    {
+      "id": "q203",
+      "paire": "nat-sens",
+      "type": "ordre",
+      "q": "Remets dans l'ordre l'aller-retour d'une demande à travers le NAT.",
+      "etapes": [
+        "Le téléphone envoie, avec son adresse privée en source",
+        "Le routeur met l'adresse publique en source et note le port",
+        "YouTube répond à l'adresse publique de la box",
+        "Le routeur lit le port dans sa table NAT",
+        "Il met l'adresse privée du téléphone en destination"
+      ],
+      "pourquoi": "Le même échange dans les deux sens : la source à l'aller, la destination au retour, avec la table NAT entre les deux."
+    },
+    {
+      "id": "q204",
+      "paire": "ip-mac",
+      "q": "Ton téléphone envoie une demande à YouTube. Pourquoi la MAC de destination est-elle celle du routeur ?",
+      "choix": [
+        "Une MAC ne sert qu'à joindre le prochain appareil du réseau local",
+        "YouTube a besoin de cette MAC pour savoir à qui renvoyer la vidéo",
+        "Le switch la remplacera par la MAC de YouTube en sortant de la box",
+        "La MAC du routeur est publique, alors que celle du téléphone est privée"
+      ],
+      "bonne": 0,
+      "pourquoi": "IP = le destinataire final. MAC = la prochaine étape, sur le réseau local seulement. YouTube ne voit jamais les MAC de chez toi."
+    },
+    {
+      "id": "q205",
+      "paire": "ip-mac",
+      "type": "saisie",
+      "q": "Complète : l'adresse IP de destination désigne le destinataire final ; l'adresse MAC de destination désigne… (deux ou trois mots)",
+      "reponses": [
+        "la prochaine étape",
+        "prochaine étape",
+        "le prochain appareil",
+        "prochain appareil",
+        "le prochain saut",
+        "prochain saut",
+        "l'appareil suivant",
+        "appareil suivant"
+      ],
+      "pourquoi": "La prochaine étape sur le réseau local. Elle change à chaque routeur ; l'IP de destination, elle, ne change pas."
+    },
+    {
+      "id": "q206",
+      "paire": "temoin-reparer",
+      "q": "Le PC voisin, branché sur le même switch, va sur Internet ; celui de ton collègue non. Que conclus-tu ?",
+      "choix": [
+        "La panne est sur son poste : son PC, son câble ou son port du switch",
+        "La panne est forcément dans la configuration IP de son PC",
+        "La panne vient de la box : il faut d'abord la redémarrer",
+        "La panne vient du DNS : il faut lui régler un autre résolveur"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le témoin prouve que tout ce qui est partagé marche. Il ne dit pas quelle partie du poste : on reprend les étages par le bas (mission 3 : c'était le port du switch)."
+    },
+    {
+      "id": "q207",
+      "paire": "modem-routeur",
+      "q": "Dans la box, quel appareil fait le NAT ?",
+      "choix": [
+        "Le routeur, qui lit et réécrit les adresses IP",
+        "Le modem, qui traduit les adresses pour la ligne",
+        "Le switch, qui livre la réponse à la bonne prise",
+        "La borne Wi-Fi, qui fait entrer le téléphone"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le routeur. Le modem ne lit pas les adresses : il convertit seulement le signal pour la fibre ou la ligne."
+    },
+    {
+      "id": "q208",
+      "paire": "protocole-langage",
+      "q": "Un camarade parle du « protocole NAT ». Qu'en dis-tu ?",
+      "choix": [
+        "Faux : c'est une traduction d'adresses faite par le routeur",
+        "Juste : c'est la règle de conversation entre box et serveur",
+        "Juste : c'est le protocole qui donne une adresse à chaque PC",
+        "Faux : c'est un langage que le routeur utilise pour router"
+      ],
+      "bonne": 0,
+      "pourquoi": "NAT = Network Address Translation, une traduction faite par le routeur. Un protocole est une règle de conversation entre deux machines (HTTP, DNS). Celui qui donne les adresses, c'est DHCP."
+    },
+    {
+      "id": "q209",
+      "paire": "nat-sens",
+      "type": "explique",
+      "q": "Un collègue de Picard : « Mon téléphone et celui de ma copine sortent sur Internet avec la même adresse, et chacun reçoit quand même ses vidéos. Comment ? » Réponds en trois phrases.",
+      "modele": "1) Le routeur de la box remplace l'adresse privée de chaque téléphone par l'unique adresse publique de la box : c'est le NAT. 2) Il note chaque connexion dans sa table NAT, avec un numéro de port différent. 3) Quand une réponse revient, il lit le port, retrouve le bon téléphone et remet son adresse privée en destination.",
+      "pourquoi": "Trois idées : remplacer (la source), noter (table et port), rendre (la destination au retour). Claude relira ton texte dans le bilan."
     }
   ],
   "entretien": [
