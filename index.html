@@ -115,6 +115,13 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .g-up, .record { text-align: center; font-weight: 700; color: var(--flame); }
 .record { font-weight: 500; font-size: .9rem; display: grid; gap: 2px; } .record b { font-weight: 700; }
 .pop { animation: pop .4s ease-out; }
+/* Prêt pour le test ? (v28) */
+.chance { display: flex; align-items: center; gap: 14px; }
+.chance > b { font: 800 2.4rem var(--f-display); color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
+.chance small { color: var(--muted); }
+.chance .pret { color: var(--good); } .chance .presque { color: var(--flame); } .chance .pasencore { color: var(--bad); }
+.courbe-c svg { width: 100%; height: auto; display: block; }
+.courbe-c .ax { fill: var(--muted); font: 10px var(--f-body); }
 .gain.anim .g-ligne, .gain.anim .g-total { animation: entre .35s ease-out both; animation-delay: calc(var(--i) * 350ms); }
 .gain.anim .g-up { animation: entre .35s ease-out both, pop .5s ease-out; animation-delay: calc(var(--i) * 350ms + 1000ms); }
 @keyframes entre { from { opacity: 0; transform: translateY(8px); } }
@@ -503,7 +510,7 @@ function detailSues() {
 }
 function ouvrirDetail(k) {
   const d = document.getElementById("detail");
-  document.getElementById("detail-corps").innerHTML = { niveau: detailNiveau, serie: detailSerie, xp: detailXP, sues: detailSues, logique: detailLogique }[k]();
+  document.getElementById("detail-corps").innerHTML = { niveau: detailNiveau, serie: detailSerie, xp: detailXP, sues: detailSues, logique: detailLogique, concours: detailConcours }[k]();
   if (d.showModal) { if (!d.open) d.showModal(); } else d.setAttribute("open", "");
   d.scrollTop = 0;
 }
@@ -536,6 +543,84 @@ function animerGain() {
     requestAnimationFrame(pas);
     barre.style.width = barre.dataset.pct + "%";
   }, 350 * g.lignes.length);
+}
+
+// Prêt pour le test d'admission ? (v28, 16/11/2026, demande d'Arnaud). On garde chaque session chronométrée (Logique en mode concours, simulation)
+// avec un « score équivalent test » : le test d'admission est supposé proche du niveau 3 (paliers A-B). Une bonne réponse plus facile que le test
+// rapporte moins (niveau 1 : 0,6 ; niveau 2 : 0,85) ; une erreur sur une question plus dure que le test coûte moins (niveau 4 : 0,3 rendu ; niveau 5 : 0,5).
+// Moyenne pondérée : chaque session plus ancienne pèse 20 % de moins (12 dernières, 60 derniers jours), pour que la progression se voie vite.
+// Chances = probabilité que le score du jour J dépasse le seuil supposé, si ce jour ressemble aux dernières sessions (loi normale : moyenne et régularité).
+const CREDIT_JUSTE = [1, .6, .85, 1, 1, 1], CREDIT_FAUX = [0, 0, 0, 0, .3, .5], SEUILS = [50, 60, 70];
+const scoreEquivalent = (items, total) => items.reduce((t, e) => t + (e.ok ? (CREDIT_JUSTE[e.niveau] ?? 1) : (CREDIT_FAUX[e.niveau] ?? 0)), 0) / Math.max(total, items.length, 1);
+const phi = z => { const t = 1 / (1 + .2316419 * Math.abs(z)), d = .3989423 * Math.exp(-z * z / 2);
+  const p = d * t * (.3193815 + t * (-.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; };
+const pctC = c => Math.max(1, Math.min(99, Math.round(100 * c)));
+function estimationConcours() {
+  const H = (etat.concoursHist || []).filter(h => Date.now() - Date.parse(h.t) < 60 * 864e5).slice(-12), seuil = (etat.seuilConcours || 60) / 100;
+  if (H.length < 3) return { pret: false, manque: 3 - H.length, H, seuil };
+  const w = H.map((_, i) => Math.pow(.8, H.length - 1 - i)), sw = w.reduce((a, b) => a + b, 0);
+  const m = H.reduce((t, h, i) => t + w[i] * h.score, 0) / sw, v = H.reduce((t, h, i) => t + w[i] * (h.score - m) ** 2, 0) / sw;
+  const sd = Math.max(Math.sqrt(v), H.length < 6 ? .12 : .07);   // peu de sessions = plus d'incertitude
+  return { pret: true, m, sd, seuil, chance: phi((m - seuil) / sd), H };
+}
+function enregistrerConcours() {
+  const avant = estimationConcours();
+  const items = session.mode === "simulation" ? session.reponses.map(r => ({ ok: r.ok, niveau: r.x.niveau }))
+    : etat.journal.filter(e => e.mode === "logique" && !e.passe && e.t >= session.t0).map(e => ({ ok: e.ok, niveau: e.niveau }));
+  const total = session.mode === "simulation" ? session.total : items.length;   // en simulation, une question sans réponse compte 0
+  if (items.length < 5) return null;
+  const h = { t: new Date().toISOString(), mode: session.mode, n: total, justes: items.filter(e => e.ok).length,
+    score: Math.round(1000 * scoreEquivalent(items, total)) / 1000, niv: +(items.reduce((t, e) => t + (e.niveau || 3), 0) / items.length).toFixed(1) };
+  etat.concoursHist = [...(etat.concoursHist || []), h].slice(-60);
+  return { h, avant, apres: estimationConcours() };
+}
+const verdictC = c => c >= .8 ? ["Prêt", "pret"] : c >= .5 ? ["Presque", "presque"] : ["Pas encore", "pasencore"];
+function courbeConcours(H, seuil) {
+  if (H.length < 2) return "";
+  const W = 300, Ht = 90, x = i => 24 + i * (W - 34) / (H.length - 1), y = v => 8 + (1 - v) * (Ht - 22);
+  const pts = H.map((h, i) => `${x(i).toFixed(1)},${y(h.score).toFixed(1)}`).join(" ");
+  return `<div class="courbe-c"><svg viewBox="0 0 ${W} ${Ht}" role="img" aria-label="Tes ${H.length} dernières sessions chronométrées : ${H.map(h => Math.round(100 * h.score) + " %").join(", ")}">
+    ${[0, .5, 1].map(v => `<text class="ax" x="0" y="${(y(v) + 3).toFixed(1)}">${100 * v}</text>`).join("")}
+    <line x1="22" x2="${W}" y1="${y(seuil).toFixed(1)}" y2="${y(seuil).toFixed(1)}" style="stroke:var(--flame)" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <polyline points="${pts}" fill="none" style="stroke:var(--accent)" stroke-width="2" stroke-linejoin="round"/>
+    ${H.map((h, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(h.score).toFixed(1)}" r="3.5" style="fill:${h.mode === "simulation" ? "var(--flame)" : "var(--accent)"}"/>`).join("")}
+  </svg><div class="legende"><span><i style="background:var(--accent)"></i>mode concours</span><span><i style="background:var(--flame)"></i>simulation · pointillés : seuil ${Math.round(100 * seuil)} %</span></div></div>`;
+}
+function carteConcours() {
+  const E = estimationConcours(), seuil = Math.round(100 * E.seuil);
+  let haut;
+  if (E.pret) { const [v, cls] = verdictC(E.chance);
+    haut = `<div class="chance"><b>${pctC(E.chance)} %</b><span>de chances de dépasser <b>${seuil} %</b> au test : <b class="${cls}">${v}</b><br><small>Score estimé : ${Math.round(100 * E.m)} %, d'après tes ${E.H.length} dernières sessions chronométrées</small></span></div>${courbeConcours(E.H, E.seuil)}`; }
+  else haut = `<p>Fais encore <b>${E.manque} session${E.manque > 1 ? "s" : ""} chronométrée${E.manque > 1 ? "s" : ""}</b> (Logique avec le mode concours coché, ou simulation de test) pour obtenir une estimation.${E.H.length ? ` Déjà ${E.H.length} : ${E.H.map(h => Math.round(100 * h.score) + " %").join(", ")}.` : ""}</p>`;
+  return `<section class="card"><span class="label">Prêt pour le test d'admission ?</span>
+    ${haut}
+    <div class="segment" role="group" aria-label="Seuil d'admission supposé">${SEUILS.map(x => `<button data-seuil="${x}" aria-pressed="${seuil === x}">Seuil ${x} %</button>`).join("")}</div>
+    <p class="note" style="text-align:left;margin:0">Seuil supposé : les écoles ne publient pas le leur. Demande-le à la candidature, puis règle-le ici.</p>
+    <button class="lien" data-detail="concours">Comment c'est calculé · historique</button>
+  </section>`;
+}
+function detailConcours() {
+  const E = estimationConcours(), H = (etat.concoursHist || []).slice().reverse();
+  return `<h2 id="detail-titre">Prêt pour le test ?</h2>
+    ${E.pret ? `<p><b>${pctC(E.chance)} %</b> de chances de dépasser ${Math.round(100 * E.seuil)} %, avec un score estimé de ${Math.round(100 * E.m)} % (à ± ${Math.round(100 * E.sd)} points près).</p>` : `<p>Encore ${E.manque} session${E.manque > 1 ? "s" : ""} chronométrée${E.manque > 1 ? "s" : ""} avant la première estimation.</p>`}
+    <h3>Comment c'est calculé</h3>
+    <div class="rappel">
+      <span><b>Ce qui compte</b> : seulement les sessions chronométrées (Logique avec le mode concours coché du début à la fin, ou simulation), d'au moins 5 exercices. Sans chrono, on ne mesure pas les conditions du test.</span>
+      <span><b>Score équivalent test</b> : le test d'admission est supposé proche du niveau 3. Une bonne réponse au niveau 1 rapporte 0,6 point, au niveau 2 0,85, au niveau 3 et plus 1 point. Une erreur au niveau 4 rend 0,3 point, au niveau 5 0,5 (la question était plus dure que le test). En simulation, une question sans réponse compte 0.</span>
+      <span><b>La moyenne</b> : les sessions récentes comptent plus. Chaque session plus ancienne pèse 20 % de moins, et seules les 12 dernières des 60 derniers jours comptent : tes progrès se voient vite, les vieux résultats ne te tirent pas vers le bas.</span>
+      <span><b>Les chances</b> : si le jour J ressemble à tes dernières sessions, c'est le nombre de fois sur 100 où tu dépasserais le seuil. Des scores réguliers donnent une estimation plus sûre que des scores en dents de scie.</span>
+      <span><b>Les limites</b> : le seuil et le niveau du vrai test sont des hypothèses (à confirmer auprès de l'école), et le stress du jour J n'est pas mesuré. C'est une estimation pour te guider, pas une promesse.</span>
+    </div>
+    <h3>Historique</h3>
+    ${H.length ? `<table class="tableau"><tr><th>Date</th><th>Type</th><th>Justes</th><th>Niveau moyen</th><th>Score</th></tr>${H.map(h => `<tr><td>${new Date(h.t).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })}</td><td>${h.mode === "simulation" ? "Simulation" : "Concours"}</td><td>${h.justes}/${h.n}</td><td>${String(h.niv).replace(".", ",")}</td><td>${Math.round(100 * h.score)} %</td></tr>`).join("")}</table>` : `<p class="muted">Aucune session chronométrée pour l'instant.</p>`}`;
+}
+function blocConcours() {
+  const c = session.concoursRes;
+  if (!c) return session.mode === "simulation" || session.concours ? `<div class="rappel"><span>Session trop courte pour compter dans « Prêt pour le test ? » (5 exercices minimum).</span></div>` : "";
+  const seuil = Math.round(100 * c.apres.seuil);
+  return `<div class="rappel"><span>Score équivalent test : <b>${Math.round(100 * c.h.score)} %</b></span>${c.apres.pret
+    ? `<span>Chances de dépasser ${seuil} % : <b>${pctC(c.apres.chance)} %</b>${c.avant.pret ? ` (avant : ${pctC(c.avant.chance)} %)` : ""}</span>`
+    : `<span>Encore ${c.apres.manque} session${c.apres.manque > 1 ? "s" : ""} chronométrée${c.apres.manque > 1 ? "s" : ""} pour une estimation.</span>`}</div>`;
 }
 
 // Records de logique (v25) : par famille et par niveau, meilleure réussite et meilleur temps moyen des bonnes réponses,
@@ -716,7 +801,7 @@ function courbe() {
 
 async function envoyer() {
   const b = { app: "memo-cyber", format: 1, exporte: new Date().toISOString(), cartesMaj: D.maj,
-              xp: etat.xp, serie: serieVisible(), dernierJour: etat.dernierJour, cartes: etat.cartes, logique: etat.logique, simulations: etat.simulations, oral: etat.oral, idees: etat.idees || [], journal: etat.journal };
+              xp: etat.xp, serie: serieVisible(), dernierJour: etat.dernierJour, cartes: etat.cartes, logique: etat.logique, simulations: etat.simulations, concours: etat.concoursHist || [], seuilConcours: etat.seuilConcours || 60, oral: etat.oral, idees: etat.idees || [], journal: etat.journal };
   const texte = JSON.stringify(b);
   const nom = `memo-cyber-bilan-${jour()}.txt`;   // .txt : Chrome refuse de partager un .json
   const fait = msg => { etat.envoye = b.exporte; sauver(); envoi = { msg }; afficher(); };
@@ -1422,7 +1507,7 @@ function choisirFamille(precedente) {
 function demarrerLogique() {
   const f = choisirFamille(null);
   session = { file: [exerciceLogique(f)], total: taille("tailleLogique"), faites: 0, justes: 0, xp: 0, ratees: new Set(), retoursPasses: 0, passees: 0,
-              ids: new Set(), etape: "repondre", res: null, mode: "logique", derniere: f, ms: 0, changements: [], t0: new Date().toISOString() };
+              ids: new Set(), etape: "repondre", res: null, mode: "logique", derniere: f, ms: 0, changements: [], t0: new Date().toISOString(), concours: !!etat.concours };
   envoi = null;
   afficher();
 }
@@ -1491,6 +1576,7 @@ function vueLogique() {
   const fams = Object.entries(FAMILLES);
   return `
     ${profilLogique()}
+    ${carteConcours()}
     <section class="card hero">
       <span class="label">Entraînement logique</span>
       <h2>Les tests d'admission, exercice par exercice</h2>
@@ -1623,6 +1709,7 @@ function vueFinSimulation() {
       <h2>${b.justes} / ${b.n} (${pc(b.justes, b.n)} %)</h2>
       <p>${b.repondues}/${b.n} questions répondues en ${duree(b.ms)}${prec ? ` · la fois d'avant : ${pc(prec.justes, prec.n)} %` : ""}</p>
       ${blocGain()}
+      ${blocConcours()}
       ${b.repondues < b.n ? `<div class="piege"><b>${b.n - b.repondues} sans réponse.</b> Le jour J, garde une minute pour répondre à tout : une réponse au hasard a une chance sur quatre, une case vide aucune (sauf si le test enlève des points aux erreurs : à demander à l'école).</div>` : ""}
       <table class="tableau"><thead><tr><th>Famille (de la plus ratée à la plus sûre)</th><th>Justes</th></tr></thead>
         <tbody>${fams.map(([f, [o, n]]) => `<tr><td>${esc(FAMILLES[f].nom)}</td><td>${o}/${n}</td></tr>`).join("")}</tbody></table>
@@ -1706,6 +1793,7 @@ function vueFinLogique() {
       <h2>${session.justes} / ${session.total} justes</h2>
       <p>${Math.round(100 * session.justes / session.total)} % de réussite · ${moy} s par exercice en moyenne · série de ${etat.serie} jour${etat.serie > 1 ? "s" : ""}</p>
       ${blocGain()}
+      ${blocConcours()}
       ${session.changements.length ? `<div class="rappel">${session.changements.map(c => `<span>${esc(c)}</span>`).join("")}</div>` : ""}
       ${session.ratees.size ? `<div class="piege"><b>À retravailler :</b> ${[...session.ratees].map(f => esc(FAMILLES[f].nom)).join(" · ")}. Relis « La méthode » sur l'accueil de la logique.</div>` : ""}
       <button class="big" id="retour">Retour</button>
@@ -1889,6 +1977,7 @@ function terminerSiVide() {
   if (session.faites && etat.dernierJour !== auj) { etat.serie = etat.dernierJour === plusJours(-1) ? etat.serie + 1 : 1; etat.dernierJour = auj; }
   etat.recordSerie = Math.max(etat.recordSerie || 0, etat.serie);
   if (session.mode === "logique") session.records = majRecords();
+  if (session.mode === "simulation" || (session.mode === "logique" && session.concours && etat.concours)) session.concoursRes = enregistrerConcours();
   session.gain = { avant, apres: etat.xp, lignes, sansFaute: palier?.[0] === 1 };
   if (["logique", "simulation"].includes(session.mode)) {
     const l0 = xpLogique(), gl = lignes.filter(l => !l[0].startsWith("Objectif")).reduce((t, l) => t + l[1], 0);
@@ -2028,6 +2117,7 @@ document.getElementById("vue").addEventListener("click", e => {
   else if (b.dataset.taille) { etat[b.dataset.cle] = +b.dataset.taille; sauver(); afficher(); }
   else if (b.dataset.fam) { etat.famLogique = b.dataset.fam; sauver(); afficher(); }
   else if (b.id === "concours") { etat.concours = !etat.concours; sauver(); afficher(); }
+  else if (b.dataset.seuil) { etat.seuilConcours = +b.dataset.seuil; sauver(); afficher(); }
   else if (session && !session.fini && clicSession(b)) return;
   else if (b.id === "retour") { session = null; afficher(); }
   else if (b.id === "envoyer") envoyer();
