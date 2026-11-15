@@ -224,6 +224,9 @@ textarea.recherche { resize: vertical; line-height: 1.45; }
 .m-gris { fill: color-mix(in srgb, var(--ink) 35%, transparent); stroke: var(--ink); stroke-width: 1.2; }
 .err { color: var(--bad); }
 .rang .case { width: 52px; height: 52px; }
+.rang:has(.grille) .case { flex: 1 1 0; min-width: 0; max-width: 84px; width: auto; height: auto; aspect-ratio: 1; }
+.choix.visuel .case.grille { max-width: 84px; }
+.motif-num { display: grid; justify-items: center; gap: 2px; font-size: .7rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 /* Superposition (13/11/2026) : trois calques par ligne, « A + B → C » ; trois couleurs distinctes, lisibles en clair comme en sombre. */
 .sp { display: grid; gap: 8px; justify-content: center; }
 .sp-ligne { display: flex; align-items: center; gap: 6px; font: 700 20px var(--f-display); color: var(--ink); }
@@ -771,7 +774,7 @@ const GENERATEURS = {
   // 3 = deux règles mêlées (somme des deux précédents, ×2 puis +c, deux suites entrelacées, écarts qui doublent). Sans niveau : toutes les familles.
   // Les mauvais choix sont les erreurs typiques (la mauvaise règle, une erreur de calcul).
   "suite-logique"(niveau) {
-    const familles = { 1: [0, 1, 6], 2: [2, 3, 4], 3: [5, 7, 8, 9] }[niveau] || [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    const familles = { 1: [0, 1, 6], 2: [2, 3, 4], 3: [5, 7, 8, 9], 4: [10, 11, 12], 5: [13, 14, 15] }[niveau] || [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     const famille = familles[alea(0, familles.length - 1)];
     let t = [], regle = "", faux = [];
     if (famille === 0) { const d = alea(2, 9), a = alea(1, 30); for (let i = 0; i < 6; i++) t.push(a + i * d); regle = `on ajoute ${d} à chaque fois`; faux = [t[5] + 1, t[5] - d, t[4] * 2]; }
@@ -782,6 +785,13 @@ const GENERATEURS = {
       for (let i = 0; i < 6; i++) t.push(i % 2 ? b + 30 + ((i - 1) / 2) * d2 : a + (i / 2) * d1);
       regle = `deux suites entrelacées, une case sur deux : ${t[0]}, ${t[2]}, ${t[4]} (+${d1}) et ${t[1]}, ${t[3]}, ${t[5]} (+${d2})`; faux = [t[4] + d1, t[3] + d1, t[5] + d1]; }
     else if (famille === 9) { const g = alea(1, 3), a = alea(1, 20); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + g * 2 ** (i - 1)); regle = `les écarts doublent : +${g}, +${2 * g}, +${4 * g}, +${8 * g}…`; faux = [t[4] + 2 * (t[4] - t[3]) + g, t[4] + (t[4] - t[3]), t[4] + (t[4] - t[3]) + g]; }
+    // N4 (16/11/2026) : deux opérations en alternance, écarts = carrés, écarts qui grandissent eux-mêmes. N5 : ×2 puis ×3 puis ×4…, écarts = nombres premiers, somme des trois précédents.
+    else if (famille === 10) { const k = alea(2, 3), neg = Math.random() < .5, c = neg ? -alea(1, 2) : alea(1, 5), a = neg ? alea(4, 6) : alea(2, 6); t = [a]; for (let i = 1; i < 6; i++) t.push(i % 2 ? t[i - 1] * k : t[i - 1] + c); regle = `on multiplie par ${k}, puis on ${c > 0 ? `ajoute ${c}` : `retire ${-c}`}, en alternance`; faux = [t[4] + c, t[5] + c, t[5] - k]; }
+    else if (famille === 11) { const a = alea(1, 15); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + i * i); regle = "les écarts sont les carrés : +1, +4, +9, +16, +25"; faux = [t[4] + 20, t[4] + 2 * (t[4] - t[3]), t[5] + 5]; }
+    else if (famille === 12) { const a = alea(1, 15); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + i * (i + 1) / 2); regle = "les écarts grandissent : +1, +3, +6, +10, +15 (les écarts des écarts font +2, +3, +4, +5)"; faux = [t[4] + 14, t[4] + 2 * (t[4] - t[3]), t[4] + (t[4] - t[3]) + 4]; }
+    else if (famille === 13) { const a = alea(1, 2); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] * (i + 1)); regle = "on multiplie par 2, puis par 3, puis par 4, puis par 5, puis par 6"; faux = [t[4] * 5, t[4] * 2, t[4] + (t[4] - t[3])]; }
+    else if (famille === 14) { const P = [2, 3, 5, 7, 11], a = alea(1, 20); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + P[i - 1]); regle = "les écarts sont les nombres premiers : +2, +3, +5, +7, +11"; faux = [t[4] + 9, t[4] + 13, t[4] + 8]; }
+    else if (famille === 15) { t = [alea(1, 3), alea(1, 3), alea(2, 4)]; for (let i = 3; i < 6; i++) t.push(t[i - 1] + t[i - 2] + t[i - 3]); regle = "chaque nombre est la somme des trois précédents"; faux = [t[4] + t[3], t[4] * 2, t[4] + t[3] + t[1] + 1]; }
     else if (famille === 2) { const x = alea(3, 9), y = alea(1, x - 1), a = alea(1, 20); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + (i % 2 ? x : -y)); regle = `on ajoute ${x}, puis on retire ${y}, en alternance`; faux = [t[5] - x - y, t[4] + x, t[5] + y]; }
     else if (famille === 3) { const a = alea(1, 6); for (let i = 0; i < 6; i++) t.push((a + i) ** 2); regle = `les carrés : ${a}², ${a + 1}², ${a + 2}²…`; faux = [t[5] + (t[4] - t[3]), t[5] + 2 * (a + 4), (a + 5) * (a + 4)]; }
     else if (famille === 4) { const a = alea(1, 20), d = alea(1, 4); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + d * i); regle = `l'écart grandit : +${d}, +${2 * d}, +${3 * d}…`; faux = [t[4] + 2 * (t[4] - t[3]), t[5] + d * 4, t[5] + d * 6]; }
@@ -800,7 +810,11 @@ const GENERATEURS = {
     if (n === 1) { const s = alea(1, 4), a = alea(0, 25 - 5 * s); for (let i = 0; i < 6; i++) t.push(a + i * s); regle = `on avance de ${s} lettre${s > 1 ? "s" : ""} à chaque fois`; }
     else if (n === 2 && Math.random() < .5) { const s = alea(2, 4), a = alea(5 * s, 25); for (let i = 0; i < 6; i++) t.push(a - i * s); regle = `on recule de ${s} lettres à chaque fois`; }
     else if (n === 2) { const x = alea(2, 4), y = alea(1, x - 1), a = alea(0, 25 - 3 * x); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + (i % 2 ? x : -y)); regle = `on avance de ${x}, puis on recule de ${y}, en alternance`; }
-    else { const a = alea(0, 10); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + i); regle = "le pas grandit : +1, +2, +3, +4, +5"; }
+    else if (n === 3) { const a = alea(0, 10); t = [a]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + i); regle = "le pas grandit : +1, +2, +3, +4, +5"; }
+    // N4 (16/11/2026) : deux suites entrelacées ; N5 : l'alphabet tourne en rond (après Z, A), ou le pas grandit de 2.
+    else if (n === 4) { const x = alea(2, 3), y = alea(1, 2), a = alea(0, 6), b = alea(18, 25); for (let i = 0; i < 6; i++) t.push(i % 2 ? b - ((i - 1) / 2) * y : a + (i / 2) * x); regle = `deux suites entrelacées, une lettre sur deux : l'une avance de ${x}, l'autre recule de ${y}`; }
+    else if (Math.random() < .5) { const p = alea(5, 8), a = alea(14, 25); for (let i = 0; i < 6; i++) t.push((a + i * p) % 26); regle = `on avance de ${p} lettres, et après Z on repart de A (l'alphabet tourne en rond)`; }
+    else { t = [0]; for (let i = 1; i < 6; i++) t.push(t[i - 1] + 2 * i - 1); regle = "le pas grandit de 2 : +1, +3, +5, +7, +9"; }
     const bonne = t[5], choix = [bonne];
     for (const d of [1, -1, 2, -2, 3, -3]) if (choix.length < 4 && bonne + d >= 0 && bonne + d <= 25) choix.push(bonne + d);
     const lettres = t.map(i => L[i]);
@@ -830,6 +844,8 @@ const GENERATEURS = {
     let a = alea(0, 6), b = alea(0, 6), regle;
     if (niveau === 1) { const d = [1, 2, -1][alea(0, 2)]; for (let i = 0; i < 5; i++) t.push([m(a + i * d), m(b + i * d)]); regle = `les deux moitiés ${d > 0 ? "avancent" : "reculent"} de ${Math.abs(d)} à chaque domino`; }
     else if (niveau === 2) { const d1 = alea(1, 3), d2 = alea(1, 2); for (let i = 0; i < 5; i++) t.push([m(a + i * d1), m(b - i * d2)]); regle = `le haut avance de ${d1}, le bas recule de ${d2}`; }
+    else if (niveau === 4) { let p = 0; for (let i = 0; i < 5; i++) { t.push([m(a + p), m(b - i)]); p += i + 1; } regle = "le pas du haut grandit (+1, +2, +3, +4) et le bas recule de 1"; }
+    else if (niveau >= 5) { const d = alea(1, 2); t.push([a, b]); for (let i = 1; i < 5; i++) t.push([m(t[i - 1][0] + t[i - 1][1]), m(t[i - 1][1] + d)]); regle = `le haut est la somme des deux moitiés du domino précédent (au-delà de 6, on repart de 0 : 7 = 0, 8 = 1…), et le bas avance de ${d}`; }
     else if (Math.random() < .5) { const d = alea(1, 3); t.push([a, b]); for (let i = 1; i < 5; i++) t.push([t[i - 1][1], m(t[i - 1][1] + d)]); regle = `le haut reprend le bas du domino précédent, et le bas avance de ${d}`; }
     else { const d1 = alea(2, 3), d2 = alea(1, 2); for (let i = 0; i < 5; i++) t.push([m(a + (i % 2 ? d1 : 0)), m(b + i * d2)]); regle = `le haut alterne entre ${a} et ${m(a + d1)}, le bas avance de ${d2}`; }
     const [h, bas] = t[4], vus = new Set([h + "-" + bas]), choix = [[h, bas]];
@@ -842,12 +858,12 @@ const GENERATEURS = {
   // Matrices (type Raven) : une grille de 3 × 3 cases ; chaque case a une forme, un nombre de formes et un remplissage.
   // Chaque caractéristique suit sa propre règle : elle change d'une ligne à l'autre, d'une colonne à l'autre, ou une fois par ligne et par colonne (comme un sudoku).
   "matrices"(niveau) {
-    const regles = { 1: [[1, 0], [0, 1], [0, 0]], 2: [[1, 0], [0, 1], [1, 1]], 3: [[1, 1], [1, 2], [2, 1]] }[niveau] || [[1, 0], [0, 1], [1, 1]];
+    const regles = { 1: [[1, 0], [0, 1], [0, 0]], 2: [[1, 0], [0, 1], [1, 1]], 3: [[1, 1], [1, 2], [2, 1]], 4: [[1, 1], [1, 2], [2, 1]] }[niveau] || [[1, 0], [0, 1], [1, 1]];
     const perm = regles.map(() => melanger([0, 1, 2]));
-    if (niveau === 3) melanger(regles);   // au niveau 3, n'importe quelle caractéristique peut suivre n'importe quelle règle
+    if (niveau >= 3) melanger(regles);   // au niveau 3, n'importe quelle caractéristique peut suivre n'importe quelle règle
     const cel = (i, j) => regles.map(([a, b], k) => perm[k][(a * i + b * j) % 3]);
     const rep = cel(2, 2), vus = new Set([rep.join()]), choix = [rep];
-    for (let k = 0; choix.length < 4 && k < 30; k++) { const c = [...rep], at = k % 3; c[at] = (c[at] + 1 + (k > 2 ? 1 : 0)) % 3; if (k > 5) c[(at + 1) % 3] = (c[(at + 1) % 3] + 1) % 3; if (!vus.has(c.join())) { vus.add(c.join()); choix.push(c); } }
+    for (let k = 0; choix.length < 4 && k < 30; k++) { const c = [...rep], at = k % 3; c[at] = (c[at] + 1 + (k > 2 ? 1 : 0)) % 3; if (k > 5 && niveau < 4) c[(at + 1) % 3] = (c[(at + 1) % 3] + 1) % 3; if (!vus.has(c.join())) { vus.add(c.join()); choix.push(c); } }
     const nomsAttr = ["la forme", "le nombre de formes", "le remplissage"];
     const dit = ([a, b], k) => a && b ? `${nomsAttr[k]} change à chaque case : chaque ligne et chaque colonne la contiennent une fois (comme un sudoku)` : a ? `${nomsAttr[k]} change d'une ligne à l'autre` : b ? `${nomsAttr[k]} change d'une colonne à l'autre` : `${nomsAttr[k]} ne change jamais`;
     const grille = [0, 1, 2].flatMap(i => [0, 1, 2].map(j => i === 2 && j === 2 ? svgCase(null) : svgCase(cel(i, j))));
@@ -863,10 +879,27 @@ const GENERATEURS = {
     else if (niveau === 1) { const a = alea(25, 89), b = alea(12, 48), c = alea(5, 19); q = `${a} + ${b} − ${c} = ?`; bonne = a + b - c; faux = [bonne + 10, bonne - 10, a + b + c]; pourquoi = `${a} + ${b} = ${a + b}, puis − ${c} = ${bonne}.`; }
     else if (niveau === 2 && k) { const p = [10, 20, 25, 50, 75][alea(0, 4)], x = 20 * alea(2, 20); q = `Combien font ${p} % de ${x} ?`; bonne = x * p / 100; faux = [bonne + x / 10, bonne * 2, x - bonne]; pourquoi = `${p} % = ${p}/100. ${p === 25 ? "25 % = un quart" : p === 50 ? "50 % = la moitié" : p === 75 ? "75 % = trois quarts" : `10 % = diviser par 10 (${x / 10})`}, donc ${bonne}.`; }
     else if (niveau === 2) { const n1 = alea(2, 5), pu = alea(2, 9), n2 = n1 + alea(1, 5); q = `${n1} cahiers coûtent ${n1 * pu} €. Combien coûtent ${n2} cahiers ?`; bonne = n2 * pu; faux = [n1 * pu + (n2 - n1), bonne + pu, bonne - pu]; u = " €"; pourquoi = `Règle de trois : un cahier coûte ${n1 * pu} ÷ ${n1} = ${pu} €, donc ${n2} cahiers coûtent ${n2} × ${pu} = ${bonne} €.`; }
-    else { const s = alea(0, 2);
+    else if (!(niveau >= 4)) { const s = alea(0, 2);
       if (s === 0) { const P = 20 * alea(2, 10), p = [5, 15, 20, 30][alea(0, 3)], baisse = Math.random() < .5, d = P * p / 100; q = `Un prix de ${P} € ${baisse ? "baisse" : "augmente"} de ${p} %. Nouveau prix ?`; bonne = baisse ? P - d : P + d; faux = [d, baisse ? P - p : P + p, baisse ? P + d : P - d]; u = " €"; pourquoi = `${p} % de ${P} = ${d} €. ${P} ${baisse ? "−" : "+"} ${d} = ${bonne} €. Piège : enlever ${p} €, ce n'est pas enlever ${p} %.`; }
       else if (s === 1) { const v = [60, 90, 120][alea(0, 2)], t = 10 * alea(1, 5); q = `À ${v} km/h, quelle distance en ${t} minutes ?`; bonne = v * t / 60; faux = [v * t / 100, bonne + 10, v - t]; u = " km"; pourquoi = `${v} km/h = ${String(v / 60).replace(".", ",")} km par minute. ${t} min × ${v / 60} = ${bonne} km.`; }
       else { let n1, j1, n2; do { n1 = alea(2, 8); j1 = alea(2, 12); n2 = alea(2, 8); } while (n1 === n2 || (n1 * j1) % n2); q = `${n1} ouvriers font un travail en ${j1} jours. Combien de jours pour ${n2} ouvriers ?`; bonne = n1 * j1 / n2; faux = [j1 + (n1 - n2), Math.round(j1 * n2 / n1), j1 - (n1 - n2)]; u = " jours"; pourquoi = `Plus il y a d'ouvriers, moins il faut de jours (proportion inverse). Le travail fait ${n1} × ${j1} = ${n1 * j1} journées, donc ${n1 * j1} ÷ ${n2} = ${bonne} jours.`; }
+    }
+    // N4 (16/11/2026) : multiplication à deux chiffres, hausse puis baisse du même pourcentage, division exacte.
+    else if (niveau === 4) { const s = alea(0, 2);
+      if (s === 0) { const a = alea(12, 29), b = alea(11, 19); q = `${a} × ${b} = ?`; bonne = a * b; faux = [a * b + 10, a * (b - 1), a * b - a + b]; pourquoi = `${a} × ${b} = ${a} × 10 + ${a} × ${b - 10} = ${a * 10} + ${a * (b - 10)} = ${bonne}. Astuce : découpe le plus petit nombre en dizaine + unités.`; }
+      else if (s === 1) { const P = 400 * alea(1, 5), p = [10, 20, 25][alea(0, 2)], h = P + P * p / 100; q = `Un prix de ${P} € augmente de ${p} %, puis baisse de ${p} %. Prix final ?`; bonne = h - h * p / 100; faux = [P, P - P * p / 100, h]; u = " €"; pourquoi = `+${p} % : ${P} → ${h} €. Puis −${p} % de ${h} (et non de ${P}) : ${h} − ${h * p / 100} = ${bonne} €. Piège classique : une hausse puis une baisse du même pourcentage ne ramènent pas au prix de départ.`; }
+      else { let d, r; do { d = alea(12, 25); r = alea(11, 39); } while (d * r > 999); q = `${d * r} ÷ ${d} = ?`; bonne = r; faux = [r + 1, r - 1, r + 10]; pourquoi = `${d} × ${r} = ${d * r}, donc ${d * r} ÷ ${d} = ${r}. Astuce : estime d'abord (${d} × ${Math.round(r / 10) * 10} = ${d * Math.round(r / 10) * 10}), puis ajuste.`; }
+    }
+    // N5 : moyenne à atteindre, vitesse moyenne d'un aller-retour, deux robinets ensemble (les trois pièges classiques des tests).
+    else { const s = alea(0, 2);
+      if (s === 0) { const M = alea(11, 15); let notes, total; do { notes = [0, 1, 2, 3].map(() => alea(M - 4, M + 4)); total = notes.reduce((x, y) => x + y, 0); bonne = 5 * M - total; } while (bonne < 1 || bonne > 20);
+        q = `Notes : ${notes.join(", ")}. Quelle 5ᵉ note faut-il pour avoir ${M} de moyenne ?`; faux = [M, bonne + 2, bonne - 2]; pourquoi = `Pour ${M} de moyenne sur 5 notes, il faut ${5 * M} points en tout. On en a déjà ${total}, donc il manque ${bonne}.`; }
+      else if (s === 1) { const [v1, v2, v, D] = [[30, 60, 40, 60], [40, 60, 48, 120], [60, 90, 72, 180], [20, 30, 24, 60], [60, 120, 80, 120], [40, 120, 60, 120]][alea(0, 5)];
+        q = `Aller à ${v1} km/h, retour par la même route à ${v2} km/h. Vitesse moyenne sur l'aller-retour ?`; bonne = v; faux = [(v1 + v2) / 2, v + 5, v - 4]; u = " km/h";
+        pourquoi = `Piège : ce n'est pas la moyenne des deux vitesses (${(v1 + v2) / 2}), car on roule plus longtemps à la vitesse lente. Prends ${D} km : aller ${D / v1} h, retour ${D / v2} h, soit ${2 * D} km en ${D / v1 + D / v2} h = ${v} km/h.`; }
+      else { const [a, b, c, L] = [[3, 6, 2, 6], [4, 12, 3, 12], [6, 12, 4, 12], [10, 15, 6, 30], [12, 24, 8, 24], [20, 30, 12, 60]][alea(0, 5)];
+        q = `Un robinet remplit une cuve en ${a} min, un autre en ${b} min. Ensemble, en combien de minutes ?`; bonne = c; faux = [(a + b) / 2, a + b, a - 1]; u = " min";
+        pourquoi = `Prends une cuve de ${L} L (un nombre divisible par les deux) : le premier verse ${L / a} L par minute, le second ${L / b} L. Ensemble, ${L / a + L / b} L par minute, donc ${L} ÷ ${L / a + L / b} = ${c} min. Réflexe : ensemble, c'est forcément plus rapide que le plus rapide des deux.`; }
     }
     const vus = new Set([bonne]), choix = [bonne];
     for (const f of [...faux, bonne + 1, bonne - 2, bonne + 5]) if (choix.length < 4 && f > 0 && Number.isInteger(f) && !vus.has(f)) { vus.add(f); choix.push(f); }
@@ -875,7 +908,7 @@ const GENERATEURS = {
   // Déduction (syllogismes) : avec des mots inventés, pour raisonner sur la forme et non sur ce qu'on sait du monde.
   // Réponse : vrai à coup sûr, faux à coup sûr, ou on ne peut pas savoir. Niveau 1 : chaînes simples ; 2 : pièges classiques ; 3 : « aucun » et « certains ».
   "deduction"(niveau) {
-    const noms = melanger(["zorb", "plink", "taru", "mépo", "vurn", "glim", "brak"]), [A, B, C] = noms, Z = ["Zak", "Lino", "Tess"][alea(0, 2)];
+    const noms = melanger(["zorb", "plink", "taru", "mépo", "vurn", "glim", "brak"]), [A, B, C, Q4] = noms, Z = ["Zak", "Lino", "Tess"][alea(0, 2)];
     const tous = (x, y) => `Tous les ${x}s sont des ${y}s.`, aucun = (x, y) => `Aucun ${x} n'est un ${y}.`, cert = (x, y) => `Certains ${x}s sont des ${y}s.`;
     const modeles = {
       1: [[[tous(A, B), tous(B, C)], tous(A, C), 0, `Les ${A}s sont dans les ${B}s, qui sont dans les ${C}s : les ${A}s sont donc dans les ${C}s.`],
@@ -890,10 +923,23 @@ const GENERATEURS = {
           [[aucun(A, B), cert(C, B)], `Certains ${C}s ne sont pas des ${A}s.`, 0, `Les ${C}s qui sont des ${B}s ne peuvent pas être des ${A}s.`],
           [[tous(A, B), aucun(C, B)], cert(C, A), 1, `Un ${C} n'est jamais un ${B} ; or tout ${A} est un ${B} : aucun ${C} ne peut être un ${A}.`],
           [[cert(A, B), cert(B, C)], cert(A, C), 2, `Les ${A}s et les ${C}s qui sont des ${B}s peuvent être deux groupes différents.`],
-          [[tous(A, B), aucun(B, C)], aucun(A, C), 0, `Les ${A}s sont dans les ${B}s, qui ne touchent jamais les ${C}s.`]] }[niveau] || [];
+          [[tous(A, B), aucun(B, C)], aucun(A, C), 0, `Les ${A}s sont dans les ${B}s, qui ne touchent jamais les ${C}s.`]],
+      4: [[[tous(A, B), tous(B, C), aucun(C, Q4)], aucun(A, Q4), 0, `Les ${A}s sont dans les ${B}s, eux-mêmes dans les ${C}s, qui ne touchent jamais les ${Q4}s.`],
+          [[tous(A, B), aucun(B, C), cert(Q4, C)], `Certains ${Q4}s ne sont pas des ${A}s.`, 0, `Les ${Q4}s qui sont des ${C}s ne peuvent pas être des ${B}s, donc pas des ${A}s non plus.`],
+          [[tous(A, B), tous(C, B)], cert(A, C), 2, `${A}s et ${C}s sont tous dans les ${B}s, mais ils peuvent y occuper deux coins séparés.`],
+          [[aucun(A, B), aucun(B, C)], aucun(A, C), 2, `N'avoir rien en commun avec les ${B}s ne dit rien du lien entre les ${A}s et les ${C}s.`],
+          [[cert(A, B), tous(B, C)], cert(A, C), 0, `Les ${A}s qui sont des ${B}s sont forcément des ${C}s.`],
+          [[tous(A, B), tous(B, C), `${Z} n'est pas un ${C}.`], `${Z} est un ${A}.`, 1, `Tout ${A} est un ${B}, donc un ${C}. ${Z} n'est pas un ${C} : il ne peut pas être un ${A}.`]],
+      5: (() => { const P = `${Z} joue au ${A}`, Q = `${Z} porte un ${B}`, nonP = `${Z} ne joue pas au ${A}`, nonQ = `${Z} ne porte pas de ${B}`, R = `${Z} gagne un ${C}`, nonR = `${Z} ne gagne pas de ${C}`, si = (x, y) => `Si ${x}, alors ${y}.`;
+        return [[[si(P, Q), P + "."], Q + ".", 0, "C'est la règle appliquée directement."],
+          [[si(P, Q), nonQ + "."], nonP + ".", 0, `S'il jouait au ${A}, il porterait un ${B}. Il n'en porte pas : il ne joue donc pas au ${A}.`],
+          [[si(P, Q), Q + "."], P + ".", 2, `Piège : il peut porter un ${B} pour une autre raison. La règle ne marche que dans un sens.`],
+          [[si(P, Q), nonP + "."], nonQ + ".", 2, `Piège : la règle ne dit rien de ce qui se passe quand il ne joue pas au ${A}.`],
+          [[si(P, Q), si(Q, R), nonR + "."], P + ".", 1, `On remonte la chaîne : pas de ${C}, donc pas de ${B}, donc pas de ${A}. « ${P} » est donc faux.`],
+          [[`${Z} joue au ${A} seulement s'il porte un ${B}.`, nonQ + "."], P + ".", 1, `« A seulement si B » veut dire : sans B, pas de A. Sans ${B}, ${Z} ne joue donc pas au ${A}.`]]; })() }[niveau] || [];
     const [prem, concl, bonne, explication] = modeles[alea(0, modeles.length - 1)];
     const q = `${prem.join("\n")}\n\nConclusion : « ${concl} »`;
-    return { q, enonce: q.replace(/\n+/g, " "), choix: ["Vrai, à coup sûr", "Faux, à coup sûr", "On ne peut pas savoir"], bonne, pourquoi: `${explication} Méthode : dessine deux ronds (des groupes) et vérifie s'il existe un dessin où la conclusion est fausse.` };
+    return { q, enonce: q.replace(/\n+/g, " "), choix: ["Vrai, à coup sûr", "Faux, à coup sûr", "On ne peut pas savoir"], bonne, pourquoi: `${explication} Méthode : ${niveau === 5 ? "« si A, alors B » marche dans un seul sens ; la seule chose sûre en sens inverse : pas de B, donc pas de A." : "dessine des ronds (des groupes) et vérifie s'il existe un dessin où la conclusion est fausse."}` };
   },
 
   // Suites de figures (12/11/2026) : une figure = { c : nombre de côtés (0 = rond), rot : angle de la flèche (null = pas de flèche), plein }.
@@ -905,8 +951,13 @@ const GENERATEURS = {
     if (niveau === 1 && Math.random() < .5) { for (let i = 0; i < 5; i++) t.push({ c: 0, rot: r0 + i * pas, plein: 0 }); regle = `la flèche tourne de ${Math.abs(pas)}° ${sens(pas)} à chaque case`; }
     else if (niveau === 1) { const c0 = alea(3, 4); for (let i = 0; i < 5; i++) t.push({ c: c0 + i, rot: null, plein: 0 }); regle = `un côté de plus à chaque case (${c0}, ${c0 + 1}, ${c0 + 2}…)`; }
     else if (niveau === 2) { for (let i = 0; i < 5; i++) t.push({ c: 3 + i, rot: r0 + i * pas, plein: 0 }); regle = `deux règles en même temps : un côté de plus à chaque case, et la flèche tourne de ${Math.abs(pas)}° ${sens(pas)}`; }
-    else { const c = alea(4, 6), s = Math.sign(pas); let r = r0; for (let i = 0; i < 5; i++) { t.push({ c, rot: r, plein: i % 2 }); r += s * 45 * (i + 1); }
+    else if (niveau === 3 || !niveau) { const c = alea(4, 6), s = Math.sign(pas); let r = r0; for (let i = 0; i < 5; i++) { t.push({ c, rot: r, plein: i % 2 }); r += s * 45 * (i + 1); }
       regle = `la flèche tourne de 45°, puis 90°, puis 135°, puis 180° (le pas grandit), ${sens(s)} ; et la figure est pleine une case sur deux`; }
+    // N4 (16/11/2026) : trois règles en même temps ; N5 : un côté de moins, une flèche qui avance puis recule, une figure pleine sur trois.
+    else if (niveau === 4) { const s = Math.sign(pas); let r = r0; for (let i = 0; i < 5; i++) { t.push({ c: 3 + i, rot: r, plein: i % 2 }); r += s * 45 * (i + 1); }
+      regle = `trois règles en même temps : un côté de plus à chaque case, la flèche tourne de 45°, 90°, 135°, 180° ${sens(s)}, et la figure est pleine une case sur deux`; }
+    else { let r = r0; for (let i = 0; i < 5; i++) { t.push({ c: 8 - i, rot: r, plein: i % 3 === 0 ? 1 : 0 }); r += i % 2 ? -45 : 90; }
+      regle = "trois règles : un côté de moins à chaque case (8, 7, 6…) ; la flèche tourne de 90° dans le sens des aiguilles d'une montre, puis revient de 45°, et ainsi de suite ; pleine, vide, vide, pleine… (une figure sur trois est pleine)"; }
     t.forEach(f => { if (f.rot !== null) f.rot = ((f.rot % 360) + 360) % 360; });
     const cle = f => `${f.c}-${f.rot}-${f.plein}`, a = t[4], vus = new Set([cle(a)]), choix = [a];
     const tourne = d => a.rot === null ? null : { ...a, rot: (((a.rot + d) % 360) + 360) % 360 };
@@ -932,7 +983,14 @@ const GENERATEURS = {
       3: [{ dit: "des nombres premiers (divisibles seulement par 1 et par eux-mêmes)", gen: () => [11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97][alea(0, 20)], ok: () => true, faux: () => [21, 27, 33, 39, 49, 51, 57, 63, 69, 77, 81, 87, 91][alea(0, 12)] },
           { dit: null, somme: true },
           { dit: "des nombres dont les chiffres montent (1 < 4 < 7)", gen: () => { const d = melanger([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 3).sort(); return +d.join(""); }, ok: croissant,
-            faux: () => { let v; do { const d = melanger([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 3); v = +d.join(""); } while (croissant(v)); return v; } }] }[niveau] || [];
+            faux: () => { let v; do { const d = melanger([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 3); v = +d.join(""); } while (croissant(v)); return v; } }],
+      4: [{ dit: "des multiples de 6 (pairs ET multiples de 3)", gen: () => 6 * alea(3, 16), ok: () => true, faux: () => Math.random() < .5 ? 6 * alea(3, 15) + 3 : 6 * alea(3, 15) + 2 },
+          { dit: "des cubes (2×2×2, 3×3×3, 4×4×4…)", gen: () => alea(2, 6) ** 3, ok: () => true, faux: () => [16, 25, 36, 49, 81, 100][alea(0, 5)] },
+          { dit: "des nombres dont le chiffre des dizaines est le double de celui des unités (21, 42…)", gen: () => 21 * alea(1, 4), ok: () => true, faux: () => 12 * alea(1, 4) }],
+      5: [{ dit: "des multiples de 7", gen: () => 7 * alea(3, 14), ok: () => true, faux: () => 7 * alea(3, 13) + [1, 2, 5, 6][alea(0, 3)] },
+          { dit: "des nombres triangulaires (1, 3, 6, 10, 15, 21… : on ajoute 2, puis 3, puis 4…)", gen: () => [6, 10, 15, 21, 28, 36, 45, 55, 66][alea(0, 8)], ok: () => true, faux: () => [12, 18, 20, 24, 30, 40, 50][alea(0, 6)] },
+          { dit: "des palindromes (ils se lisent pareil dans les deux sens)", gen: () => 101 * alea(1, 9) + 10 * alea(0, 9), ok: () => true,
+            faux: () => { let v; do { const a = alea(1, 9); v = 100 * a + 10 * alea(0, 9) + (a + alea(1, 8)) % 10; } while (String(v) === [...String(v)].reverse().join("")); return v; } }] }[niveau] || [];
     let R = regles[alea(0, regles.length - 1)];
     if (R.somme) { const k = alea(9, 13); R = { dit: `des nombres dont les chiffres font ${k} quand on les additionne`, gen: () => alea(19, 98), ok: v => somme(v) === k, faux: () => { let v; do v = alea(19, 98); while (Math.abs(somme(v) - k) !== 1); return v; } }; }
     const groupe = tirage4(R.gen, R.ok);
@@ -945,6 +1003,23 @@ const GENERATEURS = {
   // Analogies : « A est à B ce que C est à ? ». Niveau 1 : nombres (deux exemples, pour que la règle soit sûre) ;
   // 2 : lettres, carrés, « double plus un » ; 3 : analogies de mots (la relation : lieu, outil, contraire, petit, partie de…).
   "analogies"(niveau) {
+    if (niveau >= 5) {
+      const M = [["Cause", "effet", "Prémisse", "conclusion", ["raison", "début", "question"], "ce qui vient d'abord, puis ce qui en découle"],
+        ["Pétale", "fleur", "Touche", "clavier", ["doigt", "ordinateur", "écran"], "la partie et le tout"],
+        ["Sécheresse", "pluie", "Ignorance", "savoir", ["école", "erreur", "bêtise"], "le manque, puis ce qui le comble"],
+        ["Thermomètre", "température", "Balance", "masse", ["cuisine", "équilibre", "kilo"], "l'instrument et ce qu'il mesure"],
+        ["Chenille", "papillon", "Têtard", "grenouille", ["mare", "crapaud", "œuf"], "l'état d'avant, puis l'adulte"],
+        ["Pare-feu", "réseau", "Vaccin", "corps", ["virus", "médecin", "maladie"], "ce qui protège"],
+        ["Brouillon", "texte", "Maquette", "bâtiment", ["architecte", "plan", "brique"], "la version d'essai, puis l'œuvre finie"],
+        ["Partition", "musicien", "Recette", "cuisinier", ["plat", "cuisine", "four"], "ce qu'on suit pour travailler"],
+        ["Archipel", "île", "Constellation", "étoile", ["ciel", "galaxie", "planète"], "l'ensemble et ses éléments"],
+        ["Signature", "contrat", "Mot de passe", "connexion", ["clavier", "pirate", "écran"], "ce qui prouve qui on est"],
+        ["Avare", "dépenser", "Timide", "parler en public", ["rougir", "se taire", "écouter"], "ce que la personne évite"],
+        ["Graine", "arbre", "Idée", "projet", ["cerveau", "pensée", "rêve"], "ce qui contient le début de la chose"]];
+      const [a, b, c, d, faux, rel] = M[alea(0, M.length - 1)];
+      const q = `${a} est à ${b} ce que ${c} est à… ?`;
+      return { q, enonce: q, choix: [d, ...faux], bonne: 0, pourquoi: `La relation : ${rel}. ${a} → ${b}, donc ${c} → ${d}. Méthode : dis la relation en une phrase, puis élimine les mots qui sont seulement « du même sujet ».` };
+    }
     if (niveau === 3) {
       const M = [["Médecin", "hôpital", "Professeur", "école", ["élève", "cahier", "cours"], "le lieu où l'on travaille"],
         ["Chaud", "froid", "Haut", "bas", ["grand", "sommet", "chaud"], "le contraire"],
@@ -965,10 +1040,19 @@ const GENERATEURS = {
       return { q, enonce: q, choix: [d, ...faux], bonne: 0, pourquoi: `La relation : ${rel}. ${a} → ${b}, donc ${c} → ${d}. Méthode : dis la relation en une phrase avant de regarder les choix.` };
     }
     const L = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const regles = niveau === 1
+    const regles = niveau === 4
+      ? [{ f: v => v * v - 1, dit: "on prend le carré, puis on retire 1" }, { f: v => 3 * v - 2, dit: "on multiplie par 3, puis on retire 2" }, { f: v => v * (v + 1), dit: "on multiplie le nombre par celui qui le suit" }, { miroir: true }]
+      : niveau === 1
       ? [(() => { const k = alea(3, 9); return { f: v => v + k, dit: `on ajoute ${k}` }; })(), (() => { const k = alea(2, 4); return { f: v => v * k, dit: `on multiplie par ${k}` }; })()]
       : [{ f: v => v * v, dit: "on prend le carré (le nombre multiplié par lui-même)" }, { f: v => 2 * v + 1, dit: "on double, puis on ajoute 1" }, { lettres: true, k: alea(2, 4) }];
     const R = regles[alea(0, regles.length - 1)];
+    if (R.miroir) {   // l'alphabet à l'envers : A ↔ Z, B ↔ Y…
+      const [a, b, c] = melanger([...Array(26).keys()].filter(i => i !== 12 && i !== 13)).slice(0, 3), d = 25 - c, ch = [d];
+      for (const v of [d + 1, d - 1, c, d + 2, d - 2]) { const w = ((v % 26) + 26) % 26; if (ch.length < 4 && !ch.includes(w)) ch.push(w); }
+      const q = `${L[a]} → ${L[25 - a]}\n${L[b]} → ${L[25 - b]}\n${L[c]} → ?`;
+      return { q, enonce: q.replace(/\n/g, " ; "), choix: ch.map(i => L[i]), bonne: 0,
+        pourquoi: `C'est l'alphabet à l'envers (un miroir) : A ↔ Z, B ↔ Y… La position d'une lettre et celle de son miroir font toujours 27. ${L[c]} (${c + 1}) → ${L[d]} (${d + 1}).` };
+    }
     if (R.lettres) {
       const [a, b, c] = melanger([...Array(26 - R.k).keys()]).slice(0, 3), d = c + R.k;
       const q = `${L[a]} → ${L[a + R.k]}\n${L[b]} → ${L[b + R.k]}\n${L[c]} → ?`;
@@ -1022,6 +1106,66 @@ const GENERATEURS = {
       pourquoi: `La règle : ${OPS[op][1]}${miroir ? ", puis le résultat est retourné comme dans un miroir (la colonne de gauche passe à droite)" : ""}. Méthode : compare case par case (colorée des deux côtés, d'un seul, d'aucun) et vérifie ta règle sur les deux exemples avant de regarder les choix.` };
   },
 
+  // Pions dans une grille (16/11/2026, d'après les captures d'Arnaud ; tout est généré ici) : chaque pion se déplace avec son propre mouvement ;
+  // quand il sort d'un côté, il revient par le côté opposé. N1 : 5 × 5, un pion, une case tout droit ; N2 : un pion, deux cases ou en diagonale ;
+  // N3 : deux pions aux mouvements différents ; N4 : 6 × 6, deux pions, dont un au pas qui grandit ; N5 : 6 × 6, trois pions, dont un au pas qui grandit.
+  "pions"(niveau) {
+    const n = niveau >= 4 ? 6 : 5, COUL = ["sp-a", "sp-b", "sp-c"], NOMS = ["le rouge", "le bleu", "l'orange"];
+    const DROIT = [[0, 1, "vers la droite"], [0, -1, "vers la gauche"], [1, 0, "vers le bas"], [-1, 0, "vers le haut"]];
+    const DIAG = [[1, 1, "en diagonale vers le bas à droite"], [1, -1, "en diagonale vers le bas à gauche"], [-1, 1, "en diagonale vers le haut à droite"], [-1, -1, "en diagonale vers le haut à gauche"]];
+    const un = (t, pas, grandit) => { const d = t[alea(0, t.length - 1)]; return { dr: d[0], dc: d[1], dit: d[2], pas, grandit }; };
+    const plan = { 1: () => [un(DROIT, 1)], 2: () => [Math.random() < .5 ? un(DROIT, 2) : un(DIAG, 1)], 3: () => [un(DROIT, 1), Math.random() < .5 ? un(DIAG, 1) : un(DROIT, 2)],
+      4: () => [un(DROIT, 0, true), Math.random() < .5 ? un(DIAG, 1) : un(DROIT, 2)], 5: () => [un(DROIT, 0, true), un(DIAG, 1), un(DROIT, 2)] }[niveau] || (() => [un(DROIT, 1)]);
+    const mod = v => ((v % n) + n) % n, dep = (r, i) => r.grandit ? i * (i + 1) / 2 : r.pas * i;
+    let regles, departs, t;
+    for (let essai = 0; essai < 300; essai++) {
+      regles = plan();
+      departs = regles.map(r => niveau === 1 ? [r.dr ? (r.dr > 0 ? 0 : n - 1) : alea(0, n - 1), r.dc ? (r.dc > 0 ? 0 : n - 1) : alea(0, n - 1)] : [alea(0, n - 1), alea(0, n - 1)]);   // N1 : pas de sortie de la grille
+      t = [0, 1, 2, 3, 4].map(i => regles.map((r, k) => [mod(departs[k][0] + r.dr * dep(r, i)), mod(departs[k][1] + r.dc * dep(r, i))]));
+      if (t.every(g => new Set(g.map(p => p.join())).size === g.length)) break;   // jamais deux pions sur la même case
+    }
+    const a = t[4], cle = g => g.map(p => p.join(".")).join("-"), vus = new Set([cle(a)]), choix = [a];
+    const bouge = (k, f) => a.map((p, j) => j === k ? [mod(p[0] + regles[k].dr * f), mod(p[1] + regles[k].dc * f)] : p);
+    const cand = [t[3]];
+    regles.forEach((r, k) => { const der = dep(r, 4) - dep(r, 3); cand.push(bouge(k, -2 * der), bouge(k, 1), bouge(k, -1), a.map((p, j) => j === k ? t[3][k] : p)); });
+    if (a.length > 1) cand.push([a[1], a[0], ...a.slice(2)]);
+    for (const c of melanger(cand)) if (choix.length < 4 && new Set(c.map(p => p.join())).size === c.length && !vus.has(cle(c))) { vus.add(cle(c)); choix.push(c); }
+    const dit = regles.map((r, k) => `${regles.length > 1 ? NOMS[k] : "le pion"} se déplace ${r.grandit ? "de 1, puis 2, puis 3, puis 4 cases (le pas grandit)" : `de ${r.pas} case${r.pas > 1 ? "s" : ""}`} ${r.dit}`);
+    return { q: "Où seront les pions dans la grille suivante ?", figure: `<div class="rang">${t.slice(0, 4).map(g => svgGrille(g, n, COUL)).join("")}${svgGrille(null)}</div>`,
+      enonce: `pions N${niveau} (${n}×${n}) : ${t.slice(0, 4).map(cle).join(" | ")} ?`, choix: choix.map(g => svgGrille(g, n, COUL)), texte: choix.map(cle), html: true, bonne: 0,
+      pourquoi: `La règle : ${dit.join(" ; ")}.${niveau > 1 ? " Quand un pion sort d'un côté, il revient par le côté opposé." : ""} Méthode : suis UN pion à la fois, compte ses cases d'une grille à la suivante, puis vérifie les autres.` };
+  },
+
+  // Motif qui se répète (16/11/2026, d'après les captures d'Arnaud) : une suite de figures qui revient en boucle.
+  // N1 : motif de 2 ou 3 figures, la suivante ; N2 : motif de 4 où une forme revient pleine, la suivante ; N3 : motif de 3 ou 4, la figure à la 20ᵉ-45ᵉ place ;
+  // N4 : motif de 5 où une forme revient deux fois, place lointaine ; N5 : la forme suit un motif de 3 et le remplissage un motif de 2 (le tout revient tous les 6).
+  "motif"(niveau) {
+    const FO = melanger([0, 3, 4, 5, 6]), NOMF = { 0: "rond", 3: "triangle", 4: "carré", 5: "pentagone", 6: "hexagone" };
+    const fig = (c, plein = 0) => ({ c, rot: null, plein }), nom = f => NOMF[f.c] + (f.plein ? " plein" : "");
+    let M = null, p, el, S, P;
+    if (niveau >= 5) { S = FO.slice(0, 3); P = Math.random() < .5 ? [1, 0] : [0, 1]; p = 6; el = k => fig(S[k % 3], P[k % 2]); }
+    else {
+      if (niveau === 1) M = FO.slice(0, alea(2, 3)).map(c => fig(c));
+      else if (niveau === 2) M = [fig(FO[0]), fig(FO[1]), fig(FO[0], 1), fig(FO[2])];
+      else if (niveau === 3) M = FO.slice(0, alea(3, 4)).map(c => fig(c, alea(0, 1)));
+      else M = melanger([FO[0], FO[0], FO[1], FO[2], FO[3]]).map(c => fig(c));
+      p = M.length; el = k => M[k % p];
+    }
+    const montre = niveau <= 2 ? 2 * p + 1 : niveau >= 5 ? 8 : 2 * p, loin = niveau >= 3;
+    const pos = loin ? alea(20, 45) : montre + 1, bonne = el(pos - 1), cle = f => f.c + "-" + f.plein;
+    const vus = new Set([cle(bonne)]), choix = [bonne];
+    const cand = [el(pos - 2), el(pos), { ...bonne, plein: 1 - bonne.plein }, ...[...Array(p).keys()].map(el), fig(FO[4]), fig(FO[3], 1)];
+    for (const f of cand) if (choix.length < 4 && !vus.has(cle(f))) { vus.add(cle(f)); choix.push(f); }
+    const seq = [...Array(montre).keys()].map(el), reste = (x, d) => `${x} ÷ ${d} = ${Math.floor(x / d)}, reste ${x % d}`;
+    const calcul = niveau >= 5 ? `La forme revient tous les 3 (${S.map(c => NOMF[c]).join(", ")}) et le remplissage tous les 2 : on calcule chacun. Forme : ${reste(pos, 3)}, donc ${NOMF[S[(pos - 1) % 3]]} ; remplissage : ${reste(pos, 2)}, donc ${P[(pos - 1) % 2] ? "plein" : "vide"}.`
+      : loin ? `Le motif fait ${p} figures (${[...Array(p).keys()].map(k => nom(el(k))).join(", ")}). ${reste(pos, p)} : ${pos % p ? `c'est la ${pos % p}ᵉ figure du motif` : "c'est la dernière figure du motif"}, un ${nom(bonne)}.`
+      : `Le motif de ${p} figures revient en boucle : ${[...Array(p).keys()].map(k => nom(el(k))).join(", ")}. La suivante est un ${nom(bonne)}.`;
+    return { q: loin ? `Le motif continue toujours de la même façon. Quelle figure sera à la ${pos}ᵉ place ?` : "Quelle figure vient ensuite ?",
+      figure: `<div class="rang">${seq.map((f, k) => loin ? `<span class="motif-num">${svgFigure(f)}${k + 1}</span>` : svgFigure(f)).join("")}${loin ? "" : svgFigure(null)}</div>`,
+      enonce: `motif N${niveau} : ${seq.map(cle).join(" ")} → place ${pos}`, choix: choix.map(svgFigure), texte: choix.map(cle), html: true, bonne: 0,
+      pourquoi: `${calcul} Méthode : trouve d'abord où le motif recommence, compte sa longueur, puis divise la place demandée par cette longueur : le reste donne la figure.` };
+  },
+
   // Rotations dans un cercle (14/11/2026, d'après les erreurs d'Arnaud sur les décagones de l'autre appli ; tout est généré ici) :
   // un cercle coupé en secteurs ; chaque secteur coloré tourne avec son propre pas et son propre sens. Quatre cercles, puis « ? ».
   // N1 : 8 secteurs, un marqueur, pas de 1 ; N2 : un marqueur, pas de 2 ou 3, dans un sens ou l'autre ; N3 : deux marqueurs, sens opposés ;
@@ -1064,6 +1208,15 @@ function svgCercle(c, n, coul) {
   const secteur = (k, cls) => { const a0 = 2 * Math.PI * k / n, a1 = 2 * Math.PI * (k + 1) / n; return `<path d="M35,35 L${pt(a0)} A${R},${R} 0 0 1 ${pt(a1)} Z" class="${cls}"/>`; };
   const coul_de = k => { const i = c.indexOf(k); return i < 0 ? "sp-vide" : coul[i]; };
   return `<svg class="case" viewBox="0 0 70 70" role="img" aria-label="cercle de ${n} secteurs, secteurs colorés : ${c.map((v, i) => `${["rouge", "bleu", "orange"][i]} en ${v + 1}`).join(", ")}"><rect x="1" y="1" width="68" height="68" rx="8" class="m-fond"/>${[...Array(n).keys()].map(k => secteur(k, coul_de(k))).join("")}<circle cx="35" cy="35" r="${R}" class="m-creux"/><circle cx="35" cy="5" r="2" class="m-plein"/></svg>`;
+}
+
+// Une grille de pions : n × n cases, un rond coloré par pion ([ligne, colonne]) ; null = la case « ? ».
+function svgGrille(g, n, coul) {
+  if (!g) return svgCase(null);
+  const t = 60 / n, cases = [];
+  for (let k = 0; k < n * n; k++) cases.push(`<rect x="${(5 + (k % n) * t).toFixed(1)}" y="${(5 + Math.floor(k / n) * t).toFixed(1)}" width="${t.toFixed(1)}" height="${t.toFixed(1)}" class="sp-vide"/>`);
+  const pions = g.map(([r, c], i) => `<circle cx="${(5 + (c + .5) * t).toFixed(1)}" cy="${(5 + (r + .5) * t).toFixed(1)}" r="${(t * .38).toFixed(1)}" class="${coul[i]}"/>`);
+  return `<svg class="case grille" viewBox="0 0 70 70" role="img" aria-label="grille ${n} par ${n}, pions : ${g.map(([r, c], i) => `${["rouge", "bleu", "orange"][i]} ligne ${r + 1} colonne ${c + 1}`).join(", ")}"><rect x="1" y="1" width="68" height="68" rx="8" class="m-fond"/>${cases.join("")}${pions.join("")}</svg>`;
 }
 
 // Un calque de superposition : une grille n × n de cases, colorées (classe cls) ou vides ; null = la case « ? ».
@@ -1171,19 +1324,22 @@ const NIVEAUX = ["", "Reconnaître", "Retrouver seul", "Appliquer"];
 // Pas de boîtes de révision : chaque exercice est neuf. Le niveau s'adapte par famille : 3 réussites d'affilée = niveau au-dessus, 2 erreurs d'affilée = niveau en dessous.
 // limite : temps visé par question, en secondes (en mode concours, au-delà, c'est compté faux).
 const FAMILLES = {
-  suites:    { nom: "Suites de nombres", gen: "suite-logique", limite: 45 },
-  lettres:   { nom: "Suites de lettres", gen: "suite-lettres", limite: 45 },
-  dominos:   { nom: "Dominos",           gen: "dominos",       limite: 45 },
-  matrices:  { nom: "Matrices",          gen: "matrices",      limite: 60 },
-  calcul:    { nom: "Calcul mental",     gen: "calcul",        limite: 45 },
-  deduction: { nom: "Déduction",         gen: "deduction",     limite: 60 },
-  figures:   { nom: "Suites de figures", gen: "figures",       limite: 60 },
-  intrus:    { nom: "L'intrus",          gen: "intrus",        limite: 45 },
-  analogies: { nom: "Analogies",         gen: "analogies",     limite: 45 },
+  suites:    { nom: "Suites de nombres", gen: "suite-logique", limite: 45, max: 5 },
+  lettres:   { nom: "Suites de lettres", gen: "suite-lettres", limite: 45, max: 5 },
+  dominos:   { nom: "Dominos",           gen: "dominos",       limite: 45, max: 5 },
+  matrices:  { nom: "Matrices",          gen: "matrices",      limite: 60, max: 4 },
+  calcul:    { nom: "Calcul mental",     gen: "calcul",        limite: 60, max: 5 },
+  deduction: { nom: "Déduction",         gen: "deduction",     limite: 60, max: 5 },
+  figures:   { nom: "Suites de figures", gen: "figures",       limite: 60, max: 5 },
+  intrus:    { nom: "L'intrus",          gen: "intrus",        limite: 45, max: 5 },
+  analogies: { nom: "Analogies",         gen: "analogies",     limite: 45, max: 5 },
   superposition: { nom: "Superposition",  gen: "superposition", limite: 60, max: 5 },
-  rotations: { nom: "Rotations",          gen: "rotations",     limite: 60, max: 5 }
+  rotations: { nom: "Rotations",          gen: "rotations",     limite: 60, max: 5 },
+  pions:     { nom: "Pions dans une grille", gen: "pions",     limite: 60, max: 5 },
+  motif:     { nom: "Motif qui se répète", gen: "motif",       limite: 60, max: 5 }
 };
-// max : niveau le plus haut de la famille (3 par défaut ; les niveaux 4 et 5 arrivent famille par famille, décision du 13/11/2026).
+// max : niveau le plus haut de la famille (3 par défaut). Niveaux 4 et 5 partout depuis le 16/11/2026 (décision du 13/11 : le test d'admission
+// serait très difficile) ; les matrices s'arrêtent au 4 (même règles qu'au 3, mais les mauvais choix ne diffèrent que par un détail).
 const maxNiv = f => FAMILLES[f]?.max || 3;
 const statLogique = f => (etat.logique[f] ||= { niveau: 1, serie: 0, ko: 0, n: 0, ok: 0, ms: 0 });
 const duree = ms => { const s = Math.round(ms / 1000); return s < 60 ? `${s} s` : `${Math.floor(s / 60)} min${s % 60 ? ` ${String(s % 60).padStart(2, "0")}` : ""}`; };
@@ -1363,6 +1519,8 @@ function vueLogique() {
         <span><b>Figures</b> : comme les matrices, une chose à la fois : la flèche (de combien elle tourne ?), le nombre de côtés, le remplissage.</span>
         <span><b>L'intrus</b> : cherche ce que les autres ont en commun (pair, multiple de…, carré, premier), puis celui qui n'en est pas.</span>
         <span><b>Analogies</b> : dis la relation avec une phrase (« le double », « l'outil de… »), puis applique la même phrase à l'autre.</span>
+        <span><b>Pions</b> : suis un pion à la fois et compte ses cases ; s'il sort d'un côté, il revient par l'autre.</span>
+        <span><b>Motif</b> : trouve où il recommence, compte sa longueur, puis divise la place demandée : le reste donne la figure.</span>
         <span><b>Le jour du test</b> : une question bloque ? Passe et reviens-y : elles valent toutes autant de points.</span>
       </div>
     </section>
@@ -1396,7 +1554,7 @@ function carteSimulation() {
 function demarrerSimulation() {
   const d = SIMU[etat.simuDuree] ? etat.simuDuree : 30, n = SIMU[d], fams = Object.keys(FAMILLES), ordre = [];
   while (ordre.length < n) { const tour = melanger([...fams]); if (tour[0] === ordre[ordre.length - 1]) tour.push(tour.shift()); ordre.push(...tour); }
-  const file = ordre.slice(0, n).map((f, i) => ({ ...exerciceLogique(f, 1 + Math.floor(3 * i / n)), num: i + 1 }));
+  const file = ordre.slice(0, n).map((f, i) => ({ ...exerciceLogique(f, Math.min(maxNiv(f), 1 + Math.floor(5 * i / n))), num: i + 1 }));
   session = { mode: "simulation", file, total: n, duree: d, debut: Date.now(), fin: Date.now() + d * 60000, reponses: [], passees: 0,
               etape: "repondre", res: null, faites: 0, justes: 0, xp: 0, ratees: new Set(), retoursPasses: 0, ids: new Set(), calc: "" };
   envoi = null;
