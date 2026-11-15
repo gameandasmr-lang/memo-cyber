@@ -829,9 +829,9 @@
       "paire": "http-html",
       "q": "HTTP, c'est…",
       "choix": [
-        "La requête envoyée par mon navigateur",
+        "La requête envoyée par mon navigateur, et rien d'autre",
         "Les règles de la conversation : demande ET réponse",
-        "Le langage de la page web"
+        "Le langage dans lequel est écrite la page web"
       ],
       "bonne": 1,
       "pourquoi": "HTTP couvre toute la conversation. La réponse « 200 OK » est aussi du HTTP."
@@ -877,9 +877,9 @@
       "paire": "html-js",
       "q": "On bloque script.js sur une page. Que se passe-t-il ?",
       "choix": [
-        "La page ne s'affiche plus du tout",
+        "La page ne s'affiche plus du tout, elle reste blanche",
         "La page s'affiche, mais les boutons ne réagissent plus",
-        "La page s'affiche sans couleurs"
+        "La page s'affiche, mais sans couleurs ni mise en forme"
       ],
       "bonne": 1,
       "pourquoi": "Le HTML suffit pour afficher. Le JS, c'est l'électricité : sans lui, l'interrupteur ne fait plus rien."
@@ -901,9 +901,9 @@
       "paire": "codes",
       "q": "Le serveur répond 404. Ça veut dire…",
       "choix": [
-        "Il n'a pas répondu",
+        "Il n'a pas répondu : la demande s'est perdue",
         "Il a répondu : « je n'ai pas ça »",
-        "Il a planté"
+        "Il a planté en traitant la demande"
       ],
       "bonne": 1,
       "pourquoi": "404 = introuvable. Le serveur a bien répondu. Planté, c'est 500."
@@ -959,22 +959,22 @@
     {
       "id": "q12",
       "paire": "masque-passerelle",
-      "q": "Qui décide si une adresse est « dans mon réseau » ?",
+      "q": "Quel réglage permet à ton PC de savoir si une adresse est « dans mon réseau » ?",
       "choix": [
         "La passerelle",
         "Le masque",
         "Le DNS"
       ],
       "bonne": 1,
-      "pourquoi": "Le masque, c'est la règle « même immeuble ou pas ». La passerelle, c'est la boîte aux lettres pour tout le reste."
+      "pourquoi": "C'est le PC qui décide ; le masque lui donne la règle : il dit quelle partie de l'adresse est le réseau. Le PC compare cette partie : pareille = même immeuble, différente = il confie le paquet à la passerelle."
     },
     {
       "id": "q13",
       "paire": "masque-passerelle",
       "q": "Mon PC : 192.168.1.94, masque 255.255.255.0. Il veut joindre l'imprimante 192.168.1.50. Il l'envoie…",
       "choix": [
-        "Directement à l'imprimante",
-        "À la passerelle"
+        "Directement à l'imprimante : même partie réseau, 192.168.1",
+        "À la passerelle : l'imprimante est un autre appareil"
       ],
       "bonne": 0,
       "pourquoi": "Mêmes trois premiers nombres (192.168.1) = même réseau = envoi direct."
@@ -995,7 +995,7 @@
       "paire": "ip-privee-publique",
       "q": "Sur son serveur, un site voit arriver ma connexion. Il voit…",
       "choix": [
-        "L'IP privée de mon PC",
+        "L'IP privée de mon PC, celle donnée par la box",
         "L'IP publique de ma box",
         "L'IP privée de ma box"
       ],
@@ -1007,8 +1007,8 @@
       "paire": "ip-privee-publique",
       "q": "Mon voisin a aussi un PC en 192.168.1.94. Problème ?",
       "choix": [
-        "Oui, deux machines ont la même adresse",
-        "Non, ce sont des adresses privées, chacun dans sa maison"
+        "Oui : deux machines ont la même adresse, elles se gênent",
+        "Non : adresses privées, chacun dans sa maison"
       ],
       "bonne": 1,
       "pourquoi": "Les IP privées sont réutilisées partout, comme les numéros de poste internes dans chaque entreprise."
@@ -1018,9 +1018,9 @@
       "paire": "ports",
       "q": "3 onglets ouverts sur le même site : netstat montre 3 ports différents de mon côté. Pourquoi ?",
       "choix": [
-        "Les onglets sont sur 3 machines différentes",
-        "Un ticket par connexion, pour remettre chaque réponse au bon onglet",
-        "Le site utilise 3 ports"
+        "Les onglets tournent sur 3 machines différentes du site",
+        "Un ticket par connexion, pour rendre chaque réponse au bon onglet",
+        "Le site écoute sur 3 ports serveur différents, un par onglet"
       ],
       "bonne": 1,
       "pourquoi": "Même machine, mais un ticket (port client) par connexion. Le site, lui, reste sur son guichet 443."
@@ -1078,9 +1078,9 @@
       "paire": "resolveur-autorite",
       "q": "nslookup affiche « Réponse ne faisant pas autorité ». Ça veut dire…",
       "choix": [
-        "Le site est privé",
-        "C'est le résolveur (la box) qui a répondu, de mémoire",
-        "La réponse est fausse"
+        "Le site est privé : il refuse de donner son adresse",
+        "Le résolveur (la box) a répondu, de mémoire",
+        "La réponse est fausse : il faut refaire la demande"
       ],
       "bonne": 1,
       "pourquoi": "La box rapporte une réponse qu'elle a gardée en mémoire. Le serveur officiel, lui, fait autorité."
@@ -1136,8 +1136,8 @@
       "paire": "fiable-securise",
       "q": "TCP est-il sécurisé ?",
       "choix": [
-        "Oui, il vérifie tout",
-        "Non, il est fiable mais pas chiffré"
+        "Oui : il vérifie tout, donc personne ne peut lire",
+        "Non : il est fiable, mais pas chiffré"
       ],
       "bonne": 1,
       "pourquoi": "Carte postale en recommandé : elle arrive, mais tout le monde peut la lire. Le chiffrement, c'est TLS."
@@ -1147,8 +1147,8 @@
       "paire": "fiable-securise",
       "q": "Site en HTTPS. Je peux laisser le mot de passe admin en commentaire dans le HTML ?",
       "choix": [
-        "Oui, HTTPS le cache",
-        "Non, le visiteur peut lire tout le HTML"
+        "Oui : HTTPS chiffre la page, donc personne ne la lit",
+        "Non : le visiteur peut lire tout le HTML"
       ],
       "bonne": 1,
       "pourquoi": "HTTPS protège le trajet. Une fois arrivé, le HTML se lit en entier (clic droit, code source)."
@@ -1219,16 +1219,17 @@
         "Server: SimpleHTTP/0.6 Python/3.12.3"
       ],
       "bonne": 1,
-      "pourquoi": "Logiciel + version exacte = on peut chercher les failles connues de cette version."
+      "pourquoi": "Logiciel + version exacte = on peut chercher les failles connues de cette version.",
+      "longueurOk": true
     },
     {
       "id": "q35",
       "paire": "masque-passerelle",
       "q": "Le masque 255.255.255.0 sert à…",
       "choix": [
-        "Authentifier le PC sur le réseau",
-        "Délimiter la partie réseau de l'adresse (les 3 premiers nombres ici)",
-        "Indiquer l'adresse de la box"
+        "Authentifier le PC sur le réseau avec un mot de passe",
+        "Délimiter la partie réseau de l'adresse (ici les 3 premiers)",
+        "Indiquer l'adresse de la box, la sortie vers Internet"
       ],
       "bonne": 1,
       "pourquoi": "Le masque n'authentifie rien : il dit quelle partie de l'adresse est le réseau. Même partie réseau → envoi direct, sinon → passerelle."
@@ -1238,9 +1239,9 @@
       "paire": "masque-passerelle",
       "q": "Ton PC (192.168.1.20, masque /24) écrit à 51.91.60.233. Qu'est-ce qui lui fait choisir la passerelle ?",
       "choix": [
-        "Le DNS",
-        "Le masque : la partie réseau est différente de la sienne",
-        "Le port 443"
+        "Le DNS : il lui dit que l'adresse est sur Internet",
+        "Le masque : la partie réseau n'est pas la sienne",
+        "Le port 443 : il est réservé aux sites extérieurs"
       ],
       "bonne": 1,
       "pourquoi": "C'est le masque qui permet de comparer les parties réseau. Différente → la passerelle, la porte de sortie."
@@ -1250,9 +1251,9 @@
       "paire": "http-html",
       "q": "Dans « HTTP/1.1 200 OK », qui parle ?",
       "choix": [
-        "Le navigateur, qui fait sa requête",
-        "Le serveur, qui répond : la réponse aussi est du HTTP",
-        "Le HTML de la page"
+        "Le navigateur, qui envoie sa requête au serveur",
+        "Le serveur : la réponse aussi est du HTTP",
+        "Le HTML de la page, qui annonce son état"
       ],
       "bonne": 1,
       "pourquoi": "C'est la première ligne de la réponse du serveur. HTTP couvre les deux sens de la conversation."
@@ -1286,9 +1287,9 @@
       "paire": "statut-corps",
       "q": "Où se trouve le HTML dans une réponse HTTP ?",
       "choix": [
-        "Dans la première ligne, à côté du 200",
+        "Dans la première ligne, juste à côté du 200",
         "Dans le corps, après les en-têtes et une ligne vide",
-        "Dans l'en-tête Host"
+        "Dans l'en-tête Host, avec le nom du site"
       ],
       "bonne": 1,
       "pourquoi": "Ligne de statut, en-têtes, ligne vide, puis le corps : c'est lui qui transporte le HTML."
@@ -1310,9 +1311,9 @@
       "paire": "codes",
       "q": "Picard répond « 410 Gone » à une page inconnue. De quelle famille est ce code ?",
       "choix": [
-        "2xx : réussite",
-        "4xx : erreur côté client (ta demande ne va pas)",
-        "5xx : le serveur est en panne"
+        "2xx : réussite, la page a bien été trouvée",
+        "4xx : erreur côté client (ta demande)",
+        "5xx : erreur côté serveur, il est en panne"
       ],
       "bonne": 1,
       "pourquoi": "Le premier chiffre donne la famille. 410 = « ça a existé, c'est parti pour de bon », un cousin du 404."
@@ -1322,9 +1323,9 @@
       "paire": "hyperviseurs",
       "q": "Quelle est LA différence entre un hyperviseur de type 1 et de type 2 ?",
       "choix": [
-        "Le type 1 utilise le matériel, pas le type 2",
-        "Le type 1 n'a aucun système hôte en dessous ; le type 2 tourne comme une appli dans Windows ou Linux",
-        "Le type 2 est plus récent"
+        "Le type 1 utilise le matériel du PC, le type 2 ne l'utilise jamais",
+        "Type 1 : aucun système hôte dessous ; type 2 : une appli dans Windows ou Linux",
+        "Le type 2 est simplement une version plus récente que le type 1"
       ],
       "bonne": 1,
       "pourquoi": "Les deux finissent par utiliser le matériel. La différence est la couche du dessous : rien (ESXi, Proxmox) ou un système hôte (VirtualBox)."
@@ -1334,9 +1335,9 @@
       "paire": "masque-passerelle",
       "q": "PC0 (192.168.1.10/24) et PC1 (192.168.2.20/24) sont reliés par un câble. Le ping marche-t-il ?",
       "choix": [
-        "Oui, ils sont reliés par un câble",
-        "Non : le masque montre qu'ils ne sont pas dans le même réseau, et il n'y a pas de passerelle",
-        "Oui, mais seulement avec un câble croisé"
+        "Oui : ils sont reliés par un câble, ça suffit pour se parler",
+        "Non : le masque dit « autre réseau », et pas de passerelle",
+        "Oui, mais seulement s'ils sont reliés par un câble croisé"
       ],
       "bonne": 1,
       "pourquoi": "Le câble est obligatoire mais ne suffit pas. PC0 voit avec son masque que 192.168.2 n'est pas sa « rue » : il cherche une passerelle, n'en a pas, et n'envoie rien."
@@ -1358,9 +1359,9 @@
       "paire": "reseau-abonnement",
       "q": "Une entreprise a un seul abonnement Internet mais deux réseaux, 192.168.1.x (Compta) et 192.168.2.x (Ateliers). Est-ce possible ?",
       "choix": [
-        "Non, il faut un abonnement par réseau",
-        "Oui : un routeur relie les deux réseaux, l'abonnement n'a rien à voir",
-        "Oui, mais seulement en Wi-Fi"
+        "Non : il faut un abonnement Internet par réseau",
+        "Oui : un routeur relie les deux, l'abonnement n'y est pour rien",
+        "Oui, mais seulement si les deux réseaux sont en Wi-Fi"
       ],
       "bonne": 1,
       "pourquoi": "Un réseau est juste un groupe d'adresses. On découpe souvent en plusieurs réseaux pour la sécurité : un virus à l'atelier n'atteint pas directement la compta."
@@ -1370,9 +1371,9 @@
       "paire": "switch-routeur",
       "q": "À la maison, quel appareil de la box permet à ton téléphone et à ton PC de se parler entre eux ?",
       "choix": [
-        "Le switch (ou la borne Wi-Fi), car ils sont dans le même réseau",
-        "Le routeur",
-        "Le modem"
+        "Le switch (ou la borne Wi-Fi) : même réseau",
+        "Le routeur : il relie les appareils de la maison",
+        "Le modem : il fait passer tout ce qui circule"
       ],
       "bonne": 0,
       "pourquoi": "Même réseau = pas besoin de routeur. Le switch (prises) ou la borne Wi-Fi (sans-fil) transmet entre appareils de la même « rue »."
@@ -1382,9 +1383,9 @@
       "paire": "switch-routeur",
       "q": "Quel appareil de la box te permet d'aller sur YouTube ?",
       "choix": [
-        "Le switch",
-        "Le routeur (avec le modem), qui relie ton réseau de la maison à celui de l'opérateur",
-        "La borne Wi-Fi seule"
+        "Le switch : il envoie tout ce qui sort de la maison",
+        "Le routeur (avec le modem) : il relie ton réseau à l'opérateur",
+        "La borne Wi-Fi seule : elle capte Internet par les ondes"
       ],
       "bonne": 1,
       "pourquoi": "YouTube est dans un autre réseau. Pour sortir de ta « rue », il faut le routeur : c'est ta passerelle."
@@ -1600,9 +1601,9 @@
       "niveau": 3,
       "q": "Un collègue : « Le ping vers 8.8.8.8 répond. Mais aucun site ne s’ouvre par son nom, ni picard.fr ni google.fr. » Le coupable le plus probable ?",
       "choix": [
-        "Le DNS : l’annuaire ne répond plus, donc les noms ne donnent plus d’adresse",
-        "Le câble réseau",
-        "Le serveur de Picard est en panne"
+        "Le DNS : l’annuaire ne répond plus, les noms ne donnent rien",
+        "Le câble réseau : il est mal branché ou abîmé",
+        "Le serveur de Picard : il est en panne ce matin"
       ],
       "bonne": 0,
       "pourquoi": "Le ping vers une adresse marche : le câble et la sortie vers Internet vont bien. Seuls les noms échouent, et pour tous les sites : c’est la traduction nom → adresse qui casse."
@@ -1613,9 +1614,9 @@
       "niveau": 3,
       "q": "Un PC est réglé en 192.168.1.10/24, sans passerelle. Il imprime sur 192.168.1.50, mais n’atteint pas Internet. Pourquoi ?",
       "choix": [
-        "Il n’a pas de porte de sortie pour ce qui est hors de son réseau",
-        "Son masque est faux",
-        "L’imprimante bloque Internet"
+        "Il n’a pas de porte de sortie hors de son réseau",
+        "Son masque est faux : il ne voit que l’imprimante",
+        "L’imprimante bloque l’accès à Internet du réseau"
       ],
       "bonne": 0,
       "pourquoi": "L’imprimante est dans son réseau : il lui parle directement. Internet est ailleurs : il faut la passerelle, et il n’en a pas."
@@ -1739,9 +1740,9 @@
       "niveau": 3,
       "q": "Au magasin, la tablette (192.168.10.5/24) et l’imprimante (192.168.11.80/24) sont sur le même switch, mais rien ne s’imprime. Un collègue : « Le switch est mort. » Ton premier réflexe ?",
       "choix": [
-        "Comparer les deux adresses : elles ne sont pas dans la même rue, l’imprimante a sans doute une faute de frappe",
-        "Changer le switch",
-        "Régler une passerelle sur la tablette"
+        "Comparer les adresses : pas la même rue, sans doute une faute de frappe",
+        "Changer le switch : s’il ne transmet rien, c’est qu’il est mort",
+        "Régler une passerelle sur la tablette pour joindre l’imprimante"
       ],
       "bonne": 0,
       "pourquoi": "On lit d’abord les faits (les adresses), ensuite on choisit l’outil. 192.168.10 ≠ 192.168.11 : le switch n’y peut rien. On corrige l’adresse de l’imprimante."
@@ -1766,9 +1767,9 @@
       "niveau": 3,
       "q": "Tu ajoutes un routeur entre 192.168.1.0/24 et 192.168.2.0/24. PC0 (192.168.1.10) ne joint toujours pas PC2 (192.168.2.30). Que manque-t-il le plus probablement ?",
       "choix": [
-        "La passerelle par défaut sur les PC (l’adresse du routeur dans leur réseau)",
-        "Un deuxième switch",
-        "Un abonnement Internet"
+        "La passerelle des PC (l’adresse du routeur dans leur réseau)",
+        "Un deuxième switch, un pour chaque côté du routeur",
+        "Un abonnement Internet pour que le routeur fonctionne"
       ],
       "bonne": 0,
       "pourquoi": "Sans passerelle, PC0 a un message pour une autre rue et personne à qui le confier. Il faut régler 192.168.1.1 sur PC0, et 192.168.2.1 sur PC2 pour la réponse."
@@ -1779,7 +1780,7 @@
       "niveau": 3,
       "q": "Un collègue règle comme passerelle de son PC l’adresse publique de la box (par exemple 86.245.12.40). Que se passe-t-il ?",
       "choix": [
-        "Il ne sort plus du réseau : cette adresse n’est pas dans son réseau, il ne peut pas l’atteindre",
+        "Il ne sort plus : cette adresse est hors de son réseau, il ne peut pas l’atteindre",
         "Ça marche mieux, car l’adresse publique va directement sur Internet",
         "Rien ne change : la box a les deux adresses, peu importe laquelle on met"
       ],
@@ -1803,9 +1804,9 @@
       "niveau": 3,
       "q": "PC0 a sa passerelle, PC2 (dans l’autre réseau) n’en a pas. Ping de PC0 vers PC2 : que se passe-t-il ?",
       "choix": [
-        "Le ping arrive à PC2, mais sa réponse est abandonnée : Request timed out",
-        "Le ping n’arrive jamais à PC2, le routeur le bloque",
-        "Le ping marche : une seule passerelle suffit"
+        "Le ping arrive à PC2, mais sa réponse se perd : Request timed out",
+        "Le ping n’arrive jamais à PC2 : le routeur le bloque en route, faute de passerelle",
+        "Le ping marche : une seule passerelle suffit pour l’aller-retour"
       ],
       "bonne": 0,
       "pourquoi": "Recevoir ne demande pas de passerelle : le routeur livre PC2. Mais PC2 doit répondre à un autre réseau, et sans passerelle il ne sait pas à qui confier sa réponse."
@@ -1846,9 +1847,9 @@
       "niveau": 2,
       "q": "Pour relier 192.168.1.0/24 et 192.168.2.0/24, quelqu’un branche les deux switchs sur deux prises d’une box. Pourquoi ça ne marche pas ?",
       "choix": [
-        "Les prises de la box sont un switch intégré : tout reste dans un seul réseau",
-        "Il faut des câbles croisés",
-        "Une box ne sait faire que du Wi-Fi"
+        "Les prises de la box sont un switch : tout reste dans un seul réseau",
+        "Il faut des câbles croisés entre les switchs et la box",
+        "Une box ne sait faire que du Wi-Fi, pas relier des switchs"
       ],
       "bonne": 0,
       "pourquoi": "Une box = routeur + switch + Wi-Fi ; ses prises sont le switch. Pour deux réseaux, il faut un routeur avec une interface (une adresse) dans chacun."
@@ -1908,9 +1909,9 @@
       "niveau": 2,
       "q": "Docker est-il un hyperviseur ?",
       "choix": [
-        "Non : il fait tourner des conteneurs, qui partagent le noyau du système hôte",
-        "Oui, de type 2",
-        "Oui, de type 1"
+        "Non : il fait tourner des conteneurs, qui partagent le noyau de l’hôte",
+        "Oui, de type 2 : il s’installe comme une appli dans Windows",
+        "Oui, de type 1 : il prend directement le matériel du serveur"
       ],
       "bonne": 0,
       "pourquoi": "Une VM a son propre système complet (un appartement avec sa cuisine). Un conteneur partage le noyau de l’hôte (une chambre en colocation) : plus léger, moins isolé."
@@ -1935,9 +1936,9 @@
       "niveau": 1,
       "q": "Premier ping de la journée vers un autre PC : « Request timed out », puis 3 réponses. Pourquoi le premier est-il perdu ?",
       "choix": [
-        "Le PC posait d’abord la question ARP (« qui est… ? ») pour trouver l’adresse matérielle",
-        "Le câble mettait du temps à chauffer",
-        "Le switch était en panne puis a redémarré"
+        "Le PC demandait d’abord, par ARP, l’adresse matérielle du voisin",
+        "Le câble mettait du temps à chauffer avant de transmettre",
+        "Le switch était en panne au début, puis il a redémarré"
       ],
       "bonne": 0,
       "pourquoi": "La première fois, il faut trouver l’adresse MAC du destinataire (ou de la passerelle) avec l’ARP. Ensuite, elle est en mémoire : les pings suivants passent directement."
@@ -1958,8 +1959,8 @@
       "q": "Face à une suite de nombres dans un test de logique, quel est le premier réflexe ?",
       "choix": [
         "Calculer les écarts entre deux nombres qui se suivent",
-        "Chercher si ce sont des nombres premiers",
-        "Additionner tous les nombres",
+        "Chercher d'abord si ce sont des nombres premiers",
+        "Additionner tous les nombres de la suite",
         "Deviner le plus vite possible"
       ],
       "bonne": 0,
@@ -1988,10 +1989,10 @@
       "niveau": 3,
       "q": "Deux PC sur le même switch : 192.168.10.5/24 et 192.168.11.5/24, aucune passerelle. Le ping échoue. Qui bloque ?",
       "choix": [
-        "Le PC qui envoie : son masque dit « autre réseau » et il n’a pas de passerelle, il jette le paquet",
-        "Le switch : il voit que les parties réseau sont différentes",
-        "Le second PC : son adresse est mal configurée",
-        "Le routeur de la box"
+        "Le PC qui envoie : son masque dit « autre réseau », sans passerelle il jette le paquet",
+        "Le switch : il voit que les parties réseau sont différentes et filtre",
+        "Le second PC : son adresse est mal configurée, il refuse le ping",
+        "Le routeur de la box, qui bloque les échanges entre deux réseaux"
       ],
       "bonne": 0,
       "pourquoi": "Packet Tracer le dit : « The default gateway is not set. The device drops the packet. » Le paquet ne quitte même pas le PC. Le switch ne lit pas les adresses IP."
@@ -2017,7 +2018,7 @@
       "q": "Quelle adresse le switch lit-il pour livrer un paquet ?",
       "choix": [
         "L’adresse MAC de destination",
-        "L’adresse IP de destination",
+        "L’adresse IP de destination du paquet",
         "Le masque",
         "L’adresse de la passerelle"
       ],
@@ -2055,10 +2056,10 @@
       "niveau": 3,
       "q": "Le Wi-Fi d’un magasin n’accepte que les adresses MAC des tablettes. Pourquoi est-ce une protection faible ?",
       "choix": [
-        "Les MAC circulent en clair : on peut en écouter une, puis l’usurper sur son téléphone",
-        "Parce qu’une tablette n’a pas d’adresse MAC",
-        "Parce que le switch ne lit pas les MAC",
-        "Ce n’est pas faible : une MAC ne se modifie jamais"
+        "Les MAC circulent en clair : on en écoute une, puis on l’usurpe",
+        "Parce qu’une tablette n’a pas d’adresse MAC à elle",
+        "Parce que le switch ne lit jamais les adresses MAC",
+        "Ce n’est pas faible : une MAC ne peut jamais se modifier"
       ],
       "bonne": 0,
       "pourquoi": "Une MAC se change par logiciel (usurpation, MAC spoofing). Le filtrage MAC n’est jamais une protection seule : il faut un vrai mot de passe Wi-Fi."
@@ -2096,9 +2097,9 @@
       "niveau": 3,
       "q": "Ton ping vers un serveur répond, mais le site qu’il héberge ne s’affiche pas. C’est possible ?",
       "choix": [
-        "Oui : la machine est joignable, mais le service du port 443 est arrêté ou bloqué",
-        "Non : si le ping répond, le site marche forcément",
-        "Non : le ping utilise le port 443"
+        "Oui : la machine répond, mais le service web (443) est arrêté ou bloqué",
+        "Non : si le ping répond, le site marche forcément aussi",
+        "Non : le ping passe par le port 443, comme le site web"
       ],
       "bonne": 0,
       "pourquoi": "Le ping prouve seulement que la machine est joignable. Le site est un service sur le port 443 : il peut être planté ou bloqué par un pare-feu."
@@ -2120,9 +2121,9 @@
       "niveau": 2,
       "q": "Aucune réponse au ping. Ton collègue dit : « Le serveur est éteint. » A-t-il forcément raison ?",
       "choix": [
-        "Non : un pare-feu peut bloquer ICMP, ou la passerelle du serveur peut manquer",
-        "Oui, sinon il répondrait",
-        "Oui, sauf si son adresse MAC est bloquée"
+        "Non : un pare-feu peut bloquer ICMP, ou sa passerelle manquer",
+        "Oui : un serveur allumé répond toujours au ping",
+        "Oui, sauf si son adresse MAC est bloquée sur le switch"
       ],
       "bonne": 0,
       "pourquoi": "Beaucoup de serveurs refusent le ping par prudence. Une passerelle manquante empêche aussi la réponse. La MAC n’y est pour rien : elle ne sort pas de ton réseau."
@@ -2198,7 +2199,7 @@
       "q": "Le « 200 OK » d’un site répond à quoi ?",
       "choix": [
         "À la demande GET du navigateur",
-        "À la connexion au port 443",
+        "À la connexion au port 443, ouverte juste avant",
         "À la question DNS"
       ],
       "bonne": 0,
@@ -2210,10 +2211,10 @@
       "niveau": 2,
       "q": "À quoi sert SSH (port 22) ?",
       "choix": [
-        "Se connecter à distance au terminal d’une machine, avec une conversation chiffrée",
-        "Traduire un nom de domaine en adresse IP",
-        "Afficher une page web chiffrée",
-        "Envoyer un mail"
+        "Se connecter au terminal d’une machine à distance, en chiffré",
+        "Traduire un nom de domaine en adresse IP, comme un annuaire du réseau",
+        "Afficher une page web chiffrée dans le navigateur",
+        "Envoyer et recevoir des mails entre deux serveurs"
       ],
       "bonne": 0,
       "pourquoi": "SSH = Secure Shell (1995, Tatu Ylönen), qui a remplacé Telnet, où tout passait en clair. Le DNS, c’est le port 53."
@@ -2236,8 +2237,8 @@
       "niveau": 3,
       "q": "Les soldes arrivent : il faut lancer 10 copies du site web de l’entreprise en quelques secondes. VM ou conteneur ?",
       "choix": [
-        "Des conteneurs : une appli emballée, légère, qui démarre en secondes",
-        "Des VM : chacune son OS complet"
+        "Des conteneurs : légers, ils démarrent en quelques secondes",
+        "Des VM : chacune a son OS complet, donc c'est plus sûr et mieux isolé"
       ],
       "bonne": 0,
       "pourquoi": "10 VM = 10 systèmes complets en mémoire. 10 conteneurs partagent le système du serveur."
@@ -2248,9 +2249,9 @@
       "niveau": 2,
       "q": "Pourquoi 50 conteneurs tiennent-ils sur un serveur qui ne supporterait que 5 VM ?",
       "choix": [
-        "Chaque VM transporte un OS entier ; les conteneurs partagent celui du serveur",
-        "Les conteneurs contiennent des VM plus petites",
-        "Les VM n’utilisent pas l’hyperviseur"
+        "Chaque VM porte un OS entier ; les conteneurs partagent celui du serveur",
+        "Les conteneurs contiennent des VM plus petites et plus légères",
+        "Les VM n’utilisent pas l’hyperviseur : chacune prend tout le matériel pour elle seule"
       ],
       "bonne": 0,
       "pourquoi": "C’est l’OS complet de chaque VM qui coûte cher. Et un conteneur ne contient pas de VM : c’est plutôt l’inverse qui arrive."
@@ -2261,8 +2262,8 @@
       "niveau": 2,
       "q": "Hyper-V, l’hyperviseur de Microsoft qu’on active dans Windows, est de…",
       "choix": [
-        "Type 1 : une fois activé, il prend le matériel et Windows tourne au-dessus de lui",
-        "Type 2 : c’est une application de Windows"
+        "Type 1 : une fois activé, il prend le matériel et Windows passe dessus",
+        "Type 2 : c’est une application qu’on lance dans Windows, comme VirtualBox"
       ],
       "bonne": 0,
       "pourquoi": "C’est le cas particulier : on l’active depuis Windows, mais il se glisse sous Windows."
@@ -2273,9 +2274,9 @@
       "niveau": 2,
       "q": "Proxmox (au programme de l’AIS), c’est…",
       "choix": [
-        "Un hyperviseur de type 1, basé sur Linux, installé directement sur le serveur",
-        "Un hyperviseur de type 2 qu’on installe dans Windows",
-        "Un conteneur"
+        "Un hyperviseur de type 1, basé sur Linux, installé sur le serveur",
+        "Un hyperviseur de type 2 qu’on installe comme une appli dans Windows",
+        "Un conteneur qui fait tourner des applications sur un serveur Linux"
       ],
       "bonne": 0,
       "pourquoi": "Proxmox est gratuit et open source, basé sur Debian, très utilisé dans les PME. VirtualBox est de type 2, ESXi (de VMware) de type 1."
@@ -2373,7 +2374,7 @@
       "q": "The server answers « 404 Not Found ». What does it mean?",
       "choix": [
         "The page does not exist on the server",
-        "You are not allowed to see the page",
+        "You are not allowed to see the page, even if it exists",
         "The server crashed",
         "The page was found"
       ],
@@ -2415,7 +2416,7 @@
       "q": "Which address does a switch read to deliver a frame?",
       "choix": [
         "The destination MAC address",
-        "The destination IP address",
+        "The destination IP address of the packet",
         "The subnet mask",
         "The default gateway"
       ],
@@ -2445,9 +2446,9 @@
       "q": "In a technical document, « the software library » means…",
       "choix": [
         "la bibliothèque logicielle (du code réutilisable)",
-        "la librairie du logiciel",
-        "la licence du logiciel",
-        "le magasin d'applications"
+        "la librairie qui vend le logiciel en magasin",
+        "la licence qui autorise l'usage du logiciel",
+        "le magasin d'applications du système"
       ],
       "bonne": 0,
       "pourquoi": "Faux ami : « library » = bibliothèque. Une librairie (où l'on achète des livres) se dit « bookshop »."
@@ -2729,9 +2730,9 @@
       "q": "What does the server say?",
       "choix": [
         "The page exists, but you are not allowed to see it",
-        "The page does not exist",
-        "The server crashed",
-        "The connection is not encrypted"
+        "The page does not exist on this server anymore",
+        "The server crashed while reading your request",
+        "The connection is not encrypted, so it was refused"
       ],
       "bonne": 0,
       "pourquoi": "403 Forbidden = interdit : la ressource existe, l'accès est refusé. 404 = introuvable. 500 = le serveur a planté."
@@ -2745,9 +2746,9 @@
       "q": "What is most likely happening?",
       "choix": [
         "Someone is trying to guess the admin password (brute force)",
-        "The admin forgot to pay the Internet bill",
-        "The server is being updated",
-        "A user logged in successfully"
+        "The admin forgot to pay the Internet bill this month",
+        "The server is being updated and restarts several times",
+        "A user logged in successfully after a few typing errors"
       ],
       "bonne": 0,
       "pourquoi": "Beaucoup d'échecs en peu de temps sur un même compte = une attaque par force brute (brute force) : on essaie des mots de passe à la chaîne. Le compte a été verrouillé (locked) pour la bloquer."
@@ -2761,9 +2762,9 @@
       "q": "According to this documentation, what does /all add?",
       "choix": [
         "More details, such as the MAC address and the DNS servers",
-        "It pings every machine on the network",
-        "It resets the network configuration",
-        "It shows only the IP address"
+        "It pings every machine on the local network, one by one, to list them",
+        "It resets the whole network configuration of the PC",
+        "It shows only the IP address, without the other settings"
       ],
       "bonne": 0,
       "pourquoi": "Full configuration = la configuration complète : en plus de l'IP, du masque et de la passerelle, l'adresse MAC (physical address) et les serveurs DNS."
@@ -2777,9 +2778,9 @@
       "q": "Who answers, and what does it mean?",
       "choix": [
         "The router 192.168.1.1 answers: it cannot reach the destination",
-        "10.20.0.8 answers: it is busy",
-        "Nobody answers at all",
-        "The DNS cannot find the name"
+        "10.20.0.8 answers: it is too busy to reply right now",
+        "Nobody answers at all: the request is simply lost",
+        "The DNS answers: it cannot find the name you typed"
       ],
       "bonne": 0,
       "pourquoi": "Ici, c'est le routeur (192.168.1.1) qui répond : « je ne sais pas joindre cette machine ». Ce n'est pas un silence (timed out) : quelqu'un répond, mais pour dire que le chemin n'existe pas."
@@ -2790,9 +2791,9 @@
       "q": "Un switch de couche 2 se repère avec…",
       "choix": [
         "Les adresses MAC des machines branchées dessus",
-        "Le masque de sous-réseau",
-        "Les adresses IP",
-        "La passerelle par défaut"
+        "Le masque de sous-réseau de chaque machine",
+        "Les adresses IP des machines du réseau",
+        "La passerelle par défaut configurée sur les PC"
       ],
       "bonne": 0,
       "pourquoi": "Couche 2 = MAC. Le masque, c'est le PC qui s'en sert pour décider ; le switch, lui, livre à la bonne prise."
@@ -2803,9 +2804,9 @@
       "q": "La compta est en 192.168.1.0/24, l'entrepôt en 192.168.2.0/24. Le patron veut les brancher tous sur un switch classique (couche 2). Ça suffit ?",
       "choix": [
         "Non : il faut un appareil qui route (switch couche 3 ou routeur)",
-        "Oui : un switch relie tous les appareils",
-        "Oui, si on change le masque du switch",
-        "Non : il faut un modem"
+        "Oui : un switch relie tous les appareils, quel que soit le réseau",
+        "Oui, à condition de changer le masque du switch",
+        "Non : il faut ajouter un modem entre les deux"
       ],
       "bonne": 0,
       "pourquoi": "Deux réseaux différents = il faut router. Le switch couche 3 (ou le routeur) a une adresse dans chaque réseau : c'est lui, la passerelle de chaque PC."
@@ -2829,9 +2830,9 @@
       "q": "Dans une entreprise, quel appareil met-on à la SORTIE, entre l'entreprise et Internet ?",
       "choix": [
         "Le routeur (NAT, liaison avec l'opérateur)",
-        "Le switch couche 3",
-        "Le switch couche 2",
-        "La borne Wi-Fi"
+        "Le switch couche 3, qui route entre les services",
+        "Le switch couche 2, qui relie toutes les machines",
+        "La borne Wi-Fi, qui fait le lien sans câble"
       ],
       "bonne": 0,
       "pourquoi": "Le switch couche 3 relie les services à l'intérieur (beaucoup de prises, très rapide). Le routeur est à la sortie : NAT, opérateur, souvent pare-feu et VPN."
@@ -2856,7 +2857,7 @@
       "q": "Le 3ᵉ message de la poignée de main, le PC envoie…",
       "choix": [
         "ACK : « oui, je t'entends »",
-        "SYN : « tu m'entends ? »",
+        "SYN : « tu m'entends ? », pour ouvrir la connexion",
         "SYN-ACK",
         "Le GET"
       ],
@@ -2893,9 +2894,9 @@
       "q": "Le serveur répond à ton SYN. Que veut dire son SYN-ACK ?",
       "choix": [
         "« Oui, je t'entends. Et toi, tu m'entends ? »",
-        "« Voici la page »",
-        "« Je te donne ton numéro de port »",
-        "« Au revoir »"
+        "« Voici la page que tu m'as demandée »",
+        "« Je te donne ton numéro de port client »",
+        "« J'ai fini, au revoir et à bientôt »"
       ],
       "bonne": 0,
       "pourquoi": "ACK = le oui, SYN = sa propre question. C'est pour ça qu'il y a les deux mots dans un seul message."
@@ -3072,7 +3073,7 @@
         "Le SYN est parti, le SYN-ACK n'est jamais revenu",
         "Le DNS n'a pas trouvé l'adresse",
         "Le serveur a répondu 404",
-        "Le GET est parti, mais la réponse s'est perdue"
+        "Le GET est parti, mais la réponse du serveur s'est perdue en route"
       ],
       "bonne": 0,
       "pourquoi": "« Failed to connect » = la poignée de main n'a pas abouti : pas de connexion, donc pas de GET. Le DNS, lui, avait marché (curl connaissait l'adresse)."
@@ -3082,10 +3083,10 @@
       "paire": "codes",
       "q": "curl -I http://picard.fr affiche « HTTP/1.1 301 Moved Permanently » et « location: https://www.picard.fr/ ». Ça veut dire…",
       "choix": [
-        "Redirection : ce que tu cherches est ailleurs, à l'adresse indiquée",
-        "Le site n'existe pas",
-        "Le DNS a échoué",
-        "Succès : voici la page"
+        "Redirection : ce que tu cherches est à l'adresse indiquée",
+        "Le site n'existe plus : il a été supprimé pour de bon",
+        "Le DNS a échoué : le nom ne donne plus d'adresse",
+        "Succès : la page arrive juste en dessous"
       ],
       "bonne": 0,
       "pourquoi": "3xx = redirection. Ici, le DNS et la connexion ont marché : c'est le serveur qui répond « va voir ailleurs ». Le navigateur le suit tout seul, sans que tu le voies."
@@ -3135,9 +3136,9 @@
       "paire": "resolveur-autorite",
       "q": "La racine du DNS connaît-elle l'adresse IP de picard.fr ?",
       "choix": [
-        "Non : elle sait seulement qui interroger ensuite (les serveurs du .fr)",
-        "Oui : elle connaît toutes les adresses du monde",
-        "Oui, mais seulement pour les sites en .fr",
+        "Non : elle sait seulement qui interroger ensuite (le .fr)",
+        "Oui : elle connaît toutes les adresses du monde entier, c'est son rôle",
+        "Oui, mais seulement pour les sites qui finissent en .fr",
         "Non : c'est la box qui la connaît depuis le départ"
       ],
       "bonne": 0,
@@ -3159,9 +3160,9 @@
       "q": "Pourquoi SSH a-t-il remplacé Telnet ?",
       "choix": [
         "Telnet envoie tout en clair, mots de passe compris ; SSH chiffre",
-        "Telnet est trop lent",
-        "SSH marche sans réseau",
-        "Telnet ne marche que sous Windows"
+        "Telnet est trop lent pour les réseaux d'aujourd'hui",
+        "SSH marche même quand le réseau est coupé",
+        "Telnet ne marche que sous Windows, SSH partout"
       ],
       "bonne": 0,
       "pourquoi": "En 1995, Tatu Ylönen écrit SSH après une attaque où des mots de passe avaient été interceptés sur le réseau de son université."
@@ -3196,9 +3197,9 @@
       "paire": "domaine-www",
       "q": "Pour le DNS, picard.fr et www.picard.fr, c'est…",
       "choix": [
-        "Deux noms différents, chacun avec sa propre entrée (parfois une autre adresse)",
-        "Le même nom : www est une décoration",
-        "Forcément le même serveur",
+        "Deux noms distincts, chacun avec sa propre entrée",
+        "Le même nom : le www est juste une décoration en plus",
+        "Forcément le même serveur, avec la même adresse",
         "www.picard.fr est l'adresse IP de picard.fr"
       ],
       "bonne": 0,
@@ -3230,10 +3231,10 @@
       "paire": "route-dns",
       "q": "La passerelle répond au ping, mais ping 8.8.8.8 → « Request timed out » 4 fois. Où est la panne ?",
       "choix": [
-        "Au-delà de la box (box ou fournisseur d'accès) : étage du réseau",
-        "Le DNS",
-        "Le serveur de Picard",
-        "La case passerelle du PC"
+        "Au-delà de la box (box ou opérateur) : étage du réseau",
+        "Le DNS : il ne traduit plus les noms en adresses, donc plus rien ne passe",
+        "Le serveur de Picard, qui ne répond plus à personne",
+        "La case passerelle du PC, qui est mal remplie"
       ],
       "bonne": 0,
       "pourquoi": "On vise une IP : le DNS n'intervient pas. La passerelle répond, donc tout va bien jusqu'à la box ; c'est la sortie vers Internet qui est coupée (mission 2 du 14/11)."
@@ -3276,10 +3277,10 @@
       "paire": "route-dns",
       "q": "Quand ping picard.fr est-il un bon test ?",
       "choix": [
-        "Pour PROUVER une réparation : s'il réussit, la config, la route et le DNS marchent",
-        "Pour trouver l'étage en panne",
-        "Pour tester le DNS seul",
-        "Jamais"
+        "Pour PROUVER une réparation : config, route et DNS marchent",
+        "Pour trouver l'étage en panne, dès le tout début du dépannage, avant le reste",
+        "Pour tester le DNS seul, sans rien d'autre autour",
+        "Jamais : un ping ne prouve rien sur un site web"
       ],
       "bonne": 0,
       "pourquoi": "Un succès prouve tout ce qu'il traverse. Seul un échec est ambigu : pour diagnostiquer, un étage à la fois."
@@ -3291,9 +3292,9 @@
       "q": "ping to the default gateway works, but ping 8.8.8.8 fails. Where is the problem?",
       "choix": [
         "Beyond the router: the Internet connection (ISP)",
-        "The DNS resolver",
-        "The PC's network cable",
-        "The web server"
+        "The DNS resolver, which cannot translate the names",
+        "The PC's network cable, which is unplugged or broken",
+        "The web server, which is down for maintenance"
       ],
       "bonne": 0,
       "pourquoi": "The gateway answers, so the local network is fine. 8.8.8.8 is an IP address: DNS is not involved."
@@ -3354,10 +3355,10 @@
       "paire": "case-passerelle-dns",
       "q": "nslookup picard.fr 8.8.8.8 donne l'adresse. Le problème est-il réglé ?",
       "choix": [
-        "Non : on l'a contourné ; il faut corriger la case DNS Servers",
-        "Oui, définitivement",
-        "Oui, après un redémarrage",
-        "Non, il faut changer la passerelle"
+        "Non : contourné ; il faut corriger la case DNS Servers",
+        "Oui, définitivement : le DNS marche de nouveau",
+        "Oui, mais seulement après un redémarrage du PC",
+        "Non : il faut changer la passerelle du PC"
       ],
       "bonne": 0,
       "pourquoi": "Contourner ≠ réparer. On répare dans la configuration, puis on le prouve avec nslookup tout court et ping picard.fr."
@@ -3383,9 +3384,9 @@
       "q": "8.8.8.8 et ns1.iptwins.net (pour picard.fr), c'est…",
       "choix": [
         "Un résolveur et un serveur qui fait autorité",
-        "Deux résolveurs",
-        "Deux serveurs qui font autorité",
-        "Une passerelle et un résolveur"
+        "Deux résolveurs, comme celui de la box",
+        "Deux serveurs qui font autorité pour picard.fr",
+        "Une passerelle et un résolveur, dans cet ordre"
       ],
       "bonne": 0,
       "pourquoi": "8.8.8.8 cherche pour toi (l'opérateur des renseignements) ; ns1.iptwins.net détient la réponse officielle (l'annuaire)."
@@ -3461,10 +3462,10 @@
       "paire": "moindre-privilege",
       "q": "Ta collègue travaille en compte admin et ouvre une pièce jointe piégée. Qu'est-ce que ça change ?",
       "choix": [
-        "Le programme reçoit ses droits d'admin : il peut modifier le système (le DNS par exemple)",
-        "Rien : l'antivirus bloque tout",
-        "Le programme peut seulement lire ses fichiers",
-        "L'attaquant doit d'abord voler son mot de passe"
+        "Le programme a ses droits d'admin : il peut modifier le système",
+        "Rien : l'antivirus bloque tout ce qui arrive par mail",
+        "Le programme peut seulement lire ses fichiers à elle",
+        "L'attaquant doit d'abord voler son mot de passe admin"
       ],
       "bonne": 0,
       "pourquoi": "Un programme tourne avec les droits de celui qui l'ouvre. En compte standard, Windows aurait exigé un mot de passe administrateur (UAC)."
@@ -3487,10 +3488,10 @@
       "paire": "ssh-telnet",
       "q": "Tu tapes un mot de passe pour te connecter à distance. Avec Telnet au lieu de SSH, quel risque ?",
       "choix": [
-        "Le mot de passe passe en clair : quelqu'un qui écoute le réseau le lit",
-        "Aucun",
-        "La connexion est plus lente",
-        "Telnet refuse les mots de passe"
+        "Le mot de passe passe en clair : qui écoute le réseau le lit",
+        "Aucun : Telnet et SSH protègent pareil le mot de passe",
+        "La connexion est plus lente, mais tout aussi sûre",
+        "Telnet refuse les mots de passe, il faut une clé"
       ],
       "bonne": 0,
       "pourquoi": "Relier ce qu'on sait à ce qu'on voit : SSH chiffre (on dit « chiffré », pas « crypté »), Telnet non."
@@ -3502,9 +3503,9 @@
       "q": "What is the principle of least privilege?",
       "choix": [
         "Give users only the permissions they need for their job",
-        "Give every user admin rights",
-        "Use the shortest possible password",
-        "Log in as root to save time"
+        "Give every user admin rights so nobody is ever blocked",
+        "Use the shortest possible password that is easy to remember",
+        "Log in as root every day to save time"
       ],
       "bonne": 0,
       "pourquoi": "Least privilege = moindre privilège."
