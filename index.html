@@ -61,6 +61,10 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .chip { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: .85rem; font-weight: 500; font-variant-numeric: tabular-nums; }
 .chip.flame b { color: var(--flame); }
 .chip b { font-weight: 600; }
+.chip.niv { display: inline-flex; align-items: center; gap: 6px; }
+.chip.niv.up { border-color: var(--flame); }
+.nivbar { display: inline-block; width: 46px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.nivbar i { display: block; height: 100%; background: var(--flame); border-radius: 3px; }
 
 .tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 4px; }
 .tabs button { border: 0; background: none; border-radius: 9px; padding: 9px; font-weight: 500; color: var(--muted); }
@@ -313,10 +317,22 @@ function serieVisible() {
   return etat.dernierJour >= plusJours(-1) ? etat.serie : 0;
 }
 
+// Niveaux du Mémo (15/11/2026) : calculés sur l'XP gardée dans le téléphone ; il en faut de plus en plus pour monter.
+const SEUIL_MEMO = n => 40 * n * n * (n - 1);   // niveau 2 à 160 XP, 5 à 4 000, 7 à 11 760, 10 à 36 000
+const TITRES_MEMO = [[1, "Débutant"], [3, "Habitué"], [5, "Assidu"], [7, "Tenace"], [10, "Mémoire d'acier"], [13, "Encyclopédie réseau"], [16, "Légende du Mémo"]];
+function niveauMemo(xp) {
+  let n = 1; while (xp >= SEUIL_MEMO(n + 1)) n++;
+  const bas = SEUIL_MEMO(n), haut = SEUIL_MEMO(n + 1);
+  return { n, titre: TITRES_MEMO.filter(t => n >= t[0]).pop()[1], pct: Math.round(100 * (xp - bas) / (haut - bas)), reste: haut - xp };
+}
 function chips() {
   const maitrisees = D.questions.filter(q => carte(q.id).boite >= 4).length;
+  const nv = niveauMemo(etat.xp);
+  const monte = etat.niveauVu && nv.n > etat.niveauVu;   // un niveau gagné depuis le dernier affichage : on le fête une fois
+  if (etat.niveauVu !== nv.n) { etat.niveauVu = nv.n; sauver(); }
   document.getElementById("chips").innerHTML =
-    `<span class="chip flame">Série <b>${serieVisible()} j</b></span>
+    `<span class="chip niv${monte ? " up" : ""}" title="${nv.reste} XP avant le niveau ${nv.n + 1}">${monte ? "Niveau gagné ! " : ""}Niv. <b>${nv.n}</b> · ${nv.titre}<i class="nivbar"><i style="width:${nv.pct}%"></i></i></span>
+     <span class="chip flame">Série <b>${serieVisible()} j</b></span>
      <span class="chip"><b>${etat.xp}</b> XP</span>
      <span class="chip"><b>${maitrisees}</b>/${D.questions.length} sues</span>`;
 }
