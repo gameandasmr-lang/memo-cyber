@@ -1,6 +1,6 @@
 {
   "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question est liée à une paire et a un format (champ type, qcm par défaut) : qcm (choix, bonne), saisie (reponses acceptées), ordre (etapes dans le bon ordre), erreur (texte en morceaux, faux = indice du morceau faux), associer (couples), generateur (gen = nom d’un générateur de l’appli ; pour suite-logique et suite-lettres, le niveau donne la difficulté de 1 à 3), explique (modele), terminal (invite, reponses acceptées, sortie affichée après la réponse ; casse: true = les majuscules comptent, comme sous Linux). Champ en (dans chaque mot d'une paire) : le terme anglais, affiché dans le lexique et utilisé par le générateur vocab-en. Champ extrait (question) : un court texte technique (sortie de commande, message d'erreur, doc, alerte) affiché avant la question. Champ lang = \"en\" (question) : question posée en anglais, avec une pastille English. Champ niveau facultatif : 1 reconnaître, 2 retrouver seul, 3 appliquer ; sans niveau, le format le donne (qcm, associer = 1 ; saisie, ordre, erreur, terminal, generateur = 2 ; explique = 3). Échelle de formats : une question jamais vue d'un niveau supérieur reste verrouillée tant que la moitié des questions des niveaux en dessous, dans la même paire, n'est pas en boîte 2 ou plus. Les choix des QCM sont mélangés par l’appli : l’ordre dans ce fichier n’a pas d’importance. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id. Tableau entretien : les questions du mode entretien oral (id, partie, q, points clés à cocher, modele, duree visée en secondes, lang facultatif), jamais dans les révisions du jour.",
-  "maj": "2026-11-14",
+  "maj": "2026-11-15",
   "paires": [
     {
       "id": "http-html",
@@ -821,6 +821,56 @@
         }
       ],
       "piege": "Un programme tourne avec les droits de celui qui l'ouvre. Même l'administrateur a deux comptes : un normal au quotidien, un admin pour l'administration."
+    },
+    {
+      "id": "voyant-ip",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "Voyant rouge",
+          "en": "link light off / red",
+          "phrase": "Pas de lien physique entre les deux prises : câble débranché ou abîmé, mauvais câble, port désactivé, appareil éteint.",
+          "image": "La prise n'est pas branchée au courant."
+        },
+        {
+          "mot": "Mauvaise adresse IP",
+          "en": "wrong IP address",
+          "phrase": "Le lien reste VERT : c'est le PC qui, avec son masque, ne se croit plus dans le bon réseau.",
+          "image": "La lampe est branchée, mais l'adresse sur la lettre est fausse."
+        },
+        {
+          "mot": "Port désactivé",
+          "en": "shutdown port",
+          "phrase": "Une prise en bon état, éteinte par un réglage : le câble est bon, mais rien ne passe.",
+          "image": "L'interrupteur est sur « arrêt »."
+        }
+      ],
+      "piege": "Une mauvaise IP ne rend jamais un voyant rouge : le switch ne lit pas les adresses IP. Voyant rouge = étage physique."
+    },
+    {
+      "id": "temoin-reparer",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "PC témoin",
+          "en": "known-good PC",
+          "phrase": "Un poste du même réseau qui marche : tout ce qu'il partage avec le PC en panne fonctionne, donc on cherche la différence.",
+          "image": "La voisine a de la lumière : la panne n'est pas dans le quartier."
+        },
+        {
+          "mot": "Prouver une réparation",
+          "en": "verify the fix",
+          "phrase": "Remonter tous les étages jusqu'au geste de l'utilisateur : ouvrir le site par son NOM.",
+          "image": "On ne rend pas le vélo sans avoir fait un tour avec."
+        },
+        {
+          "mot": "Contourner",
+          "en": "workaround",
+          "phrase": "On obtient le résultat, mais la cause reste en place (taper l'IP au lieu du nom).",
+          "image": "Passer par la fenêtre parce que la clé est cassée."
+        }
+      ],
+      "piege": "Une panne peut en cacher une autre : un ping qui répond prouve les étages jusqu'à lui, jamais ceux du dessus."
     }
   ],
   "questions": [
@@ -3509,6 +3559,184 @@
       ],
       "bonne": 0,
       "pourquoi": "Least privilege = moindre privilège."
+    },
+    {
+      "id": "q186",
+      "paire": "voyant-ip",
+      "q": "Un collègue a tapé 10.0.0.5 au lieu de 192.168.1.10. Le voyant de son câble est…",
+      "choix": [
+        "Vert : le lien physique ne dépend pas de l'adresse IP",
+        "Rouge : le switch refuse les adresses d'un autre réseau",
+        "Orange : le switch attend que l'adresse soit corrigée",
+        "Rouge côté switch, vert côté PC : seul le PC est fautif"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le voyant montre seulement le lien entre les deux prises. Le switch ne lit pas les IP : c'est le PC qui, avec son masque, ne trouvera plus ses voisins."
+    },
+    {
+      "id": "q187",
+      "paire": "voyant-ip",
+      "type": "erreur",
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Le câble du PC est rouge aux deux bouts,",
+        "donc son adresse IP est sûrement mauvaise :",
+        "je vérifie le câble et le port du switch."
+      ],
+      "faux": 1,
+      "pourquoi": "Un voyant rouge, c'est l'étage physique (câble, prise, port désactivé, appareil). Une mauvaise IP laisse le voyant vert."
+    },
+    {
+      "id": "q188",
+      "paire": "voyant-ip",
+      "type": "saisie",
+      "q": "Le câble est bon, la prise du switch aussi, mais elle a été éteinte par un réglage. On dit que le port est… (un mot)",
+      "reponses": [
+        "désactivé",
+        "desactive",
+        "désactivée",
+        "shutdown",
+        "éteint"
+      ],
+      "pourquoi": "Un port désactivé (shutdown en anglais) : rien ne passe, le voyant reste rouge. On le rallume dans la configuration du switch."
+    },
+    {
+      "id": "q189",
+      "paire": "temoin-reparer",
+      "q": "PC-Voisin a Internet, PC-Collegue non (même switch, même box). Qu'en conclus-tu ?",
+      "choix": [
+        "Tout ce qu'ils partagent marche : la panne est propre au collègue",
+        "La box est en panne pour une partie des postes : on la redémarre",
+        "Le DNS de l'opérateur est en panne : on change celui des deux PC",
+        "Rien : un seul poste ne prouve rien, il faut tester tout le magasin"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le témoin passe par le même switch, la même box, le même opérateur, le même DNS. S'il marche, la panne est dans ce qui est propre au collègue : son câble, son port, ses réglages."
+    },
+    {
+      "id": "q190",
+      "paire": "temoin-reparer",
+      "type": "ordre",
+      "q": "Tu as réparé un PC. Remets les tests de preuve dans l'ordre.",
+      "etapes": [
+        "ping de la passerelle",
+        "ping 8.8.8.8",
+        "nslookup picard.fr",
+        "Ouvrir picard.fr dans le navigateur"
+      ],
+      "pourquoi": "On remonte les étages, l'IP avant le nom, et on finit par le geste de l'utilisateur. Une réparation peut en cacher une autre."
+    },
+    {
+      "id": "q191",
+      "paire": "temoin-reparer",
+      "q": "Le DNS du collègue est faux. Tu lui dis de taper 51.91.60.233 : la page s'ouvre. Tu as…",
+      "choix": [
+        "Contourné : la cause reste, ses autres sites par nom échoueront",
+        "Réparé : la page s'ouvre, c'est la preuve que tout marche",
+        "Réparé à moitié : il suffira de vider le cache du navigateur",
+        "Contourné, mais sans risque : les sites ne changent pas d'adresse"
+      ],
+      "bonne": 0,
+      "pourquoi": "Taper l'IP évite le DNS sans le réparer. Réparer = corriger le réglage DNS, puis prouver avec le nom."
+    },
+    {
+      "id": "q192",
+      "paire": "ip-mac",
+      "q": "Ton PC (192.168.1.10) écrit à 51.91.60.233 via la box. Entre le PC et la box, la MAC de destination est…",
+      "choix": [
+        "La MAC de la passerelle (la box, côté maison)",
+        "La MAC du serveur de Picard, donnée par le DNS",
+        "La MAC du switch, qui la remplace ensuite",
+        "Aucune : une MAC ne sert qu'entre deux PC du réseau"
+      ],
+      "bonne": 0,
+      "pourquoi": "L'IP dit où on va au bout (le serveur). La MAC dit à qui on remet l'enveloppe maintenant : la passerelle. C'est le PC qui l'écrit, le switch la lit."
+    },
+    {
+      "id": "q193",
+      "paire": "ip-mac",
+      "type": "erreur",
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Une adresse MAC ne quitte jamais le réseau local",
+        "parce que c'est une adresse privée ;",
+        "chaque routeur réécrit l'enveloppe avec la MAC du prochain appareil."
+      ],
+      "faux": 1,
+      "pourquoi": "Privé / public, c'est du vocabulaire d'adresse IP. La MAC ne sert que pour un saut : chaque routeur la remplace."
+    },
+    {
+      "id": "q194",
+      "paire": "ip-privee-publique",
+      "q": "Chez Picard, PC1 (192.168.1.10) et PC2 (192.168.2.20) sont reliés par un routeur, passerelles réglées. Le ping…",
+      "choix": [
+        "Marche : les adresses privées traversent les routeurs de l'entreprise",
+        "Échoue : une adresse privée ne traverse jamais un routeur sans NAT",
+        "Échoue : il faut pinguer l'adresse publique de la passerelle de PC2",
+        "Marche seulement si les deux PC sont branchés sur le même switch"
+      ],
+      "bonne": 0,
+      "pourquoi": "Seuls les routeurs d'Internet refusent les adresses privées (elles ne sont pas uniques au monde). Dans l'entreprise ou le labo, elles circulent à travers les routeurs."
+    },
+    {
+      "id": "q195",
+      "paire": "passerelle-faces",
+      "type": "erreur",
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Le routeur de ma box a deux adresses :",
+        "192.168.1.254 côté maison, c'est ma passerelle ;",
+        "pour sortir, la passerelle est transformée en adresse publique."
+      ],
+      "faux": 2,
+      "pourquoi": "Rien n'est transformé : l'adresse publique est une autre adresse, sur l'autre prise du routeur. Ce que le NAT remplace, c'est l'adresse privée de TON appareil."
+    },
+    {
+      "id": "q196",
+      "paire": "route-dns",
+      "type": "ordre",
+      "q": "« Plus d'Internet ». Remets les 4 étages du dépannage dans l'ordre.",
+      "etapes": [
+        "Regarder les voyants et les câbles",
+        "ipconfig /all",
+        "ping de la passerelle, puis ping 8.8.8.8",
+        "nslookup picard.fr"
+      ],
+      "pourquoi": "Physique, configuration, réseau, DNS. L'IP avant le nom : sinon un échec ne dit pas si c'est la route ou le DNS."
+    },
+    {
+      "id": "q197",
+      "paire": "route-dns",
+      "type": "erreur",
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Plus d'Internet : je pingue d'abord picard.fr,",
+        "puis la passerelle et 8.8.8.8,",
+        "et je finis par nslookup pour le DNS."
+      ],
+      "faux": 0,
+      "pourquoi": "Règle n° 1 : pour diagnostiquer, on pingue une IP. Pinguer un nom mélange deux étages (route et DNS)."
+    },
+    {
+      "id": "q198",
+      "paire": "ping-service",
+      "q": "Passerelle OK, 8.8.8.8 KO, et aucun PC du magasin n'a Internet. Que fais-tu ?",
+      "choix": [
+        "Prévenir le responsable, regarder la box, puis appeler l'opérateur",
+        "Changer le DNS de chaque PC pour 8.8.4.4, l'autre résolveur",
+        "Refaire la configuration IP du premier PC qui s'est plaint",
+        "Changer le câble du premier PC, puis tester les autres un à un"
+      ],
+      "bonne": 0,
+      "pourquoi": "Panne commune, au-delà de la box (étage réseau). On ne touche pas aux PC. Chez Picard, la box sert aussi les caisses : on prévient avant de redémarrer."
+    },
+    {
+      "id": "q199",
+      "paire": "box-routeur",
+      "type": "explique",
+      "q": "Explique le trajet de ta demande, de ton téléphone en Wi-Fi jusqu'au serveur de YouTube et retour, appareil par appareil, avec le rôle de chacun.",
+      "modele": "1) Le téléphone compare l'adresse de YouTube avec son masque : autre réseau, donc il envoie à sa passerelle. 2) Par ondes, à la borne Wi-Fi de la box, qui fait entrer la demande dans le réseau local. 3) Le routeur de la box remplace l'adresse privée du téléphone par l'adresse publique de la box (NAT) et l'envoie vers Internet. 4) Le modem traduit le signal pour la ligne (fibre ou cuivre) jusqu'à l'opérateur. 5) Les routeurs d'Internet la font suivre jusqu'au serveur de YouTube. 6) Le serveur répond par le chemin inverse ; la box remet l'adresse privée du téléphone.",
+      "pourquoi": "Claude relira ton texte dans le bilan. Le DNS se fait AVANT ce trajet : il donne seulement l'adresse, jamais la page."
     }
   ],
   "entretien": [
