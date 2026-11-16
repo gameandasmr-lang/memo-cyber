@@ -386,8 +386,8 @@
         },
         {
           "mot": "Modem",
-          "phrase": "Traduit le signal pour la ligne de l’opérateur (fibre, ADSL). Il ne décide rien.",
-          "image": "Le traducteur à la frontière : il fait passer le message dans la langue de la ligne.",
+          "phrase": "Convertit les données en signal pour la ligne de l’opérateur (lumière dans la fibre, électricité en ADSL). Il ne lit rien et ne décide rien.",
+          "image": "L’adaptateur de prise en voyage : il change la forme du courant, jamais ce que tu branches.",
           "en": "modem"
         }
       ],
@@ -896,6 +896,31 @@
         }
       ],
       "piege": "Une panne peut en cacher une autre : un ping qui répond prouve les étages jusqu'à lui, jamais ceux du dessus."
+    },
+    {
+      "id": "cloud-types",
+      "theme": "Virtualisation",
+      "items": [
+        {
+          "mot": "IaaS",
+          "phrase": "Tu loues des machines virtuelles : le fournisseur gère le matériel, toi le système et les logiciels.",
+          "image": "L’appartement vide : les murs sont fournis, les meubles c’est toi.",
+          "en": "Infrastructure as a Service"
+        },
+        {
+          "mot": "PaaS",
+          "phrase": "Tu apportes seulement ton code : le fournisseur gère le matériel et le système.",
+          "image": "La cuisine équipée : tu viens juste cuisiner ta recette.",
+          "en": "Platform as a Service"
+        },
+        {
+          "mot": "SaaS",
+          "phrase": "L’application est toute faite et gérée par le fournisseur : tu t’en sers (Gmail, Drive).",
+          "image": "Le restaurant : tu manges, tu ne cuisines pas.",
+          "en": "Software as a Service"
+        }
+      ],
+      "piege": "La seule question : qui gère le système ? IaaS = toi. PaaS et SaaS = le fournisseur. Et « cloud privé » = réservé à une seule organisation, pas « pour des données privées »."
     }
   ],
   "questions": [
@@ -3379,12 +3404,12 @@
       "paire": "case-passerelle-dns",
       "type": "terminal",
       "invite": "C:\\>",
-      "q": "Tu veux voir quel résolveur DNS ce PC interroge.",
+      "q": "Tu veux lire, dans la configuration du PC, quels serveurs DNS sont réglés (la ligne DNS Servers).",
       "reponses": [
         "ipconfig /all"
       ],
       "sortie": "   Default Gateway . . . . . . . . : 192.168.1.254\n   DNS Servers . . . . . . . . . . : 8.8.4.4",
-      "pourquoi": "ipconfig seul n'affiche pas la ligne DNS Servers : il faut /all. Le 14/11, c'est elle qui cachait la panne."
+      "pourquoi": "ipconfig seul n’affiche pas la ligne DNS Servers : il faut /all. nslookup montre aussi un résolveur (ligne « Serveur »), mais seulement celui qui a répondu, pas la configuration. Le 14/11, c’est la ligne DNS Servers qui cachait la panne."
     },
     {
       "id": "q173",
@@ -3966,6 +3991,117 @@
       ],
       "faux": 2,
       "pourquoi": "Deux noms = deux entrées DNS, qui peuvent donner deux adresses différentes : le 13/11, picard.fr donnait 51.91.60.233 et www.picard.fr une adresse Cloudflare."
+    },
+    {
+      "id": "q216",
+      "paire": "cloud-types",
+      "q": "Une PME veut garder son logiciel de comptabilité Windows, installé et réglé par elle, sans racheter de serveur. Quel cloud ?",
+      "choix": [
+        "IaaS : elle loue une VM et y gère elle-même Windows Server",
+        "PaaS : la plateforme est prête, elle y dépose son logiciel",
+        "SaaS : elle prend une comptabilité en ligne toute faite",
+        "Cloud privé : ses données comptables restent privées"
+      ],
+      "bonne": 0,
+      "pourquoi": "Garder son logiciel tel quel = avoir la main sur le système. Seul l’IaaS le permet. Le PaaS sert à déployer du code qu’on a écrit, sans voir le système (séance du 16/11)."
+    },
+    {
+      "id": "q217",
+      "paire": "cloud-types",
+      "type": "associer",
+      "q": "Relie chaque besoin au type de cloud.",
+      "couples": [
+        [
+          "Mettre en ligne mon site Python sans gérer de serveur",
+          "PaaS"
+        ],
+        [
+          "Une messagerie prête pour 15 salariés",
+          "SaaS"
+        ],
+        [
+          "3 machines Linux à configurer et casser",
+          "IaaS"
+        ]
+      ],
+      "pourquoi": "Qui gère le système ? Personne côté client en SaaS, le fournisseur en PaaS, le client en IaaS."
+    },
+    {
+      "id": "q218",
+      "paire": "cloud-types",
+      "type": "saisie",
+      "q": "En IaaS, qui installe et gère Windows Server : toi ou le fournisseur ? (un mot)",
+      "reponses": [
+        "toi",
+        "moi",
+        "le client",
+        "client",
+        "nous"
+      ],
+      "pourquoi": "En IaaS, le fournisseur gère seulement le matériel ; le système et les logiciels sont à toi."
+    },
+    {
+      "id": "q219",
+      "paire": "hyperviseurs",
+      "type": "erreur",
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Un hyperviseur de type 1",
+        "se reconnaît à ce que ses VM ont leur propre système,",
+        "alors qu’un type 2 tourne au-dessus de Windows."
+      ],
+      "faux": 1,
+      "pourquoi": "Toutes les VM ont leur propre système, type 1 comme type 2. Ce qui distingue le type 1, c’est ce qu’il y a dessous : rien, il est installé directement sur le matériel (séance du 16/11)."
+    },
+    {
+      "id": "q220",
+      "paire": "modem-routeur",
+      "type": "erreur",
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Le téléphone envoie la demande à la box,",
+        "le modem traduit la requête pour le fournisseur d’accès,",
+        "qui la fait entrer dans Internet."
+      ],
+      "faux": 1,
+      "pourquoi": "Le modem ne lit ni ne traduit aucune requête : il convertit les données en signal pour la ligne (lumière, électricité)."
+    },
+    {
+      "id": "q221",
+      "paire": "nat-sens",
+      "q": "La réponse de YouTube arrive à ta box. Qu’est-ce qui lui permet de retrouver ton téléphone ?",
+      "choix": [
+        "Le port de destination, cherché dans sa table NAT",
+        "L’adresse MAC du téléphone, écrite dans la réponse",
+        "L’adresse IP privée du téléphone, écrite dans la réponse",
+        "Le nom du téléphone, retrouvé par le DNS de la box"
+      ],
+      "bonne": 0,
+      "pourquoi": "La réponse ne porte que l’IP publique de la box et un port. YouTube n’a jamais vu ni la MAC ni l’IP privée du téléphone. La table NAT relie ce port à l’IP privée + port du téléphone."
+    },
+    {
+      "id": "q222",
+      "paire": "nat-sens",
+      "type": "ordre",
+      "q": "Ton téléphone ouvre YouTube. Remets les étapes dans l’ordre.",
+      "etapes": [
+        "Le DNS donne l’adresse IP de YouTube",
+        "Le téléphone compare cette IP à la sienne avec le masque",
+        "Pas le même réseau : il envoie à la MAC de la box",
+        "La box remplace l’IP source par son adresse publique",
+        "Le modem convertit les données en signal pour la ligne"
+      ],
+      "pourquoi": "Le DNS ne remplace pas la comparaison avec le masque, il la précède : il faut d’abord une adresse pour pouvoir comparer."
+    },
+    {
+      "id": "q223",
+      "paire": "route-dns",
+      "type": "saisie",
+      "q": "La passerelle répond, ping 8.8.8.8 échoue. Quel étage est en panne ? (0 physique, 1 passerelle, 2 route, 3 DNS, 4 service : un chiffre)",
+      "reponses": [
+        "2"
+      ],
+      "pourquoi": "Le premier étage qui échoue, c’est la panne : ici la route vers Internet. Le DNS et le service tombent avec lui."
     }
   ],
   "entretien": [
