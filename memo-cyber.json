@@ -391,7 +391,7 @@
           "en": "modem"
         }
       ],
-      "piege": "Pour aller sur YouTube, ce n’est pas « le modem » qui compte : le routeur décide que ça sort, le modem traduit. Dans la box, les deux sont réunis."
+      "piege": "Pour aller sur YouTube, ce n’est pas « le modem » qui compte : le PC voit que ce n’est pas dans son réseau et confie le message au routeur (sa passerelle), qui choisit le chemin ; le modem traduit. Dans la box, les deux sont réunis."
     },
     {
       "id": "adresse-masque",
@@ -1792,7 +1792,7 @@
         "L’opérateur et Internet",
         "Le serveur de YouTube"
       ],
-      "pourquoi": "La borne Wi-Fi est le switch sans fil (même rue) ; le routeur décide que ça sort ; le modem traduit pour la ligne."
+      "pourquoi": "La borne Wi-Fi est le switch sans fil (même rue) ; le téléphone a vu que YouTube n’est pas dans son réseau et confie la demande au routeur, sa passerelle, qui choisit le chemin ; le modem traduit pour la ligne."
     },
     {
       "id": "q70",
