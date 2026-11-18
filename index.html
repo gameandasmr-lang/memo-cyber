@@ -144,6 +144,13 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .prow { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 12px; align-items: center; font-size: .92rem; }
 .bar { height: 8px; background: var(--accent-soft); border-radius: 4px; overflow: hidden; }
 .bar i { display: block; height: 100%; background: var(--good); border-radius: 4px; }
+/* Paires à cocher pour le test ciblé (18/11/2026) : toute la ligne est un bouton. */
+.pchoix { width: 100%; text-align: left; background: none; border: 1px solid transparent; border-radius: 10px; padding: 6px 8px; }
+.pchoix[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.pchoix .bar { display: block; }
+.pchoix .coche { display: inline-block; width: 1.2em; color: var(--accent); font-weight: 700; }
+/* Numéro de la question (Q36…), pour pouvoir la signaler à Claude. */
+.qid { font-size: .75rem; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 /* Session */
 .progress { height: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
@@ -687,8 +694,11 @@ function accueil() {
     ${courbe()}
     <section class="card">
       <span class="label">Tes paires, de la plus fragile à la plus solide</span>
-      <div class="paires">${lignes.map(({ p, pct }) =>
-        `<div class="prow"><span>${esc(p.items.map(i => i.mot).join(" / "))}</span><div class="bar" aria-label="${pct} % maîtrisé"><i style="width:${pct}%"></i></div></div>`).join("")}</div>
+      <p class="note" style="text-align:left;margin:0">Touche une ou plusieurs paires pour faire un test seulement sur elles.</p>
+      <div class="paires">${lignes.map(({ p, pct }) => { const on = ciblees().includes(p.id);
+        return `<button class="prow pchoix" data-cible="${esc(p.id)}" aria-pressed="${on}"><span><span class="coche" aria-hidden="true">${on ? "✓" : ""}</span>${esc(p.items.map(i => i.mot).join(" / "))}</span><span class="bar" aria-label="${pct} % maîtrisé"><i style="width:${pct}%"></i></span></button>`; }).join("")}</div>
+      ${ciblees().length ? `<button class="big" id="go-cible" ${nbCiblees() ? "" : "disabled"}>Test sur ${ciblees().length} paire${ciblees().length > 1 ? "s" : ""} (${Math.min(taille(), nbCiblees())} questions)</button>
+      <button class="lien nsp" id="cible-vider">Tout décocher</button>` : ""}
     </section>
     ${carteEnvoi()}
     ${carteIdees()}`;
@@ -1351,16 +1361,22 @@ function preparer(q, retour) {
 }
 
 // Test aléatoire pondéré : une question de la boîte 0 a 6 fois plus de chances de sortir qu'une question de la boîte 5 (qui ne disparaît pas pour autant).
-function tirage(n, exclus = new Set()) {
-  return tirerPondere(ouvertes().filter(q => !exclus.has(q.id)).map(q => ({ q, w: 6 - carte(q.id).boite })), n);
+// paires (facultatif) : limite le tirage aux paires choisies (test ciblé).
+function tirage(n, exclus = new Set(), paires = null) {
+  return tirerPondere(ouvertes().filter(q => !exclus.has(q.id) && (!paires || paires.includes(q.paire))).map(q => ({ q, w: 6 - carte(q.id).boite })), n);
 }
+
+// Test ciblé (18/11/2026) : les paires cochées sur l'accueil, gardées d'une visite à l'autre ; on oublie celles qui n'existent plus.
+const ciblees = () => (etat.ciblees || []).filter(id => D.questions.some(q => q.paire === id));
+const nbCiblees = () => ouvertes().filter(q => ciblees().includes(q.paire)).length;
 
 const fragiles = exclus => aRevoir().filter(q => !exclus.has(q.id)).sort((a, b) => carte(a.id).boite - carte(b.id).boite || Math.random() - .5);
 
 // Session du jour : les questions dues (les plus fragiles d'abord), avec au moins RAPPELS_MIN() rappels ; s'il manque des dues, les rappels complètent la session.
+// bonus = "cible" : test aléatoire limité aux paires cochées.
 function demarrer(bonus) {
   let liste, nbRappels = 0;
-  if (bonus) liste = tirage(taille());
+  if (bonus) liste = tirage(taille(), new Set(), bonus === "cible" ? ciblees() : null);
   else {
     const dus = fragiles(new Set()), nonDus = nbNonDues();
     const nbDus = Math.min(dus.length, taille() - Math.min(RAPPELS_MIN(), nonDus));
@@ -1371,7 +1387,7 @@ function demarrer(bonus) {
   }
   const file = bonus ? liste.map(q => preparer(q)) : liste;
   session = { file, total: file.length, faites: 0, justes: 0, xp: 0, ratees: new Set(), retoursPasses: 0, passees: 0,
-              ids: new Set(file.map(x => x.id)), etape: "repondre", res: null, mode: bonus ? "aleatoire" : "jour" };
+              ids: new Set(file.map(x => x.id)), etape: "repondre", res: null, mode: bonus === "cible" ? "cible" : bonus ? "aleatoire" : "jour" };
   envoi = null;
   afficher();
 }
@@ -1381,6 +1397,7 @@ function remplacant() {
   const rapide = q => (q.type || "qcm") !== "explique";
   const exclus = new Set([...session.ids, ...D.questions.filter(q => !rapide(q)).map(q => q.id)]);
   if (session.mode === "aleatoire") return tirage(1, exclus)[0];
+  if (session.mode === "cible") return tirage(1, exclus, ciblees())[0];
   return fragiles(exclus)[0] || rappels(1, exclus)[0];
 }
 
@@ -1903,7 +1920,7 @@ function vueSession() {
   return `
     <div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
     <section class="card">
-      <div class="qhead"><span class="theme">${logique ? `${esc(FAMILLES[x.fam].nom)} · Difficulté ${x.niveau}/${maxNiv(x.fam)}` : oral ? `Entretien · ${esc(x.partie)}` : `${esc(p.theme)} · ${NIVEAUX[niv(x)]}`}</span>${logique || oral ? (session.etape === "repondre" ? `<span class="chrono" id="chrono">${chronoTexte(x)}</span>` : "") : ""}<span class="badges">${x.lang === "en" ? `<span class="anglais">English</span>` : ""}${x._retour ? `<span class="retry">Deuxième essai</span>` : x._rappel ? `<span class="retry">Rappel</span>` : ""}</span></div>
+      <div class="qhead"><span class="theme">${logique ? `${esc(FAMILLES[x.fam].nom)} · Difficulté ${x.niveau}/${maxNiv(x.fam)}` : oral ? `Entretien · ${esc(x.partie)}` : `${esc(p.theme)} · ${NIVEAUX[niv(x)]}`}</span>${logique || oral ? (session.etape === "repondre" ? `<span class="chrono" id="chrono">${chronoTexte(x)}</span>` : "") : ""}<span class="badges">${logique ? "" : `<span class="qid" title="Numéro à donner à Claude pour signaler cette question">${esc(x.id.toUpperCase())}</span>`}${x.lang === "en" ? `<span class="anglais">English</span>` : ""}${x._retour ? `<span class="retry">Deuxième essai</span>` : x._rappel ? `<span class="retry">Rappel</span>` : ""}</span></div>
       ${x.extrait ? `<pre class="extrait" lang="en">${esc(x.extrait)}</pre>` : ""}
       <div class="question"${x.lang === "en" ? ' lang="en"' : ""}>${esc(x.q).replace(/\n/g, "<br>")}</div>
       ${x.figure || ""}
@@ -2109,6 +2126,9 @@ document.getElementById("vue").addEventListener("click", e => {
   if (b.dataset.detail) ouvrirDetail(b.dataset.detail);
   else if (b.id === "go") demarrer(false);
   else if (b.id === "bonus") demarrer(true);
+  else if (b.id === "go-cible") demarrer("cible");
+  else if (b.dataset.cible) { const c = ciblees(), i = c.indexOf(b.dataset.cible); i < 0 ? c.push(b.dataset.cible) : c.splice(i, 1); etat.ciblees = c; sauver(); afficher(); }
+  else if (b.id === "cible-vider") { etat.ciblees = []; sauver(); afficher(); }
   else if (b.id === "go-logique") demarrerLogique();
   else if (b.id === "go-simu") demarrerSimulation();
   else if (b.id === "go-oral") demarrerOral();
