@@ -4187,6 +4187,127 @@
       ],
       "bonne": 0,
       "pourquoi": "La box, c’est quatre appareils dans un boîtier : ses prises sont un switch, le Wi-Fi une borne, le routeur relie les réseaux, le modem convertit le signal."
+    },
+    {
+      "id": "q231",
+      "paire": "ip-mac",
+      "niveau": 2,
+      "q": "PC-A (192.168.1.10) imprime sur l’imprimante 192.168.1.50, branchée sur le même switch. MAC de destination de la trame ?",
+      "choix": [
+        "La MAC de l’imprimante",
+        "La MAC du switch",
+        "La MAC du routeur",
+        "La MAC de la box"
+      ],
+      "bonne": 0,
+      "pourquoi": "Même réseau : le PC vise directement l’imprimante. Le switch n’est jamais le destinataire : il lit cette MAC et pousse la trame vers la bonne prise (erreur du rattrapage de l’E1, 18/11)."
+    },
+    {
+      "id": "q232",
+      "paire": "ip-mac",
+      "niveau": 2,
+      "q": "Le PC 192.168.0.42 ouvre le site 51.91.60.233. IP de destination du paquet qui quitte le PC ?",
+      "choix": [
+        "51.91.60.233, le serveur",
+        "192.168.0.1, la passerelle",
+        "88.12.34.56, la box",
+        "Celle du switch du bureau"
+      ],
+      "bonne": 0,
+      "pourquoi": "L’IP de destination est le but final : le serveur, du départ à l’arrivée. C’est seulement la MAC de destination qui est celle de la passerelle (erreur du 18/11)."
+    },
+    {
+      "id": "q233",
+      "paire": "ip-mac",
+      "type": "erreur",
+      "niveau": 2,
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Le PC voit que le serveur est sur un autre réseau,",
+        "il écrit l’IP du serveur en destination,",
+        "et la MAC du switch en destination."
+      ],
+      "faux": 2,
+      "pourquoi": "Autre réseau : MAC de destination = celle du routeur (la passerelle), trouvée par ARP. Le switch n’a pas de MAC qu’on vise."
+    },
+    {
+      "id": "q234",
+      "paire": "ip-mac",
+      "type": "explique",
+      "niveau": 3,
+      "q": "PC-Vente1 (192.168.30.10) pingue PC-Stock1 (192.168.40.10) à travers le routeur R1. Explique ce qui change et ce qui ne change pas entre la trame avant R1 et la trame après R1.",
+      "modele": "L’IP de destination ne change pas : 192.168.40.10, le but final (et la source reste 192.168.30.10). La MAC de destination, elle, est le prochain saut : avant R1, c’est la MAC de R1 (Gi0/0), source PC-Vente1 ; après R1, le routeur fabrique une nouvelle trame : source R1 (Gi0/1), destination PC-Stock1. Les switchs n’apparaissent dans aucune adresse.",
+      "pourquoi": "Claude relira ton texte dans le bilan."
+    },
+    {
+      "id": "q235",
+      "paire": "nat-sens",
+      "type": "erreur",
+      "niveau": 2,
+      "q": "Le retour d’une réponse dans la box. Touche le morceau faux.",
+      "texte": [
+        "La réponse arrive : 51.91.60.233:443 → 88.12.34.56:49200.",
+        "La box cherche le port 49200 dans sa table NAT.",
+        "Elle livre : 192.168.0.1:443 → 192.168.0.42:49200."
+      ],
+      "faux": 2,
+      "pourquoi": "Au retour, seule la destination change. La source reste le serveur : 51.91.60.233:443 → 192.168.0.42:49200 (erreur du 18/11, pourtant juste dans l’exercice d’ordre)."
+    },
+    {
+      "id": "q236",
+      "paire": "nat-sens",
+      "niveau": 2,
+      "q": "Quelqu’un sur Internet tente d’ouvrir une connexion vers ton PC, derrière ta box. Pourquoi la box la rejette-t-elle ?",
+      "choix": [
+        "Aucune ligne de sa table NAT n’attend cette connexion",
+        "Elle compare l’adresse de l’inconnu avec ses IP privées",
+        "Elle ne trouve pas la MAC de l’inconnu dans sa table ARP",
+        "Le modem refuse les adresses publiques qu’il ne connaît pas"
+      ],
+      "bonne": 0,
+      "pourquoi": "Une réponse n’entre que si une ligne de la table NAT l’attend (connexion ouverte depuis l’intérieur). Une connexion nouvelle n’a aucune ligne : la box ne sait pas à qui la remettre."
+    },
+    {
+      "id": "q237",
+      "paire": "route-dns",
+      "niveau": 2,
+      "q": "ping 8.8.8.8 répond, mais ping picard.fr affiche « impossible de trouver l’hôte ». Quelle commande confirme le diagnostic ?",
+      "choix": [
+        "nslookup picard.fr",
+        "ipconfig /all",
+        "ping 192.168.1.1",
+        "tracert 8.8.8.8"
+      ],
+      "bonne": 0,
+      "pourquoi": "C’est l’étage des noms (le DNS). nslookup teste la traduction du nom ; ipconfig /all montre seulement le réglage, il ne teste rien (erreur du 18/11)."
+    },
+    {
+      "id": "q238",
+      "paire": "temoin-reparer",
+      "niveau": 2,
+      "q": "Un seul PC n’a plus Internet, ses collègues l’ont. Le stagiaire veut redémarrer la box. Ta réponse ?",
+      "choix": [
+        "Non : la box marche pour les autres, la panne est sur ce poste",
+        "Oui : un redémarrage règle la plupart des pannes du réseau",
+        "Oui, mais seulement après avoir prévenu l’opérateur",
+        "Non : il faut d’abord changer le DNS de tous les PC"
+      ],
+      "bonne": 0,
+      "pourquoi": "Les collègues sont des témoins : la box, le routeur et l’opérateur marchent. On cherche sur ce poste (câble, port, configuration), et on ne coupe pas tout le monde pour rien."
+    },
+    {
+      "id": "q239",
+      "paire": "masque-passerelle",
+      "niveau": 3,
+      "q": "Pourquoi la passerelle réglée sur un PC doit-elle être une adresse de son propre réseau ?",
+      "choix": [
+        "Le PC lui remet la trame directement, grâce à sa MAC (ARP)",
+        "Le routeur refuse les PC des autres réseaux, par sécurité",
+        "Le masque interdit d’écrire une autre adresse dans la case",
+        "Le DNS ne répond qu’aux passerelles de son propre réseau"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le PC demande la MAC de sa passerelle par ARP et lui remet la trame en direct. L’ARP ne sort pas du réseau local : une passerelle ailleurs est injoignable."
     }
   ],
   "entretien": [
