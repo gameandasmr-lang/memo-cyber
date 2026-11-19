@@ -864,6 +864,54 @@ const GENERATEURS = {
     return { q, enonce: q, choix: ["Privée : elle ne sort jamais sur Internet", "Publique : unique au monde, visible sur Internet"], bonne: privee ? 0 : 1,
       pourquoi: `Les adresses privées commencent par 10, par 172.16 à 172.31, ou par 192.168. ${ip.join(".")} ${privee ? "en fait partie" : "n'en fait pas partie"}.` };
   },
+  // Suis la trame (19/11/2026, demande d'Arnaud après l'exercice sur papier) : un PC regarde une vidéo, on suit la trame saut par saut,
+  // aller (T1 à T3) et retour (R1 à R3), et on trouve une case du tableau. Nouvelles adresses à chaque fois.
+  // Règles visées : IP de destination = le but final ; MAC de destination = le prochain saut ; le switch ne change rien ;
+  // la box applique le NAT à l'aller (IP publique, port public) et le défait au retour (table NAT, puis table ARP).
+  // Niveau 1 : les autres cases de la ligne sont données ; niveau 2 : la case seule, et le retour plus souvent.
+  "suis-la-trame"(niveau) {
+    const hex = () => alea(16, 255).toString(16).toUpperCase(), prises = new Set();
+    const mac = () => { let m; do m = `${hex()}:${hex()}`; while (prises.has(m)); prises.add(m); return m; };
+    const r = alea(0, 20), pc = `192.168.${r}.${alea(2, 200)}`, gw = `192.168.${r}.${Math.random() < .5 ? 254 : 1}`;
+    const pub = `${alea(78, 92)}.${alea(1, 254)}.${alea(0, 255)}.${alea(1, 254)}`;
+    const srv = `${[142, 151, 104, 216][alea(0, 3)]}.${alea(0, 255)}.${alea(0, 255)}.${alea(1, 254)}`;
+    const mPc = mac(), mBox = mac(), mNet = mac(), mFai = mac(), pCli = alea(49152, 60999), pPub = alea(61000, 65000);
+    // [nom, tronçon, IP source, IP destination, MAC source, MAC destination, port suivi, sens du port]
+    const T = [
+      ["T1", "PC → switch (aller)", pc, srv, mPc, mBox, pCli, "source"],
+      ["T2", "switch → box (aller)", pc, srv, mPc, mBox, pCli, "source"],
+      ["T3", "box → routeur du FAI (aller)", pub, srv, mNet, mFai, pPub, "source"],
+      ["R1", "routeur du FAI → box (retour)", srv, pub, mFai, mNet, pPub, "destination"],
+      ["R2", "box → switch (retour)", srv, pc, mBox, mPc, pCli, "destination"],
+      ["R3", "switch → PC (retour)", srv, pc, mBox, mPc, pCli, "destination"]];
+    const t = T[niveau === 2 && Math.random() < .7 ? alea(3, 5) : alea(0, 5)], k = alea(0, 4);
+    const noms = ["IP source", "IP destination", "MAC source", "MAC destination", `port ${t[7]}`];
+    const IP = [[pc, "le PC"], [gw, "la box, côté maison"], [pub, "la box, côté Internet"], [srv, "le serveur"]];
+    const MAC = [[mPc, "le PC"], [mBox, "la box, côté maison"], [mNet, "la box, côté Internet"], [mFai, "le routeur du FAI"]];
+    const PORT = [[pCli, "port client du PC"], [pPub, "port public de la box"], [443, "HTTPS, le serveur"], [80, "HTTP"]];
+    const pool = k < 2 ? IP : k < 4 ? MAC : PORT, bonneVal = t[2 + k];
+    const ordre = [...pool.filter(([v]) => v === bonneVal), ...pool.filter(([v]) => v !== bonneVal)];
+    const ligne = (i, v) => i === k ? "?" : niveau === 2 ? "…" : v;
+    const extrait = [
+      "Le réseau",
+      `PC              IP ${pc}   MAC ${mPc}   port client ${pCli}`,
+      "Switch",
+      `Box (maison)    IP ${gw}   MAC ${mBox}`,
+      `Box (Internet)  IP ${pub}   MAC ${mNet}   port public choisi : ${pPub}`,
+      `Routeur du FAI  MAC ${mFai}`,
+      `Serveur vidéo   IP ${srv}   port 443`,
+      "",
+      `Trame ${t[0]} : ${t[1]}`,
+      `IP   ${ligne(0, t[2])} → ${ligne(1, t[3])}`,
+      `MAC  ${ligne(2, t[4])} → ${ligne(3, t[5])}`,
+      `Port ${t[7]} : ${ligne(4, t[6])}`].join("\n");
+    const regle = k < 2 ? "L'IP de destination est le but final. Seule la box touche aux IP, par le NAT : à l'aller, elle remplace l'IP privée de la source par son IP publique ; au retour, elle remet l'IP privée du PC en destination."
+      : k < 4 ? "La MAC ne sert que dans un réseau local : source = qui envoie sur ce tronçon, destination = le prochain saut. Le switch transmet sans rien changer, sa MAC n'est jamais visée."
+      : "À l'aller, la box remplace le port client par un port public (une ligne de sa table NAT). Au retour, la table NAT fait l'inverse (port public → IP privée et port client), puis la table ARP donne la MAC du PC.";
+    const q = `Trame ${t[0]}, ${t[1]} : quelle est la case « ${noms[k]} » ?`;
+    return { q, enonce: `${q} [${t[2]} → ${t[3]} · ${t[4]} → ${t[5]} · ${t[6]}]`, extrait, choix: ordre.map(([v, qui]) => `${v} (${qui})`), bonne: 0,
+      pourquoi: `Ligne complète ${t[0]} : IP ${t[2]} → ${t[3]} · MAC ${t[4]} → ${t[5]} · port ${t[7]} ${t[6]}. ${regle}` };
+  },
   // Suite logique (11/11/2026, entraînement au test de logique des admissions) : trouver le nombre suivant.
   // Le niveau de la carte choisit la difficulté (12/11/2026) : 1 = une seule opération régulière ; 2 = alternance, carrés, écarts qui grandissent ;
   // 3 = deux règles mêlées (somme des deux précédents, ×2 puis +c, deux suites entrelacées, écarts qui doublent). Sans niveau : toutes les familles.
