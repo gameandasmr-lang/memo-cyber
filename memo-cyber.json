@@ -1,6 +1,6 @@
 {
   "_lisezmoi": "Données du Mémo cyber (memo-cyber.html). Une paire = deux à quatre mots faciles à confondre, avec une phrase simple et une image simple chacun. Une question est liée à une paire et a un format (champ type, qcm par défaut) : qcm (choix, bonne), saisie (reponses acceptées), ordre (etapes dans le bon ordre), erreur (texte en morceaux, faux = indice du morceau faux), associer (couples), generateur (gen = nom d’un générateur de l’appli ; pour suite-logique et suite-lettres, le niveau donne la difficulté de 1 à 3), explique (modele), terminal (invite, reponses acceptées, sortie affichée après la réponse ; casse: true = les majuscules comptent, comme sous Linux). Champ en (dans chaque mot d'une paire) : le terme anglais, affiché dans le lexique et utilisé par le générateur vocab-en. Champ extrait (question) : un court texte technique (sortie de commande, message d'erreur, doc, alerte) affiché avant la question. Champ lang = \"en\" (question) : question posée en anglais, avec une pastille English. Champ niveau facultatif : 1 reconnaître, 2 retrouver seul, 3 appliquer ; sans niveau, le format le donne (qcm, associer = 1 ; saisie, ordre, erreur, terminal, generateur = 2 ; explique = 3). Échelle de formats : une question jamais vue d'un niveau supérieur reste verrouillée tant que la moitié des questions des niveaux en dessous, dans la même paire, n'est pas en boîte 2 ou plus. Les choix des QCM sont mélangés par l’appli : l’ordre dans ce fichier n’a pas d’importance. Pour ajouter du vocabulaire : ajouter une paire et ses questions ici, puis republier le mémo avec ce fichier. Les identifiants (id) ne doivent jamais changer : la progression est rangée par id. Tableau entretien : les questions du mode entretien oral (id, partie, q, points clés à cocher, modele, duree visée en secondes, lang facultatif), jamais dans les révisions du jour.",
-  "maj": "2026-11-26",
+  "maj": "2026-11-27",
   "paires": [
     {
       "id": "http-html",
@@ -603,6 +603,12 @@
           "phrase": "Le logiciel qui écoute sur un port (443 pour un site en HTTPS) marche. C’est un autre test que le ping.",
           "image": "La cuisine est ouverte : tu peux avoir ton plat.",
           "en": "the service responds"
+        },
+        {
+          "mot": "tracert / traceroute",
+          "phrase": "Affiche les IP des routeurs traversés jusqu'à une destination (tracert sous Windows, traceroute sous Linux).",
+          "image": "La liste des bureaux de poste par où passe ta lettre.",
+          "en": "Traceroute"
         }
       ],
       "piege": "Pas de réponse au ping ≠ machine éteinte (pare-feu qui bloque ICMP, passerelle manquante, câble coupé). Ping qui répond ≠ site qui marche. Et un ping n’est pas une « connexion » : c’est un simple message ICMP."
@@ -954,6 +960,12 @@
           "phrase": "Tu paies un prestataire pour administrer TA machine à ta place (mises à jour, sauvegardes, sécurité). Ce n’est pas un type de cloud, c’est un service humain.",
           "image": "Le gardien qui entretient ton appartement : c’est toujours ton appartement.",
           "en": "Managed services"
+        },
+        {
+          "mot": "Responsabilité partagée",
+          "phrase": "Dans le cloud, chacun sécurise sa part : en IaaS, l'OS et ses mises à jour sont au client.",
+          "image": "Le loueur entretient l'immeuble, toi tu fermes ta porte.",
+          "en": "Shared responsibility model"
         }
       ],
       "piege": "La question qui tranche : qui gère le système d’exploitation ? Le client utilise juste un logiciel fini → SaaS. Il dépose son propre code sans toucher l’OS → PaaS. Il gère l’OS d’une machine louée → IaaS. Un vieux logiciel installé avec setup.exe ne va pas dans un PaaS. Microsoft 365 = SaaS."
@@ -1035,6 +1047,12 @@
           "phrase": "Affiche ta propre configuration, dont TA MAC (« Adresse physique »).",
           "image": "Ta propre carte d’identité.",
           "en": "Show my full IP configuration"
+        },
+        {
+          "mot": "Empoisonnement ARP",
+          "phrase": "Une machine du même réseau répond « c'est moi, la passerelle » à la place de la vraie : tout le trafic passe par elle (homme du milieu).",
+          "image": "Un imposteur qui se lève à l'annonce du haut-parleur.",
+          "en": "ARP spoofing (ARP poisoning)"
         }
       ],
       "piege": "arp -a = les MAC des autres. ipconfig /all = la mienne."
@@ -1082,6 +1100,137 @@
         }
       ],
       "piege": "Une trame ne porte que les MAC du câble sur lequel elle voyage. Entre l’opérateur et la box : MAC côté Internet de la box, jamais celle côté maison."
+    },
+    {
+      "id": "dhcp-client-serveur",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "Client DHCP",
+          "phrase": "La machine qui demande ses réglages (un PC réglé « en DHCP »). C'est elle qui crie le Discover.",
+          "image": "Le voyageur qui arrive à l'hôtel.",
+          "en": "DHCP client"
+        },
+        {
+          "mot": "Serveur DHCP",
+          "phrase": "La machine qui prête les 4 réglages (IP, masque, passerelle, DNS). Elle a une IP fixe. Chez toi, c'est la box.",
+          "image": "L'accueil de l'hôtel.",
+          "en": "DHCP server"
+        },
+        {
+          "mot": "DORA",
+          "phrase": "Les 4 messages du DHCP : Discover (le PC crie), Offer (le serveur propose), Request (le PC choisit), Acknowledge (le serveur confirme).",
+          "image": "« Un accueil ? » « La 100 est libre. » « Je la prends. » « Voici ta clé. »",
+          "en": "DORA"
+        },
+        {
+          "mot": "Plage DHCP",
+          "phrase": "Les adresses que le serveur a le droit de distribuer (ex. à partir de 192.168.1.100). Il ne donne pas « l'adresse après la sienne ».",
+          "image": "La liste des chambres disponibles.",
+          "en": "DHCP pool (scope)"
+        }
+      ],
+      "piege": "Ce n'est pas « le DHCP » qui crie à chaque démarrage : c'est le PC, le client. Le serveur répond."
+    },
+    {
+      "id": "dhcp-adresses",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "0.0.0.0",
+          "phrase": "« Pas d'adresse » : la source du Discover, car le PC n'en a pas encore.",
+          "image": "« Nouvel arrivant, pas encore d'adresse » au dos de l'enveloppe.",
+          "en": "Unspecified address"
+        },
+        {
+          "mot": "255.255.255.255",
+          "phrase": "« Tout le monde sur mon réseau local » : la destination du Discover (diffusion).",
+          "image": "« À tous les habitants de l'immeuble » sur l'enveloppe.",
+          "en": "Limited broadcast"
+        },
+        {
+          "mot": "169.254.x.x (APIPA)",
+          "phrase": "Adresse que le PC se donne tout seul quand aucun serveur DHCP ne répond (masque /16, « lien local »). Ni publique, ni une des 3 plages privées.",
+          "image": "Le voyageur qui dort dans le hall faute d'accueil : il ne parle qu'à ceux du hall.",
+          "en": "Link-local address (APIPA)"
+        },
+        {
+          "mot": "/16 et /24",
+          "phrase": "Le nombre de bits de la partie réseau : /24 = 255.255.255.0 (3 nombres), /16 = 255.255.0.0 (2 nombres).",
+          "image": "Combien de mots de l'adresse disent la ville.",
+          "en": "Prefix length (CIDR)"
+        }
+      ],
+      "piege": "169.254 n'est pas une adresse publique : c'est le signe que le DHCP n'a pas répondu."
+    },
+    {
+      "id": "bail-portail",
+      "theme": "Réseau",
+      "items": [
+        {
+          "mot": "Bail DHCP",
+          "phrase": "La durée pendant laquelle l'adresse est prêtée (ex. 24 h). Renouvelé tout seul à mi-parcours ; s'il expire, l'adresse redevient libre.",
+          "image": "La durée de ton séjour à l'hôtel.",
+          "en": "DHCP lease"
+        },
+        {
+          "mot": "Portail captif",
+          "phrase": "La page web qui s'ouvre sur un Wi-Fi public et demande un code ou d'accepter les conditions : elle autorise l'accès à Internet, elle ne donne pas d'adresse.",
+          "image": "Le vigile qui vérifie ton bracelet avant la piscine de l'hôtel.",
+          "en": "Captive portal"
+        }
+      ],
+      "piege": "« Connexion accordée 24 h » à l'hôtel = le portail captif. L'adresse, le DHCP te l'avait déjà donnée en silence."
+    },
+    {
+      "id": "noyau-utilisateur",
+      "theme": "Système",
+      "items": [
+        {
+          "mot": "Noyau (espace noyau)",
+          "phrase": "Le cœur de l'OS : le seul à avoir tous les droits sur le processeur, la mémoire et le matériel.",
+          "image": "La tour de contrôle de l'aéroport.",
+          "en": "Kernel (kernel space)"
+        },
+        {
+          "mot": "Espace utilisateur",
+          "phrase": "Là où tournent les applis, sans accès direct au matériel. Une appli qui plante ne fait tomber qu'elle.",
+          "image": "Les avions et les passagers au sol.",
+          "en": "User space"
+        },
+        {
+          "mot": "Appel système",
+          "phrase": "La demande d'une appli au noyau (ouvrir un fichier, se connecter au Wi-Fi) : « l'appli demande, le noyau fait ».",
+          "image": "L'avion qui demande la piste par radio.",
+          "en": "System call"
+        }
+      ],
+      "piege": "La partie qui contrôle le matériel n'est pas « le hardware » : c'est un logiciel, le noyau."
+    },
+    {
+      "id": "outils-windows",
+      "theme": "Système",
+      "items": [
+        {
+          "mot": "Gestionnaire des tâches",
+          "phrase": "Voir ce qui tourne et ce qui consomme (onglet Processus, Performances, Services). Ctrl + Maj + Échap.",
+          "image": "Le tableau des départs : qui occupe quelle piste.",
+          "en": "Task Manager"
+        },
+        {
+          "mot": "Pare-feu Windows",
+          "phrase": "Filtre le trafic réseau entrant et sortant, avec 3 profils : Domaine, Privé, Public (le plus strict, pour un Wi-Fi public).",
+          "image": "Le contrôle à l'entrée de l'aéroport.",
+          "en": "Windows Defender Firewall"
+        },
+        {
+          "mot": "Comptes Windows",
+          "phrase": "Invité (temporaire, le minimum), Standard (le travail de tous les jours), Administrateur (tout).",
+          "image": "Visiteur, employé, directeur.",
+          "en": "Guest, Standard, Administrator accounts"
+        }
+      ],
+      "piege": "Un PC lent ? Le Gestionnaire des tâches, pas le pare-feu (qui ne s'occupe que du réseau)."
     }
   ],
   "questions": [
@@ -4748,6 +4897,202 @@
       "type": "explique",
       "q": "Un boulanger veut garder son logiciel de caisse Windows réglé à la main, sans racheter de serveur. Explique ce que tu lui conseilles, et pourquoi pas un PaaS.",
       "modele": "IaaS : il loue une VM, y installe son Windows Server et son logiciel, et garde la main sur l’OS (ou paie une infogérance pour qu’on l’administre). Pas de PaaS : la plateforme est la même pour tous, sans session admin ni installateur ; elle ne lance que du code fait pour elle. Penser aussi à une connexion Internet de secours, car les caisses passeront par Internet."
+    },
+    {
+      "id": "q262",
+      "paire": "dhcp-client-serveur",
+      "type": "ordre",
+      "q": "Remets les 4 messages du DHCP dans l'ordre.",
+      "etapes": [
+        "Discover : le PC crie « un serveur DHCP ? »",
+        "Offer : le serveur propose une adresse",
+        "Request : le PC annonce l'offre qu'il prend",
+        "Acknowledge : le serveur confirme, avec le bail"
+      ],
+      "pourquoi": "DORA. Le Request repart en diffusion pour prévenir tous les serveurs du choix du PC."
+    },
+    {
+      "id": "q263",
+      "paire": "dhcp-adresses",
+      "type": "saisie",
+      "q": "Quelle est l'adresse IP SOURCE du message Discover d'un PC qui démarre ?",
+      "reponses": [
+        "0.0.0.0"
+      ],
+      "pourquoi": "Le PC n'a pas encore d'adresse : 0.0.0.0 veut dire « pas d'adresse ». La destination, elle, est 255.255.255.255 (tout le monde)."
+    },
+    {
+      "id": "q264",
+      "paire": "dhcp-adresses",
+      "q": "Un collègue n'a plus Internet. ipconfig affiche 169.254.20.7, masque 255.255.0.0. Que conclus-tu ?",
+      "choix": [
+        "Son PC n'a reçu aucune réponse du DHCP",
+        "Son PC a reçu une adresse publique du FAI",
+        "Le serveur DNS ne répond plus à son PC",
+        "La passerelle a donné une adresse privée"
+      ],
+      "bonne": 0,
+      "pourquoi": "169.254 = APIPA : le PC s'est donné une adresse tout seul. On cherche du côté du DHCP (câble, Wi-Fi, serveur ou box), pas du DNS."
+    },
+    {
+      "id": "q265",
+      "paire": "dhcp-client-serveur",
+      "type": "erreur",
+      "q": "Touche le morceau faux.",
+      "texte": [
+        "Au démarrage, le PC en DHCP",
+        "envoie une demande ARP pour trouver le serveur DHCP,",
+        "en diffusion, depuis l'adresse 0.0.0.0."
+      ],
+      "faux": 1,
+      "pourquoi": "Une demande ARP cherche la MAC d'une IP qu'on connaît déjà. Le PC ne connaît pas l'IP du serveur : il envoie un Discover DHCP en diffusion."
+    },
+    {
+      "id": "q266",
+      "paire": "dhcp-client-serveur",
+      "q": "Le serveur DHCP a l'IP fixe 192.168.1.2 ; sa plage commence à 192.168.1.100 ; aucun bail en cours. Quelle IP reçoit le premier PC ?",
+      "choix": [
+        "192.168.1.100",
+        "192.168.1.3",
+        "192.168.1.2",
+        "192.168.1.1"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le serveur pioche dans sa plage (Start IP Address), pas « juste après sa propre adresse ». Vu en mission C le 27/11."
+    },
+    {
+      "id": "q267",
+      "paire": "dhcp-client-serveur",
+      "type": "terminal",
+      "invite": "C:\\>",
+      "q": "Ton PC est en DHCP. Fais-lui rendre son adresse au serveur.",
+      "reponses": [
+        "ipconfig /release"
+      ],
+      "sortie": "   IPv4 Address. . . . . . . . . . : 0.0.0.0",
+      "pourquoi": "/release envoie un seul message (Release) au serveur ; le PC repasse à 0.0.0.0. Puis ipconfig /renew relance le DORA. N'oublie pas l'espace avant le /."
+    },
+    {
+      "id": "q268",
+      "paire": "bail-portail",
+      "type": "explique",
+      "q": "À l'hôtel, après avoir tapé ton numéro de chambre, la page affiche « connexion accordée pour 24 h ». Explique ce que le DHCP a fait, et ce que fait cette page.",
+      "modele": "Le DHCP m'a donné mon adresse (avec masque, passerelle et DNS) en silence, dès que je me suis connecté au Wi-Fi, pour la durée d'un bail. La page, c'est le portail captif : il autorise ou bloque l'accès à Internet de mon appareil, ici pendant 24 h. L'adresse d'un côté, l'autorisation d'accès de l'autre.",
+      "pourquoi": "Deux mécanismes distincts, même s'ils ont tous les deux une durée."
+    },
+    {
+      "id": "q269",
+      "paire": "noyau-utilisateur",
+      "q": "Un logiciel plante complètement, mais le reste de l'ordinateur marche. Pourquoi ?",
+      "choix": [
+        "Il tourne dans l'espace utilisateur, isolé du noyau",
+        "Il tourne dans l'espace noyau, protégé du matériel",
+        "Le pare-feu a bloqué le logiciel qui a planté",
+        "Le matériel a redémarré le logiciel tout seul"
+      ],
+      "bonne": 0,
+      "pourquoi": "Les applis n'ont pas accès au matériel : elles demandent au noyau par des appels système. Une appli qui plante ne fait tomber qu'elle."
+    },
+    {
+      "id": "q270",
+      "paire": "outils-windows",
+      "type": "associer",
+      "q": "Relie chaque compte Windows à ce qu'il peut faire.",
+      "couples": [
+        [
+          "Accès temporaire, le minimum de droits",
+          "Invité"
+        ],
+        [
+          "Le travail de tous les jours, sans toucher au système",
+          "Standard"
+        ],
+        [
+          "Installer, configurer, gérer les comptes",
+          "Administrateur"
+        ]
+      ],
+      "pourquoi": "Les 3 comptes de la salle Windows Basics. « Super administrateur » n'en fait pas partie (le superutilisateur, c'est root, sous Linux)."
+    },
+    {
+      "id": "q271",
+      "paire": "outils-windows",
+      "q": "Ton PC Windows rame. Où vois-tu quel programme consomme le processeur ?",
+      "choix": [
+        "Gestionnaire des tâches, onglet Processus",
+        "Pare-feu Windows, paramètres avancés",
+        "Windows Update, historique des mises à jour",
+        "Panneau de configuration, Programmes"
+      ],
+      "bonne": 0,
+      "pourquoi": "Le Gestionnaire des tâches (Ctrl + Maj + Échap) montre ce qui tourne et ce qui consomme. Le pare-feu ne s'occupe que du trafic réseau."
+    },
+    {
+      "id": "q272",
+      "paire": "outils-windows",
+      "q": "Tu travailles au café, sur son Wi-Fi public. Quel profil du pare-feu Windows doit être actif ?",
+      "choix": [
+        "Public",
+        "Privé",
+        "Domaine",
+        "Invité"
+      ],
+      "bonne": 0,
+      "pourquoi": "Public = réseau non fiable : les règles les plus strictes, le PC invisible aux autres. Privé = la maison, Domaine = l'entreprise. « Invité » est un type de compte, pas un profil."
+    },
+    {
+      "id": "q273",
+      "paire": "chemins-linux",
+      "q": "Tu es dans /home/arnaud. « cd /Documents » répond No such file or directory. Pourquoi ?",
+      "choix": [
+        "Le / du début fait partir de la racine du disque",
+        "Linux ne comprend pas le / dans un chemin",
+        "Le dossier Documents s'écrit sans majuscule",
+        "Il faut être root pour entrer dans Documents"
+      ],
+      "bonne": 0,
+      "pourquoi": "Un / au début = chemin absolu, depuis la racine : /Documents n'existe pas. Le tien est /home/arnaud/Documents. Tape cd Documents, cd ~/Documents ou le chemin complet."
+    },
+    {
+      "id": "q274",
+      "paire": "chemins-linux",
+      "type": "terminal",
+      "casse": true,
+      "invite": "moi@lab:/etc$",
+      "q": "Tu es dans /etc. Va dans ton dossier Documents en utilisant le raccourci de ton dossier personnel.",
+      "reponses": [
+        "cd ~/Documents",
+        "cd ~/Documents/"
+      ],
+      "sortie": "moi@lab:~/Documents$",
+      "pourquoi": "~ = /home/moi, donc ça marche de n'importe où. cd Documents, ici, chercherait /etc/Documents et échouerait (tu resterais dans /etc)."
+    },
+    {
+      "id": "q275",
+      "paire": "cloud-types",
+      "q": "Ta boîte loue une VM Ubuntu et y installe elle-même son serveur web. Une faille d'Ubuntu sort. Qui doit la corriger ?",
+      "choix": [
+        "Vous : c'est de l'IaaS, l'OS est à vous",
+        "L'hébergeur : c'est du PaaS, l'OS est à lui",
+        "L'hébergeur : il gère tout dans une VM louée",
+        "Personne : une VM est isolée des failles"
+      ],
+      "bonne": 0,
+      "pourquoi": "Si tu peux installer un serveur web, tu as la main sur l'OS : IaaS, donc ses mises à jour sont à toi (responsabilité partagée). Fausse certitude du 27/11."
+    },
+    {
+      "id": "q276",
+      "paire": "dhcp-adresses",
+      "lang": "en",
+      "q": "A PC shows the address 169.254.135.153 with mask 255.255.0.0. What most likely failed?",
+      "choix": [
+        "It got no answer from a DHCP server",
+        "Its DNS server is not answering",
+        "Its default gateway is turned off",
+        "Its public IP address has expired"
+      ],
+      "bonne": 0,
+      "pourquoi": "169.254.x.x = APIPA (link-local): the PC gave itself an address because no DHCP server answered."
     }
   ],
   "entretien": [
@@ -4964,6 +5309,20 @@
         "Même l'administrateur a deux comptes"
       ],
       "modele": "C'est le principe du moindre privilège : chaque utilisateur, et chaque programme, ne reçoit que les droits dont il a besoin pour son travail. Si un utilisateur travaille en administrateur et ouvre une pièce jointe piégée, le programme hérite de ses droits et peut modifier tout le système, par exemple le DNS. Avec un compte standard, il serait bloqué. C'est pour ça que même un administrateur a deux comptes : un normal au quotidien, un admin pour l'administration."
+    },
+    {
+      "id": "o17",
+      "partie": "Réseau",
+      "duree": 60,
+      "q": "Un utilisateur vous appelle : il n'a plus Internet, et son ipconfig affiche une adresse en 169.254. Que faites-vous ?",
+      "points": [
+        "169.254 = APIPA : le PC n'a eu aucune réponse du DHCP",
+        "On cherche donc côté DHCP : câble ou Wi-Fi, serveur DHCP ou box",
+        "On ne commence pas par le DNS (il n'a même pas d'adresse dans le bon réseau)",
+        "Après réparation : ipconfig /renew, puis vérifier l'adresse reçue",
+        "Expliquer le DORA en une phrase"
+      ],
+      "modele": "Une adresse en 169.254 veut dire que le PC s'est donné une adresse tout seul, faute de réponse d'un serveur DHCP. Je vérifie d'abord le lien (câble branché, voyant, bon Wi-Fi), puis si le serveur DHCP ou la box fonctionne, par exemple en regardant si les autres postes ont une adresse. Une fois réparé, je lance ipconfig /renew : le PC refait le DORA (Discover, Offer, Request, Acknowledge) et doit recevoir une adresse de la bonne plage. Je ne perds pas de temps sur le DNS : sans adresse valide, le problème est en dessous."
     }
   ]
 }
