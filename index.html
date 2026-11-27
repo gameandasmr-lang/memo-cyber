@@ -1433,11 +1433,30 @@ function demarrer(bonus) {
     nbRappels = r.length;
     liste = melanger([...liste.map(q => preparer(q)), ...r.map(q => ({ ...preparer(q), _rappel: true }))]);
   }
-  const file = bonus ? liste.map(q => preparer(q)) : liste;
+  const file = limiterExplications(bonus ? liste.map(q => preparer(q)) : liste, bonus === "cible" ? "cible" : bonus ? "aleatoire" : "jour");
   session = { file, total: file.length, faites: 0, justes: 0, xp: 0, ratees: new Set(), retoursPasses: 0, passees: 0,
               ids: new Set(file.map(x => x.id)), etape: "repondre", res: null, mode: bonus === "cible" ? "cible" : bonus ? "aleatoire" : "jour" };
   envoi = null;
   afficher();
+}
+
+// Explications écrites (règle d'Arnaud, 27/11/2026) : le Mémo est un Duolingo rapide, les explications longues se font en cours.
+// Au plus MAX_EXPLIQUE explication(s) par session ; les autres sont remplacées par des questions rapides (leur carte ne bouge pas, elles reviendront).
+const MAX_EXPLIQUE = 1;
+function limiterExplications(liste, mode) {
+  let vues = 0; const garde = []; let manque = 0;
+  for (const x of liste) { if ((x.type || "qcm") === "explique" && ++vues > MAX_EXPLIQUE) manque++; else garde.push(x); }
+  if (!manque) return liste;
+  const exclus = new Set([...liste.map(x => x.id), ...D.questions.filter(q => q.type === "explique").map(q => q.id)]);
+  const pris = mode === "jour" ? [...fragiles(exclus), ...rappels(manque, exclus)] : tirage(manque, exclus, mode === "cible" ? ciblees() : null);
+  const vus = new Set();
+  for (const q of pris) {
+    if (!manque) break;
+    if (vus.has(q.id) || exclus.has(q.id)) continue;
+    vus.add(q.id); manque--;
+    garde.push({ ...preparer(q), _rappel: mode === "jour" && carte(q.id).due > jour() });
+  }
+  return garde;
 }
 
 // « Passer » : la question n'est ni ratée ni réussie (sa carte ne bouge pas, elle reviendra) ; une autre prend sa place, de préférence rapide (jamais une explication écrite).
